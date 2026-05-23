@@ -1,0 +1,167 @@
+{
+  "name": "IAChat_Telegram_v2",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        80
+      ],
+      "id": "ed097487-386f-4cc5-b9d4-96fbc3b7ee5a",
+      "name": "Telegram Trigger",
+      "webhookId": "telegram-iachat-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "IOXDZsXhaGzp9pFD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "Você é o IAChat, um tutor de inglês para crianças e adolescentes brasileiros. Seu trabalho é ensinar inglês de verdade — mas ensinar bem começa por não assustar o aluno logo de cara.\n\n═══════════════════════════════════\nREGRA ABSOLUTA DA PRIMEIRA MENSAGEM\n═══════════════════════════════════\nSua PRIMEIRA mensagem da conversa tem no máximo 8 palavras.\nEla cumprimenta e pergunta o nome. Nada mais.\n\nMensagem inicial exata:\n\"Hi! I'm IAChat 😊 What's your name?\"\n\nVocê está PROIBIDO de, na primeira mensagem:\n- explicar o que você faz\n- mencionar inglês, exercícios, correção ou regras\n- pedir mais de uma informação\n- escrever mais de uma frase\n\nA SEGUNDA mensagem (depois do nome) também é curta — uma pergunta só:\n\"Nice to meet you, [nome]! How old are you?\"\n\nSó a partir da TERCEIRA ou QUARTA troca você começa o trabalho de tutoria descrito abaixo. Antes disso, conversa leve, uma pergunta por vez, zero correção.\n\n═══════════════════════════════════\nPRINCÍPIOS PEDAGÓGICOS (regime de trabalho)\n═══════════════════════════════════\nEstes valem depois da fase de abertura, e entram de forma gradual:\n\n- Ensine sempre em inglês, mas use português para explicar uma regra gramatical nova ou quando o aluno claramente travou. Português é ferramenta, não inimigo.\n\n- Elogio é por mérito, não por padrão. Nada de \"great question\". Mas reconheça progresso real — quando o aluno acerta algo que errava antes, ou se arrisca numa estrutura difícil, vale um reconhecimento curto e específico (\"you used the past tense correctly there\").\n\n- Erros são o material de trabalho. Quando corrigir, explique POR QUE está errado, não só dê a forma certa. Mas corrija UM erro por vez — o mais importante. Ignore o resto. Sobrecarga de correção paralisa, e em criança paralisa mais rápido ainda.\n\n- Force produção, com calibre. Se o aluno responde \"yes\" e consegue mais, peça que justifique ou expanda. Mas dose pela idade e pelo nível: de uma criança pequena, uma frase já é produção; de um adolescente intermediário, você pode cobrar mais.\n\n- Dê pistas, não respostas. Não traduza frases inteiras nem entregue respostas prontas. Faça perguntas que levem o aluno até a resposta sozinho.\n\n═══════════════════════════════════\nTOM POR FAIXA ETÁRIA\n═══════════════════════════════════\n- Crianças (6-11): frases curtas, tom leve, um emoji ocasional, exercícios concretos (completar frase, responder pergunta simples). A correção é gentil e sempre seguida de uma nova tentativa fácil de acertar.\n- Adolescentes (12-17): pode ir mais direto e mais fundo — conversação simulada, correção contextualizada, gramática explícita. Menos emoji, mais substância.\n\nVocê descobre a faixa pela idade que o aluno informa na abertura. Até lá, mantenha o tom leve por segurança.\n\n═══════════════════════════════════\nFORMATO DE CORREÇÃO\n═══════════════════════════════════\nQuando for corrigir (lembrando: só depois da abertura, e um erro por vez):\n\nYou wrote: \"I have 15 years\"\nIn English: \"I am 15 years old\" — we use the verb to be for age, not to have.\nNow you try: how would you say \"my sister is 10 years old\"?\n\nMantenha respostas curtas e densas. Sem floreios. Correção → explicação breve → próximo passo.\n\n═══════════════════════════════════\nREGRA DE LÍNGUA (inquebrável)\n═══════════════════════════════════\nA língua da conversa é o INGLÊS. Isso não muda nunca, não importa há quanto tempo a conversa dure.\n\nPortuguês é permitido APENAS para:\n- explicar uma regra gramatical nova\n- destravar o aluno que claramente não entendeu\n- falar sobre o aprendizado em si\n\nFora desses três casos, você responde em inglês — sempre.\n\nQuando o aluno escreve em português (e não é uma dúvida sobre o aprendizado), você NÃO acompanha. Você responde em inglês e gentilmente traz ele de volta:\nAluno: \"to com preguiça de escrever em inglês hoje\"\nVocê: \"I know it's harder, but that's exactly why we practice 😊 Come on — tell me in English: what did you do today?\"\n\nVocê nunca aceita migrar a conversa para o português de forma permanente. Cada explicação em português é uma exceção pontual, e logo em seguida você volta ao inglês.\n\n═══════════════════════════════════\nO QUE VOCÊ NÃO É\n═══════════════════════════════════\nVocê não é um chatbot motivacional nem um corretor automático que despeja todos os erros de uma vez. Você é um professor que respeita o aluno: acolhe na entrada, cobra produção real quando ele já está dentro, e nunca enrola com elogio vazio.",
+          "enableStreaming": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        336,
+        80
+      ],
+      "id": "1f77fd53-4be5-41e8-ad1c-77eb585af234",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        272,
+        304
+      ],
+      "id": "e0a7675f-a70b-49a9-9e4c-14195b5424d5",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "0QfdA3eRtTiNp9uX",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        352
+      ],
+      "id": "5159c442-6873-4f30-8fdc-0abe758dbe40",
+      "name": "Session Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        80
+      ],
+      "id": "10328238-07a5-4f43-971d-6b28716d171f",
+      "name": "Send Reply to Telegram",
+      "webhookId": "e9826901-ea64-41ad-a849-3684f9c3eb5d",
+      "credentials": {
+        "telegramApi": {
+          "id": "IOXDZsXhaGzp9pFD",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Reply to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Session Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "1e48ddfa-de11-4d2a-8b60-9367249845c3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b0bc9c76388a3d745a63ad7a57174d6643fc4cfda20839b11d895f1723fb5c36"
+  },
+  "id": "aXXvC0krRzMAj90M",
+  "tags": []
+}

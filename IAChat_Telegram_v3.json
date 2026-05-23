@@ -1,0 +1,810 @@
+{
+  "name": "IAChat_Telegram_v3",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -420,
+        200
+      ],
+      "id": "node-001",
+      "name": "Telegram Trigger",
+      "webhookId": "telegram-iachat-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "IOXDZsXhaGzp9pFD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const e = $input.item.json;\nlet userId, chatId, type, text = '', callbackData = '', firstName = '', callbackQueryId = null;\nif (e.message) {\n  userId = e.message.from.id;\n  chatId = e.message.chat.id;\n  firstName = e.message.from.first_name || '';\n  if (typeof e.message.text === 'string' && e.message.text.trim().length) {\n    type = 'text';\n    text = e.message.text.trim();\n  } else {\n    type = 'non_text';\n  }\n} else if (e.callback_query) {\n  userId = e.callback_query.from.id;\n  chatId = e.callback_query.message.chat.id;\n  firstName = e.callback_query.from.first_name || '';\n  type = 'callback';\n  callbackData = e.callback_query.data || '';\n  callbackQueryId = e.callback_query.id;\n}\nconst isCommand = type === 'text' && text.startsWith('/');\nconst command = isCommand ? text.split(/\\s+/)[0].toLowerCase() : '';\nreturn { json: { userId, chatId, type, text, callbackData, firstName, isCommand, command, callbackQueryId } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        200
+      ],
+      "id": "node-002",
+      "name": "Normalize"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO students (user_id)\nVALUES ({{ $('Normalize').item.json.userId }})\nON CONFLICT (user_id) DO UPDATE SET updated_at = now()\nRETURNING user_id, name, age, mode, onboarding;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        20,
+        200
+      ],
+      "id": "node-003",
+      "name": "Load Student",
+      "credentials": {
+        "postgres": {
+          "id": "REPLACE_POSTGRES_CRED",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const n = $('Normalize').item.json;\nconst s = $input.item.json;\nlet route;\nif (n.command === '/start') {\n  route = (s.onboarding === 'done') ? 'menu' : 'onboarding';\n} else if (n.type === 'callback' && String(n.callbackData).startsWith('mode_')) {\n  route = 'mode_switch';\n} else if (n.type === 'non_text') {\n  route = 'non_text';\n} else if (s.onboarding !== 'done') {\n  route = 'onboarding';\n} else if (n.command === '/menu' || n.command === '/modo') {\n  route = 'menu';\n} else {\n  route = 'agent';\n}\nreturn { json: { ...s, ...n, route } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        200
+      ],
+      "id": "node-004",
+      "name": "Route Decision"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "onboarding",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "onboarding"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "mode_switch",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "mode_switch"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "non_text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "non_text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "menu",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "menu"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "agent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "agent"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        480,
+        200
+      ],
+      "id": "node-005",
+      "name": "Route"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const d = $input.item.json;\nfunction q(v){ return (v === null || v === undefined) ? 'NULL' : \"'\" + String(v).replace(/'/g, \"''\") + \"'\"; }\nlet next, reply, showMenu = false, saveName = null, saveAge = null;\nif (d.onboarding === 'new') {\n  next = 'awaiting_name';\n  reply = \"Hi! I'm IAChat 😊 What's your name?\";\n} else if (d.onboarding === 'awaiting_name') {\n  saveName = (d.text || '').slice(0, 50);\n  next = 'awaiting_age';\n  reply = \"Nice to meet you, \" + saveName + \"! How old are you?\";\n} else if (d.onboarding === 'awaiting_age') {\n  const m = (String(d.text || '').match(/\\d{1,2}/) || [])[0];\n  if (!m) {\n    next = 'awaiting_age';\n    reply = \"Just the number, please 😊 How old are you?\";\n  } else {\n    saveAge = parseInt(m, 10);\n    next = 'menu';\n    showMenu = true;\n    reply = '';\n  }\n} else {\n  next = 'menu';\n  showMenu = true;\n  reply = '';\n}\nconst sets = [\"onboarding = \" + q(next), \"updated_at = now()\"];\nif (saveName !== null) sets.push(\"name = \" + q(saveName));\nif (saveAge !== null) sets.push(\"age = \" + parseInt(saveAge, 10));\nconst sql = \"UPDATE students SET \" + sets.join(', ') + \" WHERE user_id = \" + parseInt(d.userId, 10) + \";\";\nreturn { json: { ...d, next, reply, showMenu, saveName, saveAge, sql } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -200
+      ],
+      "id": "node-006",
+      "name": "Onboarding Step"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.sql }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        940,
+        -200
+      ],
+      "id": "node-007",
+      "name": "Update Onboarding",
+      "credentials": {
+        "postgres": {
+          "id": "REPLACE_POSTGRES_CRED",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.showMenu }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1160,
+        -200
+      ],
+      "id": "node-008",
+      "name": "Show Menu?"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize').item.json.chatId }}",
+        "text": "={{ $('Onboarding Step').item.json.reply }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1400,
+        -80
+      ],
+      "id": "node-009",
+      "name": "Send Onboarding Text",
+      "webhookId": "node-010-wh",
+      "credentials": {
+        "telegramApi": {
+          "id": "IOXDZsXhaGzp9pFD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize').item.json.chatId }}",
+        "text": "How do you want to start? 👇",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "💬 Chat — just talk",
+                    "additionalFields": {
+                      "callback_data": "mode_chat"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "📚 Teacher — exercises",
+                    "additionalFields": {
+                      "callback_data": "mode_teacher"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1400,
+        -320
+      ],
+      "id": "node-011",
+      "name": "Send Menu",
+      "webhookId": "node-012-wh",
+      "credentials": {
+        "telegramApi": {
+          "id": "IOXDZsXhaGzp9pFD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const d = $input.item.json;\nconst mode = d.callbackData === 'mode_teacher' ? 'teacher' : 'chat';\nconst sql = \"UPDATE students SET mode = '\" + mode + \"', onboarding = 'done', updated_at = now() WHERE user_id = \" + parseInt(d.userId, 10) + \";\";\nconst confirm = mode === 'teacher'\n  ? \"📚 Teacher mode! I'll give you exercises and correct them. What do you want to practice?\"\n  : \"💬 Chat mode! Let's just talk 😊 What did you do today?\";\nreturn { json: { ...d, mode, sql, confirm } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        40
+      ],
+      "id": "node-013",
+      "name": "Mode Step"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.sql }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        940,
+        40
+      ],
+      "id": "node-014",
+      "name": "Update Mode",
+      "credentials": {
+        "postgres": {
+          "id": "REPLACE_POSTGRES_CRED",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "callback",
+        "operation": "answerQuery",
+        "queryId": "={{ $('Normalize').item.json.callbackQueryId }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1160,
+        40
+      ],
+      "id": "node-015",
+      "name": "Answer Callback",
+      "webhookId": "node-016-wh",
+      "credentials": {
+        "telegramApi": {
+          "id": "IOXDZsXhaGzp9pFD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize').item.json.chatId }}",
+        "text": "={{ $('Mode Step').item.json.confirm }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1400,
+        40
+      ],
+      "id": "node-017",
+      "name": "Send Mode Confirm",
+      "webhookId": "node-018-wh",
+      "credentials": {
+        "telegramApi": {
+          "id": "IOXDZsXhaGzp9pFD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize').item.json.chatId }}",
+        "text": "Can you type that in words? 😊",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        200
+      ],
+      "id": "node-019",
+      "name": "Send NonText",
+      "webhookId": "node-020-wh",
+      "credentials": {
+        "telegramApi": {
+          "id": "IOXDZsXhaGzp9pFD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const d = $input.item.json;\nconst age = parseInt(d.age, 10) || 0;\nconst faixa = (age && age <= 11) ? 'crianca (6-11)' : 'adolescente (12-17)';\nconst name = d.name || 'student';\n\nconst core = [\n\"Você é o IAChat, tutor de inglês para crianças e adolescentes brasileiros.\",\n\"\",\n\"ALUNO: \" + name + \", \" + (age || '?') + \" anos (faixa: \" + faixa + \").\",\n\"\",\n\"LÍNGUA (inquebrável): a conversa é em INGLÊS, sempre. Português só para (1) explicar uma regra gramatical nova, (2) destravar quem claramente não entendeu, (3) falar sobre o aprendizado em si. Fora isso, responda em inglês. Se o aluno escrever em português sem ser dúvida de aprendizado, responda em inglês e traga-o de volta com gentileza.\",\n\"\",\n\"CORREÇÃO: um erro por vez — o mais importante. Explique POR QUE está errado, não só a forma certa. Dê pistas, não respostas prontas; nunca traduza frases inteiras.\",\n\"\",\n\"ELOGIO: por mérito, não por padrão. Reconheça progresso real e específico. Nada de elogio vazio.\",\n\"\",\n\"TOM: criança (6-11) = frases curtas, leve, emoji ocasional, exercícios concretos, correção gentil seguida de nova tentativa fácil. Adolescente (12-17) = mais direto e fundo, gramática explícita, menos emoji, mais substância.\",\n\"\",\n\"Respostas curtas e densas, sem floreio.\"\n].join(\"\\n\");\n\nconst chat = [\n\"MODO: CONVERSA (bate-papo entre amigos).\",\n\"Converse de forma leve e natural, como um amigo — dia a dia, interesses do aluno. English-first.\",\n\"Feedback EMBUTIDO e suave: no máximo um errinho por vez, dentro do fluxo, sem quebrar o clima. Sempre devolva uma pergunta para manter o papo vivo.\"\n].join(\"\\n\");\n\nconst teacher = [\n\"MODO: PROFESSOR (aula com exercícios).\",\n\"Proponha UM exercício por vez, na hora (completar frase, traduzir, responder), calibrado pela idade/nível.\",\n\"Espere a resposta e corrija no formato:\",\n\"You wrote: \\\"...\\\"\",\n\"In English: \\\"...\\\" — (motivo breve)\",\n\"Now you try: (próximo passo)\",\n\"Seja mais explícito e rigoroso que no modo conversa, mas sempre um erro por vez. Ao terminar, ofereça o próximo exercício.\"\n].join(\"\\n\");\n\nconst sys = core + \"\\n\\n\" + (d.mode === 'teacher' ? teacher : chat);\nreturn { json: { ...d, systemMessage: sys, chatInput: d.text } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        440
+      ],
+      "id": "node-021",
+      "name": "Build Prompt"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "={{ $json.systemMessage }}",
+          "enableStreaming": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        960,
+        440
+      ],
+      "id": "node-022",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize').item.json.chatId }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1400,
+        380
+      ],
+      "id": "node-023",
+      "name": "Send Reply",
+      "webhookId": "node-024-wh",
+      "credentials": {
+        "telegramApi": {
+          "id": "IOXDZsXhaGzp9pFD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize').item.json.chatId }}",
+        "text": "One sec — try again in a moment 😊",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1400,
+        560
+      ],
+      "id": "node-025",
+      "name": "Send Error",
+      "webhookId": "node-026-wh",
+      "credentials": {
+        "telegramApi": {
+          "id": "IOXDZsXhaGzp9pFD",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        860,
+        660
+      ],
+      "id": "node-027",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "0QfdA3eRtTiNp9uX",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Normalize').item.json.userId }}",
+        "contextWindowLength": 25,
+        "tableName": "chat_memory"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1060,
+        660
+      ],
+      "id": "node-028",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "REPLACE_POSTGRES_CRED",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "Load Student",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Student": {
+      "main": [
+        [
+          {
+            "node": "Route Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Decision": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route": {
+      "main": [
+        [
+          {
+            "node": "Onboarding Step",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mode Step",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send NonText",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Menu",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Onboarding Step": {
+      "main": [
+        [
+          {
+            "node": "Update Onboarding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Onboarding": {
+      "main": [
+        [
+          {
+            "node": "Show Menu?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Show Menu?": {
+      "main": [
+        [
+          {
+            "node": "Send Menu",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Onboarding Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mode Step": {
+      "main": [
+        [
+          {
+            "node": "Update Mode",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Mode": {
+      "main": [
+        [
+          {
+            "node": "Answer Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer Callback": {
+      "main": [
+        [
+          {
+            "node": "Send Mode Confirm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "v3-1779459001142",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "IAChatTelegramV3",
+  "tags": []
+}
