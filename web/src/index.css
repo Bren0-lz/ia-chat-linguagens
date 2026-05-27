@@ -1,21 +1,69 @@
-@import "tailwindcss";
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-@layer base {
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+html, body {
+  background: var(--paper, #f1ecdf);
+  color: var(--ink, #15102e);
+  font-family: var(--font-sans), 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100svh;
+}
 
-  body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: #0F172A;
-    color: #F8FAFC;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+#root { min-height: 100svh; }
 
-  #root {
-    min-height: 100svh;
+/* Responsive shell — replaces the iPhone frame.
+   Fills viewport on mobile; centered & framed on desktop. */
+.ia-shell {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100svh;
+  background: var(--paper, #f1ecdf);
+  overflow: hidden;
+}
+@media (min-width: 720px) {
+  .ia-shell {
+    margin: 24px auto;
+    min-height: calc(100svh - 48px);
+    border-radius: 28px;
+    box-shadow: 0 30px 60px rgba(21, 16, 46, 0.12);
+    border: 1px solid var(--line, rgba(0, 0, 0, 0.06));
   }
 }
+
+/* Override the design's absolute-positioned .ia-app when used outside the iPhone frame. */
+.ia-shell .ia-app {
+  position: relative;
+  inset: auto;
+  min-height: 100svh;
+}
+@media (min-width: 720px) {
+  .ia-shell .ia-app { min-height: calc(100svh - 48px); }
+}
+
+/* Remove the grid sidebar from the design's .app-canvas, since the
+   responsive shell does its own centering. The ScreenJump (dev-only)
+   is rendered as a fixed-position panel instead. */
+.app-canvas {
+  display: block !important;
+  grid-template-columns: none !important;
+  padding: 0 !important;
+}
+.screen-jump {
+  position: fixed !important;
+  top: 16px;
+  left: 16px;
+  width: 200px;
+  max-height: calc(100svh - 32px);
+  overflow: auto;
+  z-index: 2147483645;
+}
+@media (max-width: 980px) {
+  .screen-jump { display: none !important; }
+}
+
+
+button { font-family: inherit; }
+input, textarea { font-family: inherit; }
+a { color: inherit; }

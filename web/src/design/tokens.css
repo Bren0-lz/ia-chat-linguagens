@@ -1,0 +1,360 @@
+/* ───────────────────────────────────────────────
+   IA CHAT — design tokens
+   Lúdico / vibrante. Mobile-first. Português-BR.
+   ─────────────────────────────────────────────── */
+
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+:root {
+  /* ─── Type ─── */
+  --font-display: "Bricolage Grotesque", "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+
+  /* ─── Ink ─── */
+  --ink: #15102e;
+  --ink-soft: #5b5571;
+  --ink-muted: #9a93ad;
+  --ink-faint: #cdc6dc;
+
+  /* ─── Surfaces ─── */
+  --paper: #fff7e8;         /* warm cream page bg */
+  --paper-deep: #f3eadb;
+  --surface: #ffffff;
+  --surface-soft: #f7f3ff;  /* lavender-tinted card alt */
+  --surface-ink: #1a1438;   /* deep card / hero */
+
+  /* ─── Brand & semantic ─── */
+  --brand: #5b47ff;         /* electric indigo — primary action */
+  --brand-deep: #3a26cc;
+  --brand-soft: #e8e4ff;
+  --brand-ink: #1a0f66;
+
+  --flame: #ff7a2a;         /* streak fire */
+  --flame-deep: #e85c10;
+  --flame-soft: #ffe3d0;
+
+  --coral: #ff5a7a;         /* energy accent */
+  --coral-soft: #ffe1e7;
+
+  --mint: #1ec57a;          /* success / XP up */
+  --mint-deep: #109656;
+  --mint-soft: #d3f5e3;
+
+  --gold: #ffb627;          /* XP coin / gold league */
+  --gold-deep: #d9930a;
+  --gold-soft: #fff1cc;
+
+  --telegram: #229ed9;      /* official-ish Telegram blue */
+  --telegram-deep: #1a85b8;
+  --telegram-soft: #d5eef9;
+
+  --violet: #a056ff;        /* achievements accent */
+  --violet-soft: #ecddff;
+
+  /* ─── Levels (CEFR) ─── */
+  --lv-a1: #6ed3ff;
+  --lv-a2: #5b47ff;
+  --lv-b1: #1ec57a;
+  --lv-b2: #ffb627;
+  --lv-c1: #ff7a2a;
+  --lv-c2: #ff3d5e;
+
+  /* ─── Lines ─── */
+  --line: rgba(21, 16, 46, 0.08);
+  --line-strong: rgba(21, 16, 46, 0.16);
+
+  /* ─── Shadows ─── */
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 8px 24px rgba(21, 16, 46, 0.06);
+  --shadow-pop: 0 4px 0 rgba(58, 38, 204, 1);     /* indigo "below" — pressable */
+  --shadow-pop-flame: 0 4px 0 rgba(232, 92, 16, 1);
+  --shadow-pop-mint: 0 4px 0 rgba(16, 150, 86, 1);
+  --shadow-pop-gold: 0 4px 0 rgba(217, 147, 10, 1);
+  --shadow-cta: 0 10px 30px rgba(91, 71, 255, 0.32);
+
+  /* ─── Radii ─── */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-2xl: 28px;
+  --r-pill: 999px;
+
+  /* ─── Spacing scale (informal) ─── */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 32px;
+  --sp-8: 40px;
+}
+
+/* "sério" variant overrides for the vibe tweak */
+.vibe-serio {
+  --paper: #f6f4f0;
+  --paper-deep: #ebe7df;
+  --surface-soft: #f0eef3;
+  --brand: #2e3c7e;
+  --brand-deep: #1a2455;
+  --brand-soft: #dfe3f0;
+  --flame: #e85c4a;
+  --flame-deep: #b8412f;
+  --coral: #d96466;
+  --mint: #2e8a5c;
+  --gold: #c89220;
+  --violet: #6b50a8;
+  --shadow-pop: 0 3px 0 rgba(26, 36, 85, 1);
+  --shadow-cta: 0 6px 18px rgba(46, 60, 126, 0.22);
+}
+
+/* ─── Reset / base ─── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button { font-family: inherit; }
+
+/* Hide scrollbars inside the phone */
+.ph-screen::-webkit-scrollbar { width: 0; height: 0; }
+.ph-screen { scrollbar-width: none; }
+
+/* ─── Reusable bits ─── */
+.h-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+}
+.h-section {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+}
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Press effect for pop buttons */
+.btn-pop {
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  cursor: pointer;
+}
+.btn-pop:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 currentColor;
+}
+
+/* App canvas */
+.app-canvas {
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 600px at 10% -10%, rgba(91, 71, 255, 0.06), transparent 60%),
+    radial-gradient(700px 500px at 110% 10%, rgba(255, 122, 42, 0.06), transparent 60%),
+    #f1ecdf;
+  display: grid;
+  grid-template-columns: 220px 1fr 0px;
+  gap: 24px;
+  padding: 24px;
+  align-items: start;
+}
+@media (max-width: 980px) {
+  .app-canvas { grid-template-columns: 1fr; padding: 12px; }
+  .screen-jump { display: none; }
+}
+
+.screen-jump {
+  position: sticky;
+  top: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  padding: 14px;
+  font-family: var(--font-sans);
+  box-shadow: var(--shadow-card);
+}
+.screen-jump h4 {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.screen-jump button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 12.5px;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 500;
+}
+.screen-jump button:hover { background: var(--brand-soft); }
+.screen-jump button.active {
+  background: var(--ink);
+  color: white;
+}
+.screen-jump button.active .sj-dot { background: var(--mint); }
+.screen-jump .sj-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ink-faint);
+}
+.screen-jump .sj-sect {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 10px 10px 4px;
+}
+
+.frame-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 8px;
+}
+
+/* Custom IA CHAT app shell inside phone */
+.ia-app {
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  font-family: var(--font-sans);
+  color: var(--ink);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.ia-status-pad { height: 54px; flex-shrink: 0; }
+.ia-screen {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.ia-screen::-webkit-scrollbar { display: none; }
+.ia-bottom-pad { height: 34px; flex-shrink: 0; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--brand);
+  color: white;
+  padding: 14px 22px;
+  border-radius: 14px;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  box-shadow: var(--shadow-pop);
+}
+.btn-primary:hover { background: var(--brand-deep); }
+.btn-primary:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--brand-deep); }
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--ink);
+  padding: 14px 22px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.btn-secondary:hover { background: var(--surface-soft); }
+
+.btn-telegram {
+  background: var(--telegram);
+  color: white;
+  padding: 14px 22px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 4px 0 var(--telegram-deep);
+}
+.btn-telegram:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--telegram-deep); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--brand);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px;
+  border: 0;
+  cursor: pointer;
+}
+
+/* Card */
+.card {
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+}
+
+/* Pill / chip */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+/* Level pill */
+.level-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: white;
+}
+
+/* The animated flame keyframe (used by streak) */
+@keyframes flameFlicker {
+  0%, 100% { transform: scale(1) rotate(-1deg); }
+  50% { transform: scale(1.04) rotate(1deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(91, 71, 255, 0.0); }
+  50% { box-shadow: 0 0 0 12px rgba(91, 71, 255, 0.12); }
+}

@@ -21,9 +21,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'PATCH') {
-    const { mode } = req.body ?? {}
-    if (!mode) return res.status(400).json({ error: 'Campo mode é obrigatório' })
-    await db.query('UPDATE students SET mode = $1 WHERE user_id = $2', [mode, auth.user_id])
+    const { mode, level } = req.body ?? {}
+    if (mode == null && level == null) {
+      return res.status(400).json({ error: 'Informe ao menos um campo (mode ou level)' })
+    }
+    const updates: string[] = []
+    const values: unknown[] = []
+    if (mode != null) { updates.push(`mode = $${updates.length + 1}`); values.push(mode) }
+    if (level != null) { updates.push(`level = $${updates.length + 1}`); values.push(level) }
+    values.push(auth.user_id)
+    await db.query(
+      `UPDATE students SET ${updates.join(', ')} WHERE user_id = $${values.length}`,
+      values,
+    )
     return res.json({ ok: true })
   }
 
