@@ -1,0 +1,4 @@
+.claude
+.superpowers/
+node_modules/
+web/.env
