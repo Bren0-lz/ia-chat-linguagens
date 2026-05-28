@@ -35,3 +35,14 @@ export function requireAuth(req: VercelRequest, res: VercelResponse): JWTPayload
     return null
   }
 }
+
+export function requireAdmin(req: VercelRequest, res: VercelResponse): JWTPayload | null {
+  const auth = requireAuth(req, res)
+  if (!auth) return null
+  const adminId = process.env.ADMIN_TELEGRAM_ID
+  if (!adminId || String(auth.user_id) !== String(adminId)) {
+    res.status(403).json({ error: 'Acesso negado' })
+    return null
+  }
+  return auth
+}

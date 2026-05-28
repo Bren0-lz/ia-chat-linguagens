@@ -22,4 +22,4 @@ CREATE TABLE IF NOT EXISTS test_attempts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_test_attempts_user_month
-  ON test_attempts (user_id, DATE_TRUNC('month', started_at));
+  ON test_attempts (user_id, started_at);

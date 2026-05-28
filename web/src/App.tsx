@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Landing } from './pages/Landing'
 import { Profile } from './pages/Profile'
 import { Test } from './pages/Test'
+import { Admin } from './pages/Admin'
 import { useAuth } from './hooks/useAuth'
 import './index.css'
 
@@ -36,6 +37,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Test />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <Admin />
             </ProtectedRoute>
           }
         />

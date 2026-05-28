@@ -5,6 +5,8 @@ import { GamificationPanel } from '../components/GamificationPanel'
 import { useProfile } from '../hooks/useProfile'
 import { logout } from '../lib/api'
 
+const ADMIN_ID = Number(import.meta.env.VITE_ADMIN_TELEGRAM_ID)
+
 export function Profile() {
   const navigate = useNavigate()
   const { student, canTest, testsThisMonth, loading } = useProfile()
@@ -40,6 +42,11 @@ export function Profile() {
           </button>
           <div className="flex items-center gap-3">
             <span className="text-slate-400 text-sm hidden sm:block">{student.name}</span>
+            {ADMIN_ID && student.user_id === ADMIN_ID && (
+              <Button size="sm" variant="secondary" onClick={() => navigate('/admin')}>
+                ⚙️ Admin
+              </Button>
+            )}
             <Button size="sm" variant="ghost" onClick={handleLogout}>
               Sair
             </Button>
