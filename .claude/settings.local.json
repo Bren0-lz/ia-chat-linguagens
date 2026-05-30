@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(node build_v4.js)",
+      "Bash(node -e \"const w=require\\('./IAChat_Telegram_v4.json'\\); console.log\\('valid JSON, nodes=',w.nodes.length\\); console.log\\('node names:'\\); w.nodes.forEach\\(n=>console.log\\(' -',n.name\\)\\); console.log\\('--- Load Student RETURNING ---'\\); console.log\\(w.nodes.find\\(n=>n.name==='Load Student'\\).parameters.query.split\\('RETURNING'\\)[1].trim\\(\\)\\); console.log\\('--- Build Prompt tail ---'\\); const c=w.nodes.find\\(n=>n.name==='Build Prompt'\\).parameters.jsCode; console.log\\(c.slice\\(c.indexOf\\('const p ='\\)\\)\\);\")",
+      "Bash(node -e \"const w=require\\('./IAChat_Telegram_v4.json'\\); console.log\\('JSON OK'\\); console.log\\('nodes:', w.nodes.length\\); console.log\\('switch rules:', w.nodes.find\\(n=>n.name==='Route'\\).parameters.rules.values.map\\(v=>v.outputKey\\).join\\(', '\\)\\); console.log\\('Route outputs:', w.connections.Route.main.length\\); console.log\\('has Send Unknown Command node:', !!w.nodes.find\\(n=>n.name==='Send Unknown Command'\\)\\);\")"
     ]
   }
 }
