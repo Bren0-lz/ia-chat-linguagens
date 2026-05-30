@@ -1,0 +1,1425 @@
+{
+  "name": "IAChat_Telegram_v5.1",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1856,
+        384
+      ],
+      "id": "51b32136-343d-4c5e-a50b-bcc89903791f",
+      "name": "Gatilho Telegram",
+      "webhookId": "telegram-iachat-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "wQY2w4MogQEzRJXv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const e = $input.item.json;\nlet userId, chatId, type, text = '', callbackData = '', firstName = '', callbackQueryId = null;\nif (e.message) {\n  userId = e.message.from.id;\n  chatId = e.message.chat.id;\n  firstName = e.message.from.first_name || '';\n  if (typeof e.message.text === 'string' && e.message.text.trim().length) {\n    type = 'text';\n    text = e.message.text.trim();\n  } else {\n    type = 'non_text';\n  }\n} else if (e.callback_query) {\n  userId = e.callback_query.from.id;\n  chatId = e.callback_query.message.chat.id;\n  firstName = e.callback_query.from.first_name || '';\n  type = 'callback';\n  callbackData = e.callback_query.data || '';\n  callbackQueryId = e.callback_query.id;\n}\nconst isCommand = type === 'text' && text.startsWith('/');\nconst command = isCommand ? text.split(/\\s+/)[0].toLowerCase() : '';\nreturn { json: { userId, chatId, type, text, callbackData, firstName, isCommand, command, callbackQueryId } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1312,
+        528
+      ],
+      "id": "f3482f66-56b8-4d21-8709-02701f67f695",
+      "name": "Normalizar"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO students (user_id)\nVALUES ({{ $('Normalizar').item.json.userId }})\nON CONFLICT (user_id) DO UPDATE SET updated_at = now()\nRETURNING user_id, name, age, mode, onboarding, profile, msg_count;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -1088,
+        528
+      ],
+      "id": "809ff6dc-f7ac-41e8-90d1-f0e4a6181a9b",
+      "name": "Carregar Aluno",
+      "credentials": {
+        "postgres": {
+          "id": "7Dj8pkheuaZ5WNCN",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const n = $('Normalizar').item.json;\nconst s = $input.item.json;\nconst KNOWN = ['/start', '/menu', '/modo'];\nlet route;\nif (n.command === '/start') {\n  route = (s.onboarding === 'done') ? 'menu' : 'onboarding';\n} else if (n.type === 'callback' && String(n.callbackData).startsWith('mode_')) {\n  route = 'mode_switch';\n} else if (n.type === 'non_text') {\n  route = 'non_text';\n} else if (n.isCommand && !KNOWN.includes(n.command)) {\n  route = 'unknown_command';\n} else if (s.onboarding !== 'done') {\n  route = 'onboarding';\n} else if (n.command === '/menu' || n.command === '/modo') {\n  route = 'menu';\n} else {\n  route = 'agent';\n}\nreturn { json: { ...s, ...n, route } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -880,
+        528
+      ],
+      "id": "e1653bd3-008f-4037-b8a1-89f0d13d488b",
+      "name": "Decisão de Rota"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "onboarding",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "onboarding"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "mode_switch",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "mode_switch"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "non_text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "non_text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "menu",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "menu"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "agent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "agent"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "unknown_command",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "unknown_command"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -640,
+        528
+      ],
+      "id": "2c51e726-bb04-41fb-a77d-0f58f9c92e1a",
+      "name": "Rota"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const d = $input.item.json;\n\nfunction sanitizeName(s) {\n  return String(s || '').replace(/[^a-zA-Z\\u00C0-\\u024F\\s'\\-]/g, '').slice(0, 50).trim();\n}\n\nfunction q(v) {\n  return (v === null || v === undefined) ? 'NULL' : \"'\" + String(v).replace(/'/g, \"''\") + \"'\";\n}\n\nlet next, reply, showMenu = false, saveName = null, saveAge = null, menuIntro = null;\n\nif (!d.onboarding || d.onboarding === 'new') {\n  next = 'awaiting_name';\n  reply = \"Oi! Eu sou o IAChat 😊 Qual é o seu nome?\";\n\n} else if (d.onboarding === 'awaiting_name') {\n  saveName = sanitizeName(d.text);\n  if (!saveName) {\n    next = 'awaiting_name';\n    reply = \"Hmm, não entendi o nome 😊 Pode escrever só o seu nome?\";\n  } else {\n    next = 'awaiting_age';\n    reply = \"Prazer, \" + saveName + \"! Quantos anos você tem?\";\n  }\n\n} else if (d.onboarding === 'awaiting_age') {\n  const m = (String(d.text || '').match(/\\d{1,2}/) || [])[0];\n  if (!m) {\n    next = 'awaiting_age';\n    reply = \"Só o número, por favor 😊 Quantos anos você tem?\";\n  } else {\n    saveAge = parseInt(m, 10);\n    next = 'menu';\n    showMenu = true;\n    reply = '';\n    menuIntro = \"Cadastro feito! 🎉 Como você quer começar? 👇\";\n  }\n\n} else {\n  next = 'menu';\n  showMenu = true;\n  reply = '';\n  menuIntro = \"É só tocar em um dos botões abaixo pra começar 👇\";\n}\n\nconst sets = [\"onboarding = \" + q(next), \"updated_at = now()\"];\nif (saveName !== null) sets.push(\"name = \" + q(saveName));\nif (saveAge !== null) sets.push(\"age = \" + parseInt(saveAge, 10));\n\nconst sql = \"UPDATE students SET \" + sets.join(', ') + \" WHERE user_id = \" + parseInt(d.userId, 10) + \";\";\n\nreturn { json: { ...d, next, reply, showMenu, saveName, saveAge, menuIntro, sql } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        128
+      ],
+      "id": "a27e173e-4bce-4411-820c-0b099e0ded08",
+      "name": "Etapa de Cadastro"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.sql }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -176,
+        128
+      ],
+      "id": "b5ff0618-7ed3-4ece-803b-76cb964ddcec",
+      "name": "Atualizar Cadastro",
+      "credentials": {
+        "postgres": {
+          "id": "7Dj8pkheuaZ5WNCN",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('Etapa de Cadastro').item.json.showMenu.toBoolean() }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "id": "a33b47c7-ea87-45e7-8126-42a91ece870d"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        48,
+        128
+      ],
+      "id": "0d8f7584-53da-4fb6-a90c-cb0e241aba6f",
+      "name": "Mostrar Menu?"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalizar').item.json.chatId }}",
+        "text": "={{ $('Etapa de Cadastro').item.json.reply }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        240
+      ],
+      "id": "bac4f4fc-2ac6-44cc-8dce-46b81e0d0299",
+      "name": "Enviar Texto de Cadastro",
+      "webhookId": "node-010-wh",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "telegramApi": {
+          "id": "wQY2w4MogQEzRJXv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalizar').item.json.chatId }}",
+        "text": "={{ (\"Como você quer começar? 👇\") + \"\\n\\nComandos que eu reconheço:\\n/start — recomeçar do início\\n/menu ou /modo — escolher o modo (conversa ou professor)\" }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "💬 Conversa — só bater papo",
+                    "additionalFields": {
+                      "callback_data": "mode_chat"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "📚 Professor — exercícios",
+                    "additionalFields": {
+                      "callback_data": "mode_teacher"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        0
+      ],
+      "id": "abed8e04-2d69-43b2-a279-718b714adae9",
+      "name": "Enviar Menu",
+      "webhookId": "node-012-wh",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "telegramApi": {
+          "id": "wQY2w4MogQEzRJXv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const d = $input.item.json;\n// FIX: impede completar onboarding sem nome/idade (ex.: callback de modo numa\n// sessão diferente com teclado inline cacheado pelo Telegram).\nif (!d.name || !d.age) {\n  const sql = \"UPDATE students SET updated_at = now() WHERE user_id = \" + parseInt(d.userId, 10) + \";\";\n  const confirm = \"Vamos primeiro terminar seu cadastro! Digite /start para começar 😊\";\n  return { json: { ...d, mode: d.mode || 'chat', sql, confirm } };\n}\nconst mode = d.callbackData === 'mode_teacher' ? 'teacher' : 'chat';\nconst sql = \"UPDATE students SET mode = '\" + mode + \"', onboarding = 'done', updated_at = now() WHERE user_id = \" + parseInt(d.userId, 10) + \";\";\nconst confirm = mode === 'teacher'\n  ? \"📚 Modo Professor! Vou te passar exercícios e corrigir cada um. Let's start — what do you want to practice? 😊\"\n  : \"💬 Modo Conversa! Bora bater um papo. So, what did you do today? 😊\";\nreturn { json: { ...d, mode, sql, confirm } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        368
+      ],
+      "id": "6b359023-3c14-443f-ba37-34e6a8a03499",
+      "name": "Etapa de Modo"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.sql }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -144,
+        416
+      ],
+      "id": "4b8f3814-69b9-4c0a-817e-514e4c5d75fc",
+      "name": "Atualizar Modo",
+      "credentials": {
+        "postgres": {
+          "id": "7Dj8pkheuaZ5WNCN",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "callback",
+        "queryId": "={{ $('Normalizar').item.json.callbackQueryId }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        416
+      ],
+      "id": "9eb869d2-891c-4c3d-801f-e53a89e4f6ac",
+      "name": "Responder Callback",
+      "webhookId": "node-016-wh",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "telegramApi": {
+          "id": "wQY2w4MogQEzRJXv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalizar').item.json.chatId }}",
+        "text": "={{ $('Etapa de Modo').item.json.confirm }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        416
+      ],
+      "id": "082a73e0-8ed3-42d5-9125-6629e03135ad",
+      "name": "Enviar Confirmação de Modo",
+      "webhookId": "node-018-wh",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "telegramApi": {
+          "id": "wQY2w4MogQEzRJXv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalizar').item.json.chatId }}",
+        "text": "Você pode escrever isso em palavras? 😊",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        528
+      ],
+      "id": "641aa31c-c257-426e-80e0-487812fa61df",
+      "name": "Enviar Não-Texto",
+      "webhookId": "node-020-wh",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "telegramApi": {
+          "id": "wQY2w4MogQEzRJXv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const d = $input.item.json;\nconst age = parseInt(d.age, 10) || 0;\nconst name = d.name || 'student';\n\nconst core = [\n\"Você é o IAChat, tutor de inglês para brasileiros.\",\n\"\",\n\"ALUNO: \" + name + (age ? \", \" + age + \" anos.\" : \".\"),\n\"\",\n\"LÍNGUA (regra inquebrável, com prioridade sobre todas as outras): TODA resposta é em INGLÊS por padrão. O português é exceção pontual, permitido SOMENTE para (1) explicar uma regra gramatical nova, (2) destravar quem claramente não entendeu, ou (3) falar sobre o próprio aprendizado. Mesmo nesses casos, use o mínimo de português — uma frase curta — e VOLTE imediatamente ao inglês para dar continuidade ao diálogo. NUNCA conduza a conversa em português: a parte que dá sequência ao papo (perguntas, próximos passos) é SEMPRE em inglês. Se o aluno escrever em português sem ser dúvida de aprendizado, responda em inglês e o traga de volta com gentileza. E se em mensagens anteriores você acabou deslizando para o português, ignore esse desvio e retome o inglês AGORA — o histórico não justifica continuar em português.\",\n\"\",\n\"CORREÇÃO: um erro por vez — o mais importante. Explique POR QUE está errado, não só a forma certa. Dê pistas, não respostas prontas; nunca traduza frases inteiras.\",\n\"\",\n\"ELOGIO: por mérito, não por padrão. Reconheça progresso real e específico. Nada de elogio vazio.\",\n\"\",\n\"TAMANHO (regra inquebrável): calibre sua resposta pelo tamanho da mensagem do aluno — mensagem curta exige resposta curta. Nunca escreva mais de 4 frases por turno. Uma ideia de cada vez. Diálogo é troca, não monólogo.\",\n\"\",\n\"FORMATAÇÃO: responda sempre em texto puro. Nunca use markdown nem asteriscos (* ou **) para formatar — o Telegram mostra os símbolos crus para o aluno.\"\n].join(\"\\n\");\n\nconst chat = [\n\"MODO: CONVERSA (bate-papo entre amigos).\",\n\"Converse de forma leve e natural, como um amigo — dia a dia, interesses do aluno. English-first.\",\n\"TAMANHO no modo conversa: MÁXIMO DE 2-3 frases por turno. Termine com UMA pergunta em inglês — nunca duas. Nunca escreva múltiplos parágrafos numa resposta de bate-papo.\",\n\"Feedback EMBUTIDO e suave: no máximo um errinho por vez, dentro do fluxo, sem quebrar o clima.\",\n\"SIGA A REGRA DE TAMANHO DE FORMA EXATA\"\n].join(\"\\n\");\n\nconst teacher = [\n\"MODO: PROFESSOR (aula com exercícios).\",\n\"TAMANHO no modo professor: exercício em no máximo 3 linhas. Feedback em 1-2 frases. Se precisar explicar uma regra, use uma frase — não discorra.\",\n\"FOCO: use os 'erros recorrentes' do perfil como tema da sessão; só introduza algo novo quando o aluno acertar o foco atual.\",\n\"EXERCÍCIO: UM por vez, VARIANDO o formato a cada rodada — completar lacuna, traduzir PT->EN, reordenar palavras, achar o erro, responder pergunta, mini-diálogo, ou cenário curto usando um interesse do aluno. Calibre pela idade/nível.\",\n\"LUTA PRODUTIVA: se a resposta vier errada, primeiro dê UMA dica e peça nova tentativa. Só revele a forma certa se ele errar de novo ou pedir.\",\n\"CORREÇÃO: natural e conversacional, NUNCA num molde rígido. Reaja como um professor humano — um sinal rápido quando ajudar (Nice! / Almost!), mostre a forma correta de leve dentro da fala, diga em uma frase o porquê (UM erro por vez) e emende com o próximo passo.\",\n\"NÃO INVENTE ERRO: se já está correto, elogie por mérito e suba um pouco a dificuldade. Nunca 'corrija' o que já está certo nem invente regra.\",\n\"DIFICULDADE ADAPTATIVA: 2-3 acertos seguidos — aumente o desafio; errou — simplifique e dê mais andaime.\",\n\"Ao fechar um item, ofereça o próximo exercício.\"\n].join(\"\\n\");\n\nconst p = (d.profile && typeof d.profile === 'object') ? d.profile : {};\nconst _pp = [];\nif (p.level) _pp.push('Nivel atual (CEFR): ' + p.level);\nif (Array.isArray(p.recurring_errors) && p.recurring_errors.length) _pp.push('Erros recorrentes a observar: ' + p.recurring_errors.join('; '));\nif (Array.isArray(p.mastered) && p.mastered.length) _pp.push('Ja domina (nao corrija como novidade): ' + p.mastered.join('; '));\nif (Array.isArray(p.interests) && p.interests.length) _pp.push('Interesses (use para temas de conversa): ' + p.interests.join('; '));\nif (p.notes) _pp.push('Notas: ' + p.notes);\nconst profileBlock = _pp.length ? (\"\\n\\nO QUE VOCE JA SABE SOBRE O ALUNO (use para personalizar; nao repita literalmente):\\n- \" + _pp.join(\"\\n- \")) : \"\";\nconst sys = core + profileBlock + \"\\n\\n\" + (d.mode === 'teacher' ? teacher : chat);\nreturn { json: { ...d, systemMessage: sys, chatInput: d.text } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -368,
+        752
+      ],
+      "id": "2fa4a89e-d529-44be-9943-4f59af0cc59c",
+      "name": "Montar Prompt"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "={{ $json.systemMessage }}",
+          "enableStreaming": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -160,
+        768
+      ],
+      "id": "463b78c8-3de6-4672-ab42-d0153f2d282c",
+      "name": "Agente IA",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst raw = (item.output && String(item.output).trim().length) ? String(item.output) : \"Hmm, não entendi direito — pode repetir? 😊\";\nconst LIMIT = 4000;\nfunction split(t, limit) {\n  const chunks = [];\n  let rest = t;\n  while (rest.length > limit) {\n    let cut = rest.lastIndexOf('\\n', limit);\n    if (cut < limit * 0.5) cut = rest.lastIndexOf(' ', limit);\n    if (cut < limit * 0.5) cut = limit;\n    chunks.push(rest.slice(0, cut));\n    rest = rest.slice(cut).replace(/^\\s+/, '');\n  }\n  if (rest.length) chunks.push(rest);\n  return chunks;\n}\nconst parts = split(raw, LIMIT);\nreturn parts.map((p, i) => ({ json: { messageText: p, partIndex: i + 1, partTotal: parts.length } }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        624
+      ],
+      "id": "049a3c06-387c-4416-8d33-1ca1b0b8b8b1",
+      "name": "Dividir Resposta"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalizar').item.json.chatId }}",
+        "text": "={{ $json.messageText }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        480
+      ],
+      "id": "4839cd01-9774-4459-aa73-8a73dc2aa02d",
+      "name": "Enviar Resposta",
+      "webhookId": "node-024-wh",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "telegramApi": {
+          "id": "wQY2w4MogQEzRJXv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalizar').item.json.chatId }}",
+        "text": "Só um segundo — tenta de novo daqui a pouco 😊",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        336,
+        1008
+      ],
+      "id": "a38f7b86-e875-4093-a041-2be16de8bd1c",
+      "name": "Enviar Erro",
+      "webhookId": "node-026-wh",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "telegramApi": {
+          "id": "wQY2w4MogQEzRJXv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        992
+      ],
+      "id": "0ad9d4cc-f0eb-4824-8bb8-f585c394a9aa",
+      "name": "Modelo Groq",
+      "credentials": {
+        "groqApi": {
+          "id": "lx7HDqKQacfeFcyy",
+          "name": "AGORA VAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.user_id }}",
+        "tableName": "chat_memory",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        1008
+      ],
+      "id": "989996e1-8ddb-4960-8708-085e3bad8d1c",
+      "name": "Memória Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "7Dj8pkheuaZ5WNCN",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE students SET msg_count = COALESCE(msg_count,0) + 1, updated_at = now() WHERE user_id = {{ $('Normalizar').item.json.userId }} RETURNING msg_count, profile;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        464,
+        800
+      ],
+      "id": "784bb396-2db2-46eb-abbe-89b6b95d9fc3",
+      "name": "Incrementar Contador",
+      "credentials": {
+        "postgres": {
+          "id": "7Dj8pkheuaZ5WNCN",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.msg_count }}",
+              "rightValue": 20,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        768
+      ],
+      "id": "f694a868-4d57-4944-b41d-a3bdc95edf16",
+      "name": "Precisa Atualizar?"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT message FROM chat_memory WHERE session_id = '{{ $('Normalizar').item.json.userId }}' ORDER BY id DESC LIMIT 40;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        960,
+        624
+      ],
+      "id": "45021b86-008e-48d9-ab3e-179592f55830",
+      "name": "Buscar Recentes",
+      "credentials": {
+        "postgres": {
+          "id": "7Dj8pkheuaZ5WNCN",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all();\nconst msgs = rows.map(r => r.json.message).filter(Boolean).reverse();\nconst transcript = msgs.map(m => {\n  const role = (m.type === 'human') ? 'Aluno' : 'Tutor';\n  const content = (m.data && m.data.content) ? m.data.content : '';\n  return role + ': ' + content;\n}).join('\\n');\nconst current = ($('Incrementar Contador').first().json.profile) || {};\nconst userId = $('Normalizar').first().json.userId;\nconst prompt = [\n  'Voce e um analista pedagogico. Atualize o PERFIL de um aluno de ingles com base na transcricao recente.',\n  'Regras: preserve o que ainda for verdade no perfil atual e faca MERGE com o que aprendeu. Nao invente. Seja conciso.',\n  'Responda APENAS com um objeto JSON valido (sem markdown, sem texto extra) com as chaves:',\n  '{\"level\":\"A1|A2|B1|B2|C1\",\"recurring_errors\":[],\"mastered\":[],\"interests\":[],\"notes\":\"\"}',\n  '',\n  'PERFIL ATUAL (JSON):',\n  JSON.stringify(current),\n  '',\n  'TRANSCRICAO RECENTE:',\n  transcript\n].join('\\n');\nreturn { json: { prompt, userId } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        624
+      ],
+      "id": "514156d2-5dcb-477e-9e5a-a8a17adc6ca8",
+      "name": "Montar Prompt de Perfil"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "options": {
+          "systemMessage": "Voce responde SEMPRE e APENAS com JSON valido, sem texto extra e sem markdown.",
+          "enableStreaming": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1392,
+        624
+      ],
+      "id": "51f9f0a5-f4de-4bc3-b779-124017c97d97",
+      "name": "Extrator de Perfil",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const userId = parseInt($('Montar Prompt de Perfil').first().json.userId, 10);\nlet raw = String($json.output || '').replace(/```json/gi, '').replace(/```/g, '').trim();\nconst a = raw.indexOf('{'); const b = raw.lastIndexOf('}');\nlet obj = null;\nif (a !== -1 && b !== -1) { try { obj = JSON.parse(raw.slice(a, b + 1)); } catch (e) {} }\nlet sql;\nif (obj) {\n  // sucesso: salva o perfil e zera o contador\n  const profileJson = JSON.stringify(obj).replace(/'/g, \"''\");\n  sql = \"UPDATE students SET profile = '\" + profileJson + \"'::jsonb, msg_count = 0 WHERE user_id = \" + userId + \";\";\n} else {\n  // falha na extracao: NAO mexe no profile e recua o contador para tentar de novo em ~5 mensagens (em vez de zerar e perder a janela). 15 = limiar do no 'Precisa Atualizar?' (20) menos 5.\n  sql = \"UPDATE students SET msg_count = 15 WHERE user_id = \" + userId + \";\";\n}\nreturn { json: { sql, ok: obj !== null } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        624
+      ],
+      "id": "f7d1da4f-e277-42b8-8153-8c20f8abac23",
+      "name": "Processar Perfil"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.sql }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1856,
+        624
+      ],
+      "id": "754d9e9c-59b2-478c-bfcf-cb411d7607a7",
+      "name": "Salvar Perfil",
+      "credentials": {
+        "postgres": {
+          "id": "7Dj8pkheuaZ5WNCN",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalizar').item.json.chatId }}",
+        "text": "Não reconheço esse comando 🤔 Eu reconheço apenas:\n/start — recomeçar do início\n/menu ou /modo — escolher o modo (conversa ou professor)",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -320,
+        1200
+      ],
+      "id": "4dcd1093-81a1-4472-9ff9-a7aba1886984",
+      "name": "Enviar Comando Desconhecido",
+      "webhookId": "node-037-wh",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "telegramApi": {
+          "id": "wQY2w4MogQEzRJXv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ !!($json.message && ($json.message.voice || $json.message.audio)) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1632,
+        384
+      ],
+      "id": "2352c539-87d1-448f-a0c9-365d0fa4f171",
+      "name": "É Voz?"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice ? $json.message.voice.file_id : $json.message.audio.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1280,
+        144
+      ],
+      "id": "5813b673-4e91-4619-943b-ddc785cc8062",
+      "name": "Baixar Áudio",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "webhookId": "node-041-wh",
+      "credentials": {
+        "telegramApi": {
+          "id": "wQY2w4MogQEzRJXv",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const item = $input.item;\nconst b = item.binary && item.binary.data;\nif (b) {\n  const mime = (b.mimeType || '').toLowerCase();\n  const map = { 'audio/ogg': 'ogg', 'audio/opus': 'opus', 'audio/mpeg': 'mp3', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/wav': 'wav', 'audio/x-wav': 'wav', 'audio/webm': 'webm', 'audio/flac': 'flac' };\n  const ok = ['flac','mp3','mp4','mpeg','mpga','m4a','ogg','opus','wav','webm'];\n  let ext = map[mime];\n  if (!ext) {\n    const m = (b.fileName || '').toLowerCase().match(/\\.([a-z0-9]+)$/);\n    ext = (m && ok.includes(m[1])) ? m[1] : 'ogg';\n  }\n  b.fileName = 'audio.' + ext;\n  if (!b.mimeType) b.mimeType = 'audio/ogg';\n}\nreturn item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -864,
+        48
+      ],
+      "id": "6eb3df54-4bbe-4bb1-97c0-ee270425e90f",
+      "name": "Preparar Áudio"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/audio/transcriptions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "groqApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "model",
+              "value": "whisper-large-v3"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -512,
+        -96
+      ],
+      "id": "58e14775-3e7b-4e95-8fd3-4f54ec42be1f",
+      "name": "Transcrever",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "groqApi": {
+          "id": "lx7HDqKQacfeFcyy",
+          "name": "AGORA VAI"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ String($json.text || '').trim().length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -96,
+        -176
+      ],
+      "id": "757deb2b-5508-4ac3-95cf-0bb9b50ed3e0",
+      "name": "Transcrição OK?"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Gatilho Telegram').item.json.message.chat.id }}",
+        "text": "Não consegui entender o áudio 😅 Pode digitar o que você quis dizer?",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        -160
+      ],
+      "id": "e8f13963-403d-4419-962a-32f636e16ffc",
+      "name": "Erro de Transcrição",
+      "webhookId": "node-046-wh",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "telegramApi": {
+          "id": "wQY2w4MogQEzRJXv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const src = $('Gatilho Telegram').item.json;\nconst text = String($json.text || '').trim();\nconst out = JSON.parse(JSON.stringify(src));\nif (out.message) {\n  out.message.text = text;\n  delete out.message.voice;\n  delete out.message.audio;\n}\nreturn { json: out };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        -400
+      ],
+      "id": "903d2ffa-bf32-4d99-9236-d19b1a066cb5",
+      "name": "Injetar Transcrição"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        848
+      ],
+      "id": "0dfd0f53-84e3-4606-bac3-e78e69a84bad",
+      "name": "Modelo Groq Perfil",
+      "credentials": {
+        "groqApi": {
+          "id": "lx7HDqKQacfeFcyy",
+          "name": "AGORA VAI"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gatilho Telegram": {
+      "main": [
+        [
+          {
+            "node": "É Voz?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar": {
+      "main": [
+        [
+          {
+            "node": "Carregar Aluno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Carregar Aluno": {
+      "main": [
+        [
+          {
+            "node": "Decisão de Rota",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decisão de Rota": {
+      "main": [
+        [
+          {
+            "node": "Rota",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rota": {
+      "main": [
+        [
+          {
+            "node": "Etapa de Cadastro",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Etapa de Modo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Não-Texto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Menu",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Montar Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Comando Desconhecido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Etapa de Cadastro": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Cadastro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Cadastro": {
+      "main": [
+        [
+          {
+            "node": "Mostrar Menu?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mostrar Menu?": {
+      "main": [
+        [
+          {
+            "node": "Enviar Menu",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Texto de Cadastro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Etapa de Modo": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Modo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Modo": {
+      "main": [
+        [
+          {
+            "node": "Responder Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder Callback": {
+      "main": [
+        [
+          {
+            "node": "Enviar Confirmação de Modo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Prompt": {
+      "main": [
+        [
+          {
+            "node": "Agente IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente IA": {
+      "main": [
+        [
+          {
+            "node": "Dividir Resposta",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Incrementar Contador",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo Groq": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente IA",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo Groq Perfil": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extrator de Perfil",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memória Postgres": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente IA",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dividir Resposta": {
+      "main": [
+        [
+          {
+            "node": "Enviar Resposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Incrementar Contador": {
+      "main": [
+        [
+          {
+            "node": "Precisa Atualizar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Precisa Atualizar?": {
+      "main": [
+        [
+          {
+            "node": "Buscar Recentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Recentes": {
+      "main": [
+        [
+          {
+            "node": "Montar Prompt de Perfil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Prompt de Perfil": {
+      "main": [
+        [
+          {
+            "node": "Extrator de Perfil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrator de Perfil": {
+      "main": [
+        [
+          {
+            "node": "Processar Perfil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar Perfil": {
+      "main": [
+        [
+          {
+            "node": "Salvar Perfil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É Voz?": {
+      "main": [
+        [
+          {
+            "node": "Baixar Áudio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Normalizar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar Áudio": {
+      "main": [
+        [
+          {
+            "node": "Preparar Áudio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Áudio": {
+      "main": [
+        [
+          {
+            "node": "Transcrever",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcrever": {
+      "main": [
+        [
+          {
+            "node": "Transcrição OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcrição OK?": {
+      "main": [
+        [
+          {
+            "node": "Injetar Transcrição",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro de Transcrição",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Injetar Transcrição": {
+      "main": [
+        [
+          {
+            "node": "Normalizar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "18d42778-b051-4714-be73-ce8d94deadc4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8839934ba0db24c50d30b5974fff4ae99ae885c5d467d8c373920f615c507d3e"
+  },
+  "id": "6u4qtfcEuD0fcTro",
+  "tags": []
+}
