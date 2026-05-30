@@ -68,23 +68,6 @@ function ScreenLanding({ go }) {
         </div>
       </div>
 
-      {/* social proof */}
-      <div style={{ padding: "16px 24px", display: "flex", alignItems: "center", gap: 12 }}>
-        <div style={{ display: "flex" }}>
-          {["AM","RC","JS","LP"].map((n, i) => (
-            <Avatar key={n} name={n} size={28}
-              style={{ marginLeft: i ? -8 : 0, border: "2px solid var(--paper)" }} />
-          ))}
-        </div>
-        <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            {[0,1,2,3,4].map(i => <span key={i} style={{ color: "var(--gold)" }}>{I.star(11, "var(--gold)")}</span>)}
-            <span style={{ fontWeight: 700, color: "var(--ink)", marginLeft: 2 }}>4.9</span>
-          </div>
-          <div>+2.300 alunos ativos</div>
-        </div>
-      </div>
-
       {/* how it works */}
       <div style={{ padding: "24px 24px 8px" }}>
         <div className="eyebrow" style={{ marginBottom: 6 }}>Como funciona</div>
