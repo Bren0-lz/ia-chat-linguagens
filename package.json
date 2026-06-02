@@ -1,0 +1,12 @@
+{
+  "name": "ia-chat-linguagens",
+  "private": true,
+  "description": "IAChat — tutor de línguas via Telegram (n8n + Supabase + Groq)",
+  "scripts": {
+    "db:push": "dotenv -e .env -- node db/migrate.js",
+    "db:new": "node db/new.js"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^7.4.4"
+  }
+}

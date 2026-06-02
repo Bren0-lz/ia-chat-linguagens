@@ -3,3 +3,8 @@
 node_modules/
 web/.env
 db/node_modules/
+
+# raiz
+.env
+.env.*
+!.env.example

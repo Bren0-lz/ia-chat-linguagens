@@ -64,7 +64,7 @@
       "name": "Transcrição OK?"
     },
     {
-      "parameters": { "chatId": "={{ $('Gatilho Telegram').item.json.message.chat.id }}", "text": "Não consegui entender o áudio 😅 Pode digitar o que você quis dizer?", "additionalFields": { "appendAttribution": false } },
+      "parameters": { "chatId": "={{ $('Gatilho Telegram').item.json.message.chat.id }}", "text": "Não consegui entender o áudio 😅 Pode digitar o que você quis dizer?", "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [-500, 600],
@@ -91,7 +91,7 @@
       "name": "Normalizar"
     },
     {
-      "parameters": { "operation": "executeQuery", "query": "=INSERT INTO students (user_id)\nVALUES ({{ $('Normalizar').item.json.userId }})\nON CONFLICT (user_id) DO UPDATE SET updated_at = now()\nRETURNING user_id, name, age, mode, onboarding, profile, msg_count, level, placement_state, teacher_state;", "options": {} },
+      "parameters": { "operation": "executeQuery", "query": "=INSERT INTO students (user_id)\nVALUES ({{ $('Normalizar').first().json.userId }})\nON CONFLICT (user_id) DO UPDATE SET updated_at = now()\nRETURNING user_id, name, age, mode, onboarding, profile, msg_count, level, placement_state, teacher_state;", "options": {} },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [-150, 200],
@@ -100,7 +100,7 @@
       "credentials": { "postgres": { "id": "REPLACE_POSTGRES_CRED", "name": "Postgres account" } }
     },
     {
-      "parameters": { "mode": "runOnceForEachItem", "jsCode": "const n = $('Normalizar').item.json;\nconst s = $input.item.json;\nconst ps = s.placement_state || null;\nconst ts = s.teacher_state || null;\nconst cb = String(n.callbackData || '');\nconst cmd = n.command || '';\nlet route, subroute = '';\nif (cmd === '/pausa' || cb === 'pl_pause') { route='placement'; subroute='pause'; }\nelse if (cmd === '/continuar' || cb === 'pl_resume') { route='placement'; subroute='resume'; }\nelse if (cmd === '/nivel') { route='placement'; subroute='restart'; }\nelse if (ps && ps.status === 'in_progress') {\n  if (n.type==='callback' && cb.startsWith('ans_')) { route='placement'; subroute='answer'; }\n  else if (n.type==='text' && !n.isCommand) { route='placement'; subroute='answer'; }\n  else { route='system_msg'; subroute='in_test'; }\n}\nelse if (ps && ps.status === 'paused') { route='system_msg'; subroute='paused'; }\nelse if (s.onboarding !== 'done' && s.onboarding !== 'placement_intro') { route='onboarding'; subroute='step'; }\nelse if (s.onboarding === 'placement_intro') {\n  if (cb.startsWith('pl_start_')) { route='placement'; subroute='start'; }\n  else { route='system_msg'; subroute='pick_level'; }\n}\nelse if (cmd === '/start') { route='menu'; }\nelse if (n.type==='callback' && cb.startsWith('mode_')) { route='mode_switch'; }\nelse if (cmd === '/menu' || cmd === '/modo') { route='menu'; }\nelse if (n.isCommand) { route='system_msg'; subroute='unknown'; }\nelse if (n.type === 'non_text') { route='system_msg'; subroute='non_text'; }\nelse if (s.mode === 'teacher') {\n  route='professor';\n  if (n.type==='callback' && cb==='t_answer') subroute='want_answer';\n  else if (n.type==='callback' && cb==='t_doubt') subroute='doubt';\n  else if (n.type==='callback' && cb==='t_back') subroute='back';\n  else if (n.type==='callback' && cb==='t_next') subroute='new';\n  else if (ts && ts.awaiting==='answer') subroute='check';\n  else if (ts && ts.awaiting==='doubt') subroute='doubt_msg';\n  else subroute='new';\n}\nelse { route='conversa'; }\nreturn { json: { ...s, ...n, route, subroute } };" },
+      "parameters": { "mode": "runOnceForEachItem", "jsCode": "const n = $('Normalizar').first().json;\nconst s = $input.item.json;\nconst ps = s.placement_state || null;\nconst ts = s.teacher_state || null;\nconst cb = String(n.callbackData || '');\nconst cmd = n.command || '';\nlet route, subroute = '';\nif (cmd === '/restart') { route='onboarding'; subroute='reset'; } // DEV /restart — remover depois\nelse if (cmd === '/pausa' || cb === 'pl_pause') { route='placement'; subroute='pause'; }\nelse if (cmd === '/continuar' || cb === 'pl_resume') { route='placement'; subroute='resume'; }\nelse if (cmd === '/nivel') { route='placement'; subroute='restart'; }\nelse if (ps && ps.status === 'in_progress') {\n  if (n.type==='callback' && cb.startsWith('ans_')) { route='placement'; subroute='answer'; }\n  else if (n.type==='text' && !n.isCommand) { route='placement'; subroute='answer'; }\n  else { route='system_msg'; subroute='in_test'; }\n}\nelse if (ps && ps.status === 'paused') { route='system_msg'; subroute='paused'; }\nelse if (s.onboarding !== 'done' && s.onboarding !== 'placement_intro') { route='onboarding'; subroute='step'; }\nelse if (s.onboarding === 'placement_intro') {\n  if (cb.startsWith('pl_start_')) { route='placement'; subroute='start'; }\n  else { route='onboarding'; subroute='step'; }\n}\nelse if (cmd === '/start') { route='menu'; }\nelse if (n.type==='callback' && cb.startsWith('mode_')) { route='mode_switch'; }\nelse if (cmd === '/menu' || cmd === '/modo') { route='menu'; }\nelse if (n.isCommand) { route='system_msg'; subroute='unknown'; }\nelse if (n.type === 'non_text') { route='system_msg'; subroute='non_text'; }\nelse if (s.mode === 'teacher') {\n  route='professor';\n  if (n.type==='callback' && cb==='t_answer') subroute='want_answer';\n  else if (n.type==='callback' && cb==='t_doubt') subroute='doubt';\n  else if (n.type==='callback' && cb==='t_back') subroute='back';\n  else if (n.type==='callback' && cb==='t_next') subroute='new';\n  else if (ts && ts.awaiting==='answer') subroute='check';\n  else if (ts && ts.awaiting==='doubt') subroute='doubt_msg';\n  else subroute='new';\n}\nelse { route='conversa'; }\nreturn { json: { ...s, ...n, route, subroute } };" },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [50, 200],
@@ -126,7 +126,7 @@
     },
 
     {
-      "parameters": { "mode": "runOnceForEachItem", "jsCode": "const d = $input.item.json;\nfunction sanitizeName(s){ return String(s||'').replace(/[^a-zA-Z\\u00C0-\\u024F\\s'\\-]/g,'').slice(0,50).trim(); }\nfunction q(v){ return (v===null||v===undefined)?'NULL':\"'\"+String(v).replace(/'/g,\"''\")+\"'\"; }\nlet next, reply, sendKind='text', saveName=null, saveAge=null;\nconst ob = d.onboarding;\nif (!ob || ob==='new') { next='awaiting_name'; reply='Oi! Eu sou o IAChat 😊 Qual é o seu nome?'; }\nelse if (ob==='awaiting_name') { saveName=sanitizeName(d.text); if(!saveName){ next='awaiting_name'; reply='Hmm, não entendi 😊 Pode escrever só o seu nome?'; } else { next='awaiting_age'; reply='Prazer, '+saveName+'! Quantos anos você tem?'; } }\nelse if (ob==='awaiting_age') { const m=(String(d.text||'').match(/\\d{1,2}/)||[])[0]; if(!m){ next='awaiting_age'; reply='Só o número, por favor 😊 Quantos anos você tem?'; } else { saveAge=parseInt(m,10); next='placement_intro'; sendKind='level_pick'; reply='Antes de começar, vou medir seu nível com um teste rápido 📊\\n\\nVocê já estudou inglês? Escolha por onde começar 👇'; } }\nelse { next='placement_intro'; sendKind='level_pick'; reply='Escolha por onde começar o teste 👇'; }\nconst sets=['onboarding='+q(next),'updated_at=now()'];\nif(saveName!==null) sets.push('name='+q(saveName));\nif(saveAge!==null) sets.push('age='+parseInt(saveAge,10));\nconst sql='UPDATE students SET '+sets.join(', ')+' WHERE user_id='+parseInt(d.userId,10)+';';\nreturn { json: { ...d, next, reply, sendKind, saveName, saveAge, sql } };" },
+      "parameters": { "mode": "runOnceForEachItem", "jsCode": "const d = $input.item.json;\nfunction sanitizeName(s){ return String(s||'').replace(/[^a-zA-Z\\u00C0-\\u024F\\s'\\-]/g,'').slice(0,50).trim(); }\nfunction q(v){ return (v===null||v===undefined)?'NULL':\"'\"+String(v).replace(/'/g,\"''\")+\"'\"; }\nlet next, reply, sendKind='text', saveName=null, saveAge=null;\nconst isReset = (d.command === '/restart'); // DEV /restart — remover depois\nconst ob = isReset ? 'new' : d.onboarding;\nif (!ob || ob==='new') { next='awaiting_name'; reply='Oi! 👋 Eu sou o <b>IAChat</b>, seu tutor de inglês pessoal aqui no Telegram.\\n\\nMeu objetivo é te ajudar a <b>aprender e praticar inglês</b> do seu jeito — conversando sobre o que você curte e treinando justamente os pontos onde você mais erra.\\n\\nPra deixar tudo com a sua cara, primeiro preciso te conhecer um pouco. 😊\\n\\nPra começar: <b>qual é o seu nome?</b>'; }\nelse if (ob==='awaiting_name') { saveName=sanitizeName(d.text); if(!saveName){ next='awaiting_name'; reply='Hmm, não entendi 😊 Pode escrever só o seu nome?'; } else { next='awaiting_age'; reply='Prazer, '+saveName+'! Quantos anos você tem?'; } }\nelse if (ob==='awaiting_age') { const m=(String(d.text||'').match(/\\d{1,2}/)||[])[0]; if(!m){ next='awaiting_age'; reply='Só o número, por favor 😊 Quantos anos você tem?'; } else { saveAge=parseInt(m,10); next='placement_intro'; sendKind='level_pick'; reply='Show! 🙌 Agora me conta: como você se sente com o seu inglês hoje? 👇\\n\\n📝 Assim que você escolher, vou iniciar um <b>teste de 10 questões</b> pra avaliar o seu nível.\\n\\n⚠️ <b>Responda com sinceridade e sem nenhuma ajuda externa</b> (tradutor, internet, outra pessoa) — é o seu número de acertos e erros que me permite te dar a melhor experiência. 🙂'; } }\nelse { next='placement_intro'; sendKind='level_pick'; reply='Como você se sente com o seu inglês hoje? 👇\\n\\n📝 Ao escolher, começa um <b>teste de 10 questões</b>. Responda com <b>sinceridade e sem ajuda externa</b> — é isso que garante a melhor experiência. 🙂'; }\nconst sets=['onboarding='+q(next),'updated_at=now()'];\nif(isReset){ sets.push('placement_state=NULL','teacher_state=NULL'); } // DEV /restart — remover depois\nif(saveName!==null) sets.push('name='+q(saveName));\nif(saveAge!==null) sets.push('age='+parseInt(saveAge,10));\nconst sql='UPDATE students SET '+sets.join(', ')+' WHERE user_id='+parseInt(d.userId,10)+';';\nreturn { json: { ...d, next, reply, sendKind, saveName, saveAge, sql } };" },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [520, -560],
@@ -155,13 +155,14 @@
       "name": "Tipo de Envio Cadastro"
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $('Etapa de Cadastro').item.json.reply }}", "replyMarkup": "inlineKeyboard",
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "={{ $('Etapa de Cadastro').item.json.reply }}", "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": { "rows": [
-          { "row": { "buttons": [ { "text": "🌱 Nunca estudei", "additionalFields": { "callback_data": "pl_start_A1" } }, { "text": "A1 — básico", "additionalFields": { "callback_data": "pl_start_A1" } } ] } },
-          { "row": { "buttons": [ { "text": "A2 — elementar", "additionalFields": { "callback_data": "pl_start_A2" } }, { "text": "B1 — intermediário", "additionalFields": { "callback_data": "pl_start_B1" } } ] } },
-          { "row": { "buttons": [ { "text": "B2 — avançado", "additionalFields": { "callback_data": "pl_start_B2" } } ] } }
+          { "row": { "buttons": [ { "text": "🌱 Tô começando do zero", "additionalFields": { "callback_data": "pl_start_A1" } } ] } },
+          { "row": { "buttons": [ { "text": "📖 Sei o básico, frases simples", "additionalFields": { "callback_data": "pl_start_A2" } } ] } },
+          { "row": { "buttons": [ { "text": "💬 Me viro numa conversa do dia a dia", "additionalFields": { "callback_data": "pl_start_B1" } } ] } },
+          { "row": { "buttons": [ { "text": "🚀 Já falo bem, quero treinar mais", "additionalFields": { "callback_data": "pl_start_B2" } } ] } }
         ] },
-        "additionalFields": { "appendAttribution": false } },
+        "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1180, -680],
@@ -172,7 +173,7 @@
       "credentials": { "telegramApi": { "id": "IOXDZsXhaGzp9pFD", "name": "Telegram account" } }
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $('Etapa de Cadastro').item.json.reply }}", "additionalFields": { "appendAttribution": false } },
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "={{ $('Etapa de Cadastro').item.json.reply }}", "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1180, -480],
@@ -193,7 +194,7 @@
       "credentials": { "postgres": { "id": "REPLACE_POSTGRES_CRED", "name": "Postgres account" } }
     },
     {
-      "parameters": { "mode": "runOnceForEachItem", "jsCode": "const d = $input.item.json;\nconst sub = d.subroute;\nconst bank = $('Carregar Questões Exam').all().map(r=>r.json);\nconst uid = parseInt(d.userId,10);\nfunction q(v){ return (v===null||v===undefined)?'NULL':\"'\"+String(v).replace(/'/g,\"''\")+\"'\"; }\nfunction norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9\\s]/g,'').replace(/\\s+/g,' ').trim(); }\nconst LEVELS=['A1','A2','B1','B2','C1'];\nfunction clampLevel(i){ return LEVELS[Math.max(0,Math.min(LEVELS.length-1,i))]; }\nconst profile=(d.profile&&typeof d.profile==='object')?d.profile:{};\nlet ps=d.placement_state||null;\nconst TOTAL=10;\nlet out={ send_kind:'', text:'', gabarito:'', resultText:'', sql:'' };\nfunction qById(id){ return bank.find(b=>b.id===id); }\nfunction buildState(startLevel){\n  const li=LEVELS.indexOf(startLevel);\n  const order=[li,li+1,li-1,li+2,li-2];\n  const picked=[]; const used=new Set(); let guard=0;\n  while(picked.length<TOTAL && guard<300){\n    for(const lv of order){ const L=LEVELS[lv]; if(!L) continue; const pool=bank.filter(b=>b.cefr_level===L && !used.has(b.id)); if(pool.length){ const it=pool[(picked.length+guard)%pool.length]; used.add(it.id); picked.push(it.id); if(picked.length>=TOTAL) break; } }\n    guard++;\n  }\n  return { status:'in_progress', qids:picked, idx:0, answers:[], level:startLevel, start_level:startLevel, streak_ok:0, streak_bad:0 };\n}\nfunction render(qq, idx){ let t='Questão '+(idx+1)+'/'+TOTAL+'\\n\\n'+qq.prompt; if(qq.qtype==='mc'&&Array.isArray(qq.options)){ const L=['A','B','C','D','E']; t+='\\n\\n'+qq.options.map((o,i)=>L[i]+') '+o).join('\\n'); } else { t+='\\n\\n(escreva sua resposta)'; } return t; }\nif(sub==='start' || sub==='restart'){\n  let startLevel='A2'; const cb=String(d.callbackData||'');\n  if(cb.startsWith('pl_start_')) startLevel=cb.replace('pl_start_','');\n  if(sub==='restart') startLevel=(profile.level||d.level||'A2');\n  if(!LEVELS.includes(startLevel)) startLevel='A1';\n  ps=buildState(startLevel);\n  const qq=qById(ps.qids[0]);\n  out.send_kind = qq.qtype==='mc'?'mc':'written';\n  out.text=render(qq,0);\n  out.sql='UPDATE students SET placement_state='+q(JSON.stringify(ps))+\"::jsonb, onboarding='done', updated_at=now() WHERE user_id=\"+uid+'; INSERT INTO placement_attempts (user_id, started_at) VALUES ('+uid+', now());';\n}\nelse if(sub==='pause'){\n  if(ps && ps.status==='in_progress'){ ps.status='paused'; out.send_kind='pause'; out.text='Teste pausado ⏸️ Seu progresso está salvo. Toque em [▶️ Continuar] quando quiser retomar.'; out.sql='UPDATE students SET placement_state='+q(JSON.stringify(ps))+'::jsonb, updated_at=now() WHERE user_id='+uid+';'; }\n  else { out.send_kind='pause'; out.text='Não há teste em andamento para pausar 😊'; out.sql='UPDATE students SET updated_at=now() WHERE user_id='+uid+';'; }\n}\nelse if(sub==='resume'){\n  if(ps && ps.status==='paused'){ ps.status='in_progress'; const qq=qById(ps.qids[ps.idx]); out.send_kind=qq.qtype==='mc'?'mc':'written'; out.text='De volta! ▶️\\n\\n'+render(qq,ps.idx); out.sql='UPDATE students SET placement_state='+q(JSON.stringify(ps))+'::jsonb, updated_at=now() WHERE user_id='+uid+';'; }\n  else { out.send_kind='pause'; out.text='Não há teste pausado para continuar 😊'; out.sql='UPDATE students SET updated_at=now() WHERE user_id='+uid+';'; }\n}\nelse if(sub==='answer'){\n  const qq=qById(ps.qids[ps.idx]);\n  let given=d.text||''; const cb=String(d.callbackData||'');\n  if(cb.startsWith('ans_')){ const letter=cb.replace('ans_',''); const li=['A','B','C','D','E'].indexOf(letter); if(qq.qtype==='mc'&&Array.isArray(qq.options)&&li>=0&&li<qq.options.length) given=qq.options[li]; }\n  let ok;\n  if(qq.qtype==='mc'&&Array.isArray(qq.options)){ const L=['a','b','c','d','e']; const li=L.indexOf(norm(given)); const chosen=(li>=0&&li<qq.options.length)?qq.options[li]:given; ok=norm(chosen)===norm(qq.answer); }\n  else { ok=norm(given)===norm(qq.answer); }\n  ps.answers.push({ qid:qq.id, given:given, correct:qq.answer, ok:ok, skill:qq.skill, prompt:qq.prompt, explanation:qq.explanation });\n  if(ok){ ps.streak_ok++; ps.streak_bad=0; if(ps.streak_ok>=2){ ps.level=clampLevel(LEVELS.indexOf(ps.level)+1); ps.streak_ok=0; } }\n  else { ps.streak_bad++; ps.streak_ok=0; if(ps.streak_bad>=2){ ps.level=clampLevel(LEVELS.indexOf(ps.level)-1); ps.streak_bad=0; } }\n  ps.idx++;\n  if(ps.idx>=TOTAL || ps.idx>=ps.qids.length){\n    const correctCount=ps.answers.filter(a=>a.ok).length;\n    const score=Math.round((correctCount/ps.answers.length)*100);\n    const finalLevel=ps.level;\n    const gb=ps.answers.map((a,i)=>{ const head=a.prompt.split('\\n')[0]; return (i+1)+'. '+(a.ok?'✅':'❌')+' '+head+'\\n   Sua: '+a.given+' | Certa: '+a.correct+(a.ok?'':'\\n   '+a.explanation); }).join('\\n\\n');\n    const bySkill={}; ps.answers.forEach(a=>{ bySkill[a.skill]=bySkill[a.skill]||{ok:0,n:0}; bySkill[a.skill].n++; if(a.ok)bySkill[a.skill].ok++; });\n    const weak=Object.keys(bySkill).filter(s=>bySkill[s].ok/bySkill[s].n<0.6);\n    profile.level=finalLevel;\n    out.send_kind='gabarito';\n    out.gabarito='📋 Gabarito do teste:\\n\\n'+gb;\n    out.resultText='🎯 Seu nível estimado: '+finalLevel+'\\nAcertos: '+correctCount+'/'+ps.answers.length+' ('+score+'%)\\n'+(weak.length?('Pontos a reforçar: '+weak.join(', ')):'Mandou bem em todas as áreas!')+'\\n\\nComo você quer continuar? 👇';\n    const answersJson=JSON.stringify(ps.answers);\n    out.sql='UPDATE students SET placement_state=NULL, level='+q(finalLevel)+', profile='+q(JSON.stringify(profile))+'::jsonb, updated_at=now() WHERE user_id='+uid+'; UPDATE placement_attempts SET finished_at=now(), level_result='+q(finalLevel)+', score='+score+', answers='+q(answersJson)+'::jsonb WHERE id=(SELECT id FROM placement_attempts WHERE user_id='+uid+' ORDER BY started_at DESC LIMIT 1);';\n  } else {\n    const nq=qById(ps.qids[ps.idx]);\n    out.send_kind=nq.qtype==='mc'?'mc':'written';\n    out.text=(ok?'✅':'❌')+'\\n\\n'+render(nq,ps.idx);\n    out.sql='UPDATE students SET placement_state='+q(JSON.stringify(ps))+'::jsonb, updated_at=now() WHERE user_id='+uid+';';\n  }\n}\nreturn { json: { ...d, ...out } };" },
+      "parameters": { "mode": "runOnceForAllItems", "jsCode": "const d = $('Roteador Mestre').first().json;\nconst sub = d.subroute;\nconst bank = $input.all().map(r=>r.json);\nconst uid = parseInt(d.userId,10);\nfunction q(v){ return (v===null||v===undefined)?'NULL':\"'\"+String(v).replace(/'/g,\"''\")+\"'\"; }\nfunction norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9\\s]/g,'').replace(/\\s+/g,' ').trim(); }\nconst LEVELS=['A1','A2','B1','B2','C1'];\nfunction clampLevel(i){ return LEVELS[Math.max(0,Math.min(LEVELS.length-1,i))]; }\nconst profile=(d.profile&&typeof d.profile==='object')?d.profile:{};\nlet ps=d.placement_state||null;\nconst TOTAL=10;\nlet out={ send_kind:'', text:'', gabarito:'', resultText:'', sql:'' };\nfunction qById(id){ return bank.find(b=>b.id===id); }\nfunction buildState(startLevel){\n  const li=LEVELS.indexOf(startLevel);\n  const order=[li,li+1,li-1,li+2,li-2];\n  const picked=[]; const used=new Set(); let guard=0;\n  while(picked.length<TOTAL && guard<300){\n    for(const lv of order){ const L=LEVELS[lv]; if(!L) continue; const pool=bank.filter(b=>b.cefr_level===L && !used.has(b.id)); if(pool.length){ const it=pool[(picked.length+guard)%pool.length]; used.add(it.id); picked.push(it.id); if(picked.length>=TOTAL) break; } }\n    guard++;\n  }\n  return { status:'in_progress', qids:picked, idx:0, answers:[], level:startLevel, start_level:startLevel, streak_ok:0, streak_bad:0 };\n}\nfunction render(qq, idx){ let t='Questão '+(idx+1)+'/'+TOTAL+'\\n\\n'+qq.prompt; if(qq.qtype==='mc'&&Array.isArray(qq.options)){ const L=['A','B','C','D','E']; t+='\\n\\n'+qq.options.map((o,i)=>L[i]+') '+o).join('\\n'); } else { t+='\\n\\n(escreva sua resposta)'; } return t; }\nif(sub==='start' || sub==='restart'){\n  let startLevel='A2'; const cb=String(d.callbackData||'');\n  if(cb.startsWith('pl_start_')) startLevel=cb.replace('pl_start_','');\n  if(sub==='restart') startLevel=(profile.level||d.level||'A2');\n  if(!LEVELS.includes(startLevel)) startLevel='A1';\n  ps=buildState(startLevel);\n  const qq=qById(ps.qids[0]);\n  out.send_kind = qq.qtype==='mc'?'mc':'written';\n  out.text=render(qq,0);\n  out.sql='UPDATE students SET placement_state='+q(JSON.stringify(ps))+\"::jsonb, onboarding='done', updated_at=now() WHERE user_id=\"+uid+'; INSERT INTO placement_attempts (user_id, started_at) VALUES ('+uid+', now());';\n}\nelse if(sub==='pause'){\n  if(ps && ps.status==='in_progress'){ ps.status='paused'; out.send_kind='pause'; out.text='Teste pausado ⏸️ Seu progresso está salvo. Toque em [▶️ Continuar] quando quiser retomar.'; out.sql='UPDATE students SET placement_state='+q(JSON.stringify(ps))+'::jsonb, updated_at=now() WHERE user_id='+uid+';'; }\n  else { out.send_kind='pause'; out.text='Não há teste em andamento para pausar 😊'; out.sql='UPDATE students SET updated_at=now() WHERE user_id='+uid+';'; }\n}\nelse if(sub==='resume'){\n  if(ps && ps.status==='paused'){ ps.status='in_progress'; const qq=qById(ps.qids[ps.idx]); out.send_kind=qq.qtype==='mc'?'mc':'written'; out.text='De volta! ▶️\\n\\n'+render(qq,ps.idx); out.sql='UPDATE students SET placement_state='+q(JSON.stringify(ps))+'::jsonb, updated_at=now() WHERE user_id='+uid+';'; }\n  else { out.send_kind='pause'; out.text='Não há teste pausado para continuar 😊'; out.sql='UPDATE students SET updated_at=now() WHERE user_id='+uid+';'; }\n}\nelse if(sub==='answer'){\n  const qq=qById(ps.qids[ps.idx]);\n  let given=d.text||''; const cb=String(d.callbackData||'');\n  if(cb.startsWith('ans_')){ const letter=cb.replace('ans_',''); const li=['A','B','C','D','E'].indexOf(letter); if(qq.qtype==='mc'&&Array.isArray(qq.options)&&li>=0&&li<qq.options.length) given=qq.options[li]; }\n  let ok;\n  if(qq.qtype==='mc'&&Array.isArray(qq.options)){ const L=['a','b','c','d','e']; const li=L.indexOf(norm(given)); const chosen=(li>=0&&li<qq.options.length)?qq.options[li]:given; ok=norm(chosen)===norm(qq.answer); }\n  else { ok=norm(given)===norm(qq.answer); }\n  ps.answers.push({ qid:qq.id, given:given, correct:qq.answer, ok:ok, skill:qq.skill, prompt:qq.prompt, explanation:qq.explanation });\n  if(ok){ ps.streak_ok++; ps.streak_bad=0; if(ps.streak_ok>=2){ ps.level=clampLevel(LEVELS.indexOf(ps.level)+1); ps.streak_ok=0; } }\n  else { ps.streak_bad++; ps.streak_ok=0; if(ps.streak_bad>=2){ ps.level=clampLevel(LEVELS.indexOf(ps.level)-1); ps.streak_bad=0; } }\n  ps.idx++;\n  if(ps.idx>=TOTAL || ps.idx>=ps.qids.length){\n    const correctCount=ps.answers.filter(a=>a.ok).length;\n    const score=Math.round((correctCount/ps.answers.length)*100);\n    const finalLevel=ps.level;\n    const skillPT={grammar:'gramática',vocabulary:'vocabulário',reading:'leitura'};\n    const gb=ps.answers.map((a,i)=>{ const head=a.prompt.split('\\n')[0]; let b=(i+1)+'. '+(a.ok?'✅':'❌')+' '+head+'\\n      🗣️ Você: '+(a.given||'—'); if(!a.ok){ b+='\\n      ✔️ Correta: '+a.correct+'\\n      💡 '+a.explanation; } return b; }).join('\\n\\n');\n    const bySkill={}; ps.answers.forEach(a=>{ bySkill[a.skill]=bySkill[a.skill]||{ok:0,n:0}; bySkill[a.skill].n++; if(a.ok)bySkill[a.skill].ok++; });\n    const weak=Object.keys(bySkill).filter(s=>bySkill[s].ok/bySkill[s].n<0.6);\n    profile.level=finalLevel;\n    out.send_kind='gabarito';\n    out.gabarito='🎯 Seu nível estimado: '+finalLevel+'\\n✅ Acertos: '+correctCount+'/'+ps.answers.length+' ('+score+'%)\\n'+(weak.length?('📌 Reforçar: '+weak.map(s=>skillPT[s]||s).join(', ')):'🌟 Mandou bem em todas as áreas!')+'\\n\\n━━━━━━━━━━━━\\n📋 Gabarito detalhado\\n━━━━━━━━━━━━\\n\\n'+gb;\n    out.resultText='E aí, como você quer continuar? 👇';\n    const answersJson=JSON.stringify(ps.answers);\n    out.sql='UPDATE students SET placement_state=NULL, level='+q(finalLevel)+', profile='+q(JSON.stringify(profile))+'::jsonb, updated_at=now() WHERE user_id='+uid+'; UPDATE placement_attempts SET finished_at=now(), level_result='+q(finalLevel)+', score='+score+', answers='+q(answersJson)+'::jsonb WHERE id=(SELECT id FROM placement_attempts WHERE user_id='+uid+' ORDER BY started_at DESC LIMIT 1);';\n  } else {\n    const nq=qById(ps.qids[ps.idx]);\n    out.send_kind=nq.qtype==='mc'?'mc':'written';\n    out.text=(ok?'✅ <b>Acertou!</b>':'❌ <b>Quase lá</b>')+'\\n➖➖➖➖➖➖➖➖\\n\\n'+render(nq,ps.idx);\n    out.sql='UPDATE students SET placement_state='+q(JSON.stringify(ps))+'::jsonb, updated_at=now() WHERE user_id='+uid+';';\n  }\n}\nreturn { json: { ...d, ...out } };" },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [740, -280],
@@ -212,10 +213,10 @@
     {
       "parameters": {
         "rules": { "values": [
-          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Placement Engine').item.json.send_kind }}", "rightValue": "mc", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "mc" },
-          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Placement Engine').item.json.send_kind }}", "rightValue": "written", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "written" },
-          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Placement Engine').item.json.send_kind }}", "rightValue": "pause", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "pause" },
-          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Placement Engine').item.json.send_kind }}", "rightValue": "gabarito", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "gabarito" }
+          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Placement Engine').first().json.send_kind }}", "rightValue": "mc", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "mc" },
+          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Placement Engine').first().json.send_kind }}", "rightValue": "written", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "written" },
+          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Placement Engine').first().json.send_kind }}", "rightValue": "pause", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "pause" },
+          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Placement Engine').first().json.send_kind }}", "rightValue": "gabarito", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "gabarito" }
         ] }, "options": {} },
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
@@ -224,12 +225,12 @@
       "name": "Envio Placement"
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $('Placement Engine').item.json.text }}", "replyMarkup": "inlineKeyboard",
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "={{ $('Placement Engine').first().json.text }}", "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": { "rows": [
           { "row": { "buttons": [ { "text": "A", "additionalFields": { "callback_data": "ans_A" } }, { "text": "B", "additionalFields": { "callback_data": "ans_B" } }, { "text": "C", "additionalFields": { "callback_data": "ans_C" } }, { "text": "D", "additionalFields": { "callback_data": "ans_D" } } ] } },
           { "row": { "buttons": [ { "text": "⏸️ Pausar", "additionalFields": { "callback_data": "pl_pause" } } ] } }
         ] },
-        "additionalFields": { "appendAttribution": false } },
+        "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1420, -460],
@@ -240,9 +241,9 @@
       "credentials": { "telegramApi": { "id": "IOXDZsXhaGzp9pFD", "name": "Telegram account" } }
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $('Placement Engine').item.json.text }}", "replyMarkup": "inlineKeyboard",
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "={{ $('Placement Engine').first().json.text }}", "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": { "rows": [ { "row": { "buttons": [ { "text": "⏸️ Pausar", "additionalFields": { "callback_data": "pl_pause" } } ] } } ] },
-        "additionalFields": { "appendAttribution": false } },
+        "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1420, -320],
@@ -253,9 +254,9 @@
       "credentials": { "telegramApi": { "id": "IOXDZsXhaGzp9pFD", "name": "Telegram account" } }
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $('Placement Engine').item.json.text }}", "replyMarkup": "inlineKeyboard",
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "={{ $('Placement Engine').first().json.text }}", "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": { "rows": [ { "row": { "buttons": [ { "text": "▶️ Continuar", "additionalFields": { "callback_data": "pl_resume" } } ] } } ] },
-        "additionalFields": { "appendAttribution": false } },
+        "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1420, -180],
@@ -266,7 +267,7 @@
       "credentials": { "telegramApi": { "id": "IOXDZsXhaGzp9pFD", "name": "Telegram account" } }
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $('Placement Engine').item.json.gabarito }}", "additionalFields": { "appendAttribution": false } },
+      "parameters": { "chatId": "={{ $json.chatId }}", "text": "={{ $json.messageText }}", "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1420, -40],
@@ -277,12 +278,12 @@
       "credentials": { "telegramApi": { "id": "IOXDZsXhaGzp9pFD", "name": "Telegram account" } }
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $('Placement Engine').item.json.resultText }}", "replyMarkup": "inlineKeyboard",
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "={{ $('Placement Engine').first().json.resultText }}", "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": { "rows": [
           { "row": { "buttons": [ { "text": "💬 Conversa — bater papo", "additionalFields": { "callback_data": "mode_chat" } } ] } },
           { "row": { "buttons": [ { "text": "📚 Professor — exercícios", "additionalFields": { "callback_data": "mode_teacher" } } ] } }
         ] },
-        "additionalFields": { "appendAttribution": false } },
+        "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1640, -40],
@@ -294,12 +295,12 @@
     },
 
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "Como você quer continuar? 👇\n\nComandos:\n/menu ou /modo — trocar de modo\n/nivel — refazer o teste de nível", "replyMarkup": "inlineKeyboard",
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "Como você quer continuar? 👇\n\nComandos:\n/menu ou /modo — trocar de modo\n/nivel — refazer o teste de nível", "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": { "rows": [
           { "row": { "buttons": [ { "text": "💬 Conversa — bater papo", "additionalFields": { "callback_data": "mode_chat" } } ] } },
           { "row": { "buttons": [ { "text": "📚 Professor — exercícios", "additionalFields": { "callback_data": "mode_teacher" } } ] } }
         ] },
-        "additionalFields": { "appendAttribution": false } },
+        "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [520, 100],
@@ -327,18 +328,7 @@
       "credentials": { "postgres": { "id": "REPLACE_POSTGRES_CRED", "name": "Postgres account" } }
     },
     {
-      "parameters": { "resource": "callback", "operation": "answerQuery", "queryId": "={{ $('Normalizar').item.json.callbackQueryId }}", "additionalFields": {} },
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [960, 260],
-      "id": "n30",
-      "name": "Responder Callback Modo",
-      "webhookId": "n30-wh",
-      "retryOnFail": true, "maxTries": 3, "waitBetweenTries": 2000, "onError": "continueRegularOutput",
-      "credentials": { "telegramApi": { "id": "IOXDZsXhaGzp9pFD", "name": "Telegram account" } }
-    },
-    {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $('Etapa de Modo').item.json.confirm }}", "additionalFields": { "appendAttribution": false } },
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "={{ $('Etapa de Modo').item.json.confirm }}", "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1180, 260],
@@ -350,7 +340,7 @@
     },
 
     {
-      "parameters": { "mode": "runOnceForEachItem", "jsCode": "const d=$input.item.json;\nconst name=d.name||'student';\nconst p=(d.profile&&typeof d.profile==='object')?d.profile:{};\nconst level=p.level||d.level||'';\nconst interests=Array.isArray(p.interests)?p.interests:[];\nconst notes=p.notes||'';\nconst sys=[\n'Você é o IAChat, tutor de inglês para brasileiros. Aluno: '+name+(level?(' (nível '+level+')'):'')+'.',\n'LÍNGUA: responda SEMPRE em inglês por padrão. Português só uma frase curta para destravar, e volte ao inglês.',\n'MODO CONVERSA: bate-papo leve e natural, como um amigo. English-first.',\n'TAMANHO: máximo 2-3 frases por turno. Termine com UMA pergunta em inglês. Nada de parágrafos longos.',\n'FEEDBACK: no máximo um errinho por vez, embutido e suave, sem quebrar o clima.',\n'FORMATAÇÃO: texto puro, sem markdown nem asteriscos.',\ninterests.length?('Interesses do aluno (use nos temas): '+interests.join(', ')):'',\nnotes?('Notas: '+notes):''\n].filter(Boolean).join('\\n');\nreturn { json:{ ...d, systemMessage:sys, chatInput:d.text } };" },
+      "parameters": { "mode": "runOnceForEachItem", "jsCode": "const d=$input.item.json;\nconst name=d.name||'student';\nconst p=(d.profile&&typeof d.profile==='object')?d.profile:{};\nconst level=(p.level||d.level||'').toUpperCase();\nconst interests=Array.isArray(p.interests)?p.interests:[];\nconst notes=p.notes||'';\nconst PLAYBOOK={\n  A1:{ rotulo:'A1 (iniciante absoluto)', idioma:'IDIOMA: fale cerca de metade em inglês e metade em português. Sempre que disser algo em inglês, traga a tradução em português logo em seguida, entre parênteses.', linguagem:'LINGUAGEM: use só presente simples e vocabulário básico (família, rotina, comida, cores, números). Nada de gírias, phrasal verbs ou expressões idiomáticas.', tamanho:'TAMANHO: frases bem curtas (3 a 6 palavras), uma ideia por vez.', perguntas:'PERGUNTAS: faça perguntas fechadas ou de escolha (ex.: Do you like coffee or tea?).', correcao:'CORREÇÃO: quase não corrija. Se precisar, repita a forma certa de leve e sempre elogie a tentativa. A prioridade é o aluno se sentir seguro e capaz.', desafio:'puxe muito pouco além do nível — o foco é dar confiança.' },\n  A2:{ rotulo:'A2 (básico)', idioma:'IDIOMA: fale a maior parte em inglês; use o português só para destravar uma palavra difícil.', linguagem:'LINGUAGEM: presente, passado simples e futuro com going to. Vocabulário do dia a dia. Apenas os phrasal verbs mais comuns.', tamanho:'TAMANHO: 1 a 2 frases curtas por turno.', perguntas:'PERGUNTAS: perguntas abertas simples sobre o cotidiano (ex.: What did you do yesterday?).', correcao:'CORREÇÃO: corrija no máximo 1 erro por vez, reformulando a frase do jeito certo de forma natural.', desafio:'introduza aos poucos novas palavras úteis do dia a dia.' },\n  B1:{ rotulo:'B1 (intermediário)', idioma:'IDIOMA: fale 100% em inglês. Recorra ao português só em último caso, se o aluno travar totalmente.', linguagem:'LINGUAGEM: variedade de tempos verbais, conectivos e phrasal verbs comuns.', tamanho:'TAMANHO: 2 a 3 frases por turno.', perguntas:'PERGUNTAS: perguntas abertas que pedem opinião e justificativa (ex.: Why do you think so?).', correcao:'CORREÇÃO: corrija os erros que atrapalham a comunicação e apresente 1 palavra ou expressão nova por turno para expandir o vocabulário.', desafio:'estimule o aluno a explicar e justificar as próprias ideias.' },\n  B2:{ rotulo:'B2 (avançado)', idioma:'IDIOMA: 100% inglês, natural e fluido, em ritmo próximo ao de um nativo.', linguagem:'LINGUAGEM: estruturas complexas, condicionais, expressões idiomáticas, phrasal verbs e vocabulário mais preciso.', tamanho:'TAMANHO: 3 a 4 frases, com mais nuance.', perguntas:'PERGUNTAS: perguntas que desafiam — hipóteses, comparações e opiniões sobre temas abstratos.', correcao:'CORREÇÃO: foque em naturalidade, collocations e nuance; sugira alternativas mais idiomáticas mesmo quando a frase já está correta.', desafio:'provoque o aluno a se expressar com mais precisão e sofisticação.' },\n  C1:{ rotulo:'C1 (proficiente)', idioma:'IDIOMA: inglês sofisticado, variando o registro conforme o assunto.', linguagem:'LINGUAGEM: expressões idiomáticas avançadas, vocabulário acadêmico e profissional, humor e ironia sutis.', tamanho:'TAMANHO: pode desenvolver mais, mas mantenha o tom de conversa (não vire monólogo).', perguntas:'PERGUNTAS: provoque debates e argumentação sobre temas abstratos, hipotéticos ou polêmicos.', correcao:'CORREÇÃO: refine sutilezas — conotação, registro e precisão; desafie o aluno a defender posições e a usar vocabulário mais sofisticado.', desafio:'mantenha o aluno intelectualmente engajado e fora da zona de conforto.' }\n};\nconst pb=PLAYBOOK[level]||PLAYBOOK.A2;\nconst sys=[\n'Você é o IAChat, tutor de inglês para brasileiros, conversando com '+name+'.',\n'MODO CONVERSA: um bate-papo leve e natural, como um amigo. O objetivo é o aluno PRATICAR inglês sem medo de errar.',\n'NÍVEL DO ALUNO: '+pb.rotulo+'. Adapte TUDO (idioma, vocabulário, gramática, tamanho e desafio) a esse nível, seguindo as regras abaixo.',\npb.idioma,\npb.linguagem,\npb.tamanho,\npb.perguntas,\npb.correcao,\n'DESAFIO NA MEDIDA: fique no nível do aluno, mas '+pb.desafio,\n'REGRA i+1: de vez em quando introduza UMA novidade levemente acima do nível (uma palavra ou expressão), de um jeito que dê para entender pelo contexto.',\n'EQUILÍBRIO: nunca deixe o papo difícil a ponto de assustar, nem fácil a ponto de entediar. Se o aluno errar muito, simplifique; se mandar bem, suba um pouco a régua.',\n'Termine SEMPRE com UMA pergunta em inglês para manter a conversa fluindo.',\n'FORMATAÇÃO: texto puro, sem markdown nem asteriscos.',\ninterests.length?('INTERESSES do aluno (puxe os temas a partir daqui): '+interests.join(', ')):'',\nnotes?('NOTAS sobre o aluno: '+notes):''\n].filter(Boolean).join('\\n');\nreturn { json:{ ...d, systemMessage:sys, chatInput:d.text } };" },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [520, 460],
@@ -367,7 +357,7 @@
       "retryOnFail": true, "waitBetweenTries": 5000, "onError": "continueErrorOutput"
     },
     {
-      "parameters": { "mode": "runOnceForAllItems", "jsCode": "const item=$input.first().json;\nconst raw=(item.output && String(item.output).trim().length)?String(item.output):'Hmm, não entendi direito — pode repetir? 😊';\nconst LIMIT=4000;\nfunction split(t,limit){ const chunks=[]; let rest=t; while(rest.length>limit){ let cut=rest.lastIndexOf('\\n',limit); if(cut<limit*0.5) cut=rest.lastIndexOf(' ',limit); if(cut<limit*0.5) cut=limit; chunks.push(rest.slice(0,cut)); rest=rest.slice(cut).replace(/^\\s+/,''); } if(rest.length) chunks.push(rest); return chunks; }\nconst parts=split(raw,LIMIT);\nreturn parts.map((p,i)=>({ json:{ messageText:p, partIndex:i+1, partTotal:parts.length } }));" },
+      "parameters": { "mode": "runOnceForAllItems", "jsCode": "const item=$input.first().json;\nconst raw=(item.output && String(item.output).trim().length)?String(item.output):'Hmm, não entendi direito — pode repetir? 😊';\nconst LIMIT=4000;\nconst esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');\nfunction split(t,limit){ const chunks=[]; let rest=t; while(rest.length>limit){ let cut=rest.lastIndexOf('\\n',limit); if(cut<limit*0.5) cut=rest.lastIndexOf(' ',limit); if(cut<limit*0.5) cut=limit; chunks.push(rest.slice(0,cut)); rest=rest.slice(cut).replace(/^\\s+/,''); } if(rest.length) chunks.push(rest); return chunks; }\nconst parts=split(esc(raw),LIMIT);\nreturn parts.map((p,i)=>({ json:{ messageText:p, partIndex:i+1, partTotal:parts.length } }));" },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [1000, 400],
@@ -375,7 +365,7 @@
       "name": "Dividir Resposta"
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $json.messageText }}", "additionalFields": { "appendAttribution": false } },
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "={{ $json.messageText }}", "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1220, 400],
@@ -386,7 +376,7 @@
       "credentials": { "telegramApi": { "id": "IOXDZsXhaGzp9pFD", "name": "Telegram account" } }
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "Só um segundo — tenta de novo daqui a pouco 😊", "additionalFields": { "appendAttribution": false } },
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "Só um segundo — tenta de novo daqui a pouco 😊", "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1000, 580],
@@ -407,7 +397,7 @@
       "credentials": { "postgres": { "id": "REPLACE_POSTGRES_CRED", "name": "Postgres account" } }
     },
     {
-      "parameters": { "mode": "runOnceForEachItem", "jsCode": "const d=$input.item.json;\nlet sub=d.subroute;\nconst pool=$('Carregar Questão Practice').all().map(r=>r.json);\nconst uid=parseInt(d.userId,10);\nconst profile=(d.profile&&typeof d.profile==='object')?d.profile:{};\nconst themes=profile.themes||{};\nlet ts=d.teacher_state||null;\nfunction q(v){ return (v===null||v===undefined)?'NULL':\"'\"+String(v).replace(/'/g,\"''\")+\"'\"; }\nfunction norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9\\s]/g,'').replace(/\\s+/g,' ').trim(); }\nconst THEMES=['past_simple','present_perfect','prepositions','articles','phrasal_verbs','third_person_s'];\nlet out={ send_kind:'', needsLLM:false, deterministicText:'', sql:'' };\nfunction curQ(){ return (ts&&ts.qid)?pool.find(p=>p.id===ts.qid):null; }\nif(sub==='want_answer'){\n  ts={ ...(ts||{}), awaiting:'answer' };\n  out.send_kind='ask_answer'; out.deterministicText='Manda sua resposta 👇 (pode escrever a letra ou o texto)';\n  out.sql='UPDATE students SET teacher_state='+q(JSON.stringify(ts))+'::jsonb, updated_at=now() WHERE user_id='+uid+';';\n}\nelse if(sub==='doubt' || sub==='doubt_msg'){\n  ts={ ...(ts||{}), awaiting:'doubt' };\n  out.send_kind='doubt'; out.needsLLM=true;\n  out.sql='UPDATE students SET teacher_state='+q(JSON.stringify(ts))+'::jsonb, updated_at=now() WHERE user_id='+uid+';';\n}\nelse if(sub==='back'){\n  ts={ ...(ts||{}), awaiting:null };\n  out.send_kind='ask_answer'; out.deterministicText='Beleza! Quando quiser responda com [✍️ Responder] ou peça o próximo exercício.';\n  out.sql='UPDATE students SET teacher_state='+q(JSON.stringify(ts))+'::jsonb, updated_at=now() WHERE user_id='+uid+';';\n}\nelse if(sub==='check'){\n  const cur=curQ();\n  if(!cur){ sub='new'; }\n  else {\n    const given=norm(d.text);\n    let ok;\n    if(cur.qtype==='mc'&&Array.isArray(cur.options)){ const L=['a','b','c','d','e']; const li=L.indexOf(given); const chosen=(li>=0&&li<cur.options.length)?cur.options[li]:d.text; ok=norm(chosen)===norm(cur.answer); }\n    else { ok=given===norm(cur.answer); }\n    const th=themes[cur.theme]||{d1:false,d2:false,d3:false,mastered:false,slips:0};\n    if(ok){ th['d'+cur.difficulty]=true; if(th.d1&&th.d2&&th.d3) th.mastered=true; th.slips=0; }\n    else { th['d'+cur.difficulty]=false; if(th.mastered){ th.slips=(th.slips||0)+1; if(th.slips>=2){ th.mastered=false; th.slips=0; } } }\n    themes[cur.theme]=th; profile.themes=themes;\n    ts={ ...ts, awaiting:null };\n    out.send_kind='check';\n    out.deterministicText=(ok?'✅ Correct! ':'❌ Not quite. ')+'The answer is: '+cur.answer+'.\\n'+cur.explanation+'\\n\\nWant another one? 👇';\n    out.sql='UPDATE students SET teacher_state='+q(JSON.stringify(ts))+'::jsonb, profile='+q(JSON.stringify(profile))+'::jsonb, updated_at=now() WHERE user_id='+uid+';';\n  }\n}\nif(out.send_kind==='' || sub==='new'){\n  function score(t){ const x=themes[t]||{}; if(x.mastered) return 99; return (x.d1?1:0)+(x.d2?1:0)+(x.d3?1:0); }\n  const ordered=THEMES.slice().sort((a,b)=>score(a)-score(b));\n  const theme=ordered[0]; const x=themes[theme]||{};\n  const diff=!x.d1?1:(!x.d2?2:3);\n  let cands=pool.filter(p=>p.theme===theme && p.difficulty===diff);\n  if(!cands.length) cands=pool.filter(p=>p.theme===theme);\n  if(!cands.length) cands=pool;\n  const pick=cands[(parseInt(d.msg_count,10)||0)%cands.length];\n  ts={ qid:pick.id, theme:pick.theme, difficulty:pick.difficulty, awaiting:null };\n  out.send_kind='present'; out.needsLLM=true;\n  out.sql='UPDATE students SET teacher_state='+q(JSON.stringify(ts))+'::jsonb, profile='+q(JSON.stringify(profile))+'::jsonb, updated_at=now() WHERE user_id='+uid+';';\n}\nconst question=(ts&&ts.qid)?pool.find(p=>p.id===ts.qid):null;\nreturn { json:{ ...d, ...out, questionForLLM:question } };" },
+      "parameters": { "mode": "runOnceForAllItems", "jsCode": "const d=$('Roteador Mestre').first().json;\nlet sub=d.subroute;\nconst pool=$input.all().map(r=>r.json);\nconst uid=parseInt(d.userId,10);\nconst profile=(d.profile&&typeof d.profile==='object')?d.profile:{};\nconst themes=profile.themes||{};\nlet ts=d.teacher_state||null;\nfunction q(v){ return (v===null||v===undefined)?'NULL':\"'\"+String(v).replace(/'/g,\"''\")+\"'\"; }\nfunction norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9\\s]/g,'').replace(/\\s+/g,' ').trim(); }\nconst THEMES=['past_simple','present_perfect','prepositions','articles','phrasal_verbs','third_person_s'];\nlet out={ send_kind:'', needsLLM:false, deterministicText:'', sql:'' };\nfunction curQ(){ return (ts&&ts.qid)?pool.find(p=>p.id===ts.qid):null; }\nif(sub==='want_answer'){\n  ts={ ...(ts||{}), awaiting:'answer' };\n  out.send_kind='ask_answer'; out.deterministicText='Manda sua resposta 👇 (pode escrever a letra ou o texto)';\n  out.sql='UPDATE students SET teacher_state='+q(JSON.stringify(ts))+'::jsonb, updated_at=now() WHERE user_id='+uid+';';\n}\nelse if(sub==='doubt'){\n  ts={ ...(ts||{}), awaiting:'doubt' };\n  out.send_kind='ask_answer'; out.deterministicText='Pode mandar sua dúvida 👇 Escreva o que ficou confuso.';\n  out.sql='UPDATE students SET teacher_state='+q(JSON.stringify(ts))+'::jsonb, updated_at=now() WHERE user_id='+uid+';';\n}\nelse if(sub==='doubt_msg'){\n  ts={ ...(ts||{}), awaiting:'doubt' };\n  out.send_kind='doubt'; out.needsLLM=true;\n  out.sql='UPDATE students SET teacher_state='+q(JSON.stringify(ts))+'::jsonb, updated_at=now() WHERE user_id='+uid+';';\n}\nelse if(sub==='back'){\n  ts={ ...(ts||{}), awaiting:null };\n  out.send_kind='ask_answer'; out.deterministicText='Beleza! Quando quiser responda com [✍️ Responder] ou peça o próximo exercício.';\n  out.sql='UPDATE students SET teacher_state='+q(JSON.stringify(ts))+'::jsonb, updated_at=now() WHERE user_id='+uid+';';\n}\nelse if(sub==='check'){\n  const cur=curQ();\n  if(!cur){ sub='new'; }\n  else {\n    const given=norm(d.text);\n    let ok;\n    if(cur.qtype==='mc'&&Array.isArray(cur.options)){ const L=['a','b','c','d','e']; const li=L.indexOf(given); const chosen=(li>=0&&li<cur.options.length)?cur.options[li]:d.text; ok=norm(chosen)===norm(cur.answer); }\n    else { ok=given===norm(cur.answer); }\n    const th=themes[cur.theme]||{d1:false,d2:false,d3:false,mastered:false,slips:0};\n    if(ok){ th['d'+cur.difficulty]=true; if(th.d1&&th.d2&&th.d3) th.mastered=true; th.slips=0; }\n    else { th['d'+cur.difficulty]=false; if(th.mastered){ th.slips=(th.slips||0)+1; if(th.slips>=2){ th.mastered=false; th.slips=0; } } }\n    themes[cur.theme]=th; profile.themes=themes;\n    ts={ ...ts, awaiting:null };\n    out.send_kind='check';\n    out.deterministicText=(ok?'✅ Correct! ':'❌ Not quite. ')+'The answer is: '+cur.answer+'.\\n'+cur.explanation+'\\n\\nWant another one? 👇';\n    out.sql='UPDATE students SET teacher_state='+q(JSON.stringify(ts))+'::jsonb, profile='+q(JSON.stringify(profile))+'::jsonb, updated_at=now() WHERE user_id='+uid+';';\n  }\n}\nif(out.send_kind==='' || sub==='new'){\n  function score(t){ const x=themes[t]||{}; if(x.mastered) return 99; return (x.d1?1:0)+(x.d2?1:0)+(x.d3?1:0); }\n  const ordered=THEMES.slice().sort((a,b)=>score(a)-score(b));\n  const theme=ordered[0]; const x=themes[theme]||{};\n  const diff=!x.d1?1:(!x.d2?2:3);\n  let cands=pool.filter(p=>p.theme===theme && p.difficulty===diff);\n  if(!cands.length) cands=pool.filter(p=>p.theme===theme);\n  if(!cands.length) cands=pool;\n  const pick=cands[(parseInt(d.msg_count,10)||0)%cands.length];\n  ts={ qid:pick.id, theme:pick.theme, difficulty:pick.difficulty, awaiting:null };\n  out.send_kind='present'; out.needsLLM=true;\n  out.sql='UPDATE students SET teacher_state='+q(JSON.stringify(ts))+'::jsonb, profile='+q(JSON.stringify(profile))+'::jsonb, updated_at=now() WHERE user_id='+uid+';';\n}\nconst question=(ts&&ts.qid)?pool.find(p=>p.id===ts.qid):null;\nreturn { json:{ ...d, ...out, questionForLLM:question } };" },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [740, 760],
@@ -426,10 +416,10 @@
     {
       "parameters": {
         "rules": { "values": [
-          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Professor Engine').item.json.send_kind }}", "rightValue": "present", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "present" },
-          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Professor Engine').item.json.send_kind }}", "rightValue": "check", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "check" },
-          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Professor Engine').item.json.send_kind }}", "rightValue": "doubt", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "doubt" },
-          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Professor Engine').item.json.send_kind }}", "rightValue": "ask_answer", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "ask_answer" }
+          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Professor Engine').first().json.send_kind }}", "rightValue": "present", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "present" },
+          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Professor Engine').first().json.send_kind }}", "rightValue": "check", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "check" },
+          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Professor Engine').first().json.send_kind }}", "rightValue": "doubt", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "doubt" },
+          { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $('Professor Engine').first().json.send_kind }}", "rightValue": "ask_answer", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "renameOutput": true, "outputKey": "ask_answer" }
         ] }, "options": {} },
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
@@ -455,9 +445,9 @@
       "retryOnFail": true, "waitBetweenTries": 5000, "onError": "continueRegularOutput"
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $json.output }}", "replyMarkup": "inlineKeyboard",
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "={{ String($json.output||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }}", "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": { "rows": [ { "row": { "buttons": [ { "text": "✍️ Responder", "additionalFields": { "callback_data": "t_answer" } }, { "text": "❓ Tirar dúvida", "additionalFields": { "callback_data": "t_doubt" } } ] } } ] },
-        "additionalFields": { "appendAttribution": false } },
+        "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1840, 640],
@@ -468,9 +458,9 @@
       "credentials": { "telegramApi": { "id": "IOXDZsXhaGzp9pFD", "name": "Telegram account" } }
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $('Professor Engine').item.json.deterministicText }}", "replyMarkup": "inlineKeyboard",
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "={{ $('Professor Engine').first().json.deterministicText }}", "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": { "rows": [ { "row": { "buttons": [ { "text": "➡️ Próximo exercício", "additionalFields": { "callback_data": "t_next" } } ] } } ] },
-        "additionalFields": { "appendAttribution": false } },
+        "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1400, 820],
@@ -498,9 +488,9 @@
       "retryOnFail": true, "waitBetweenTries": 5000, "onError": "continueRegularOutput"
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $json.output }}", "replyMarkup": "inlineKeyboard",
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "={{ String($json.output||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }}", "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": { "rows": [ { "row": { "buttons": [ { "text": "↩️ Voltar ao exercício", "additionalFields": { "callback_data": "t_back" } } ] } } ] },
-        "additionalFields": { "appendAttribution": false } },
+        "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1840, 960],
@@ -511,7 +501,7 @@
       "credentials": { "telegramApi": { "id": "IOXDZsXhaGzp9pFD", "name": "Telegram account" } }
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $('Professor Engine').item.json.deterministicText }}", "additionalFields": { "appendAttribution": false } },
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "={{ $('Professor Engine').first().json.deterministicText }}", "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1400, 1100],
@@ -531,7 +521,7 @@
       "name": "Mensagem Sistema"
     },
     {
-      "parameters": { "chatId": "={{ $('Normalizar').item.json.chatId }}", "text": "={{ $json.sysText }}", "additionalFields": { "appendAttribution": false } },
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "={{ $json.sysText }}", "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [740, 1100],
@@ -543,7 +533,7 @@
     },
 
     {
-      "parameters": { "operation": "executeQuery", "query": "=UPDATE students SET msg_count = COALESCE(msg_count,0) + 1, updated_at = now() WHERE user_id = {{ $('Normalizar').item.json.userId }} RETURNING msg_count, profile;", "options": {} },
+      "parameters": { "operation": "executeQuery", "query": "=UPDATE students SET msg_count = COALESCE(msg_count,0) + 1, updated_at = now() WHERE user_id = {{ $('Normalizar').first().json.userId }} RETURNING msg_count, profile;", "options": {} },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [1460, 400],
@@ -563,7 +553,7 @@
       "name": "Precisa Atualizar?"
     },
     {
-      "parameters": { "operation": "executeQuery", "query": "=SELECT message FROM chat_memory WHERE session_id = '{{ $('Normalizar').item.json.userId }}' ORDER BY id DESC LIMIT 40;", "options": {} },
+      "parameters": { "operation": "executeQuery", "query": "=SELECT message FROM chat_memory WHERE session_id = '{{ $('Normalizar').first().json.userId }}' ORDER BY id DESC LIMIT 40;", "options": {} },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [1900, 320],
@@ -650,6 +640,44 @@
       "id": "n62",
       "name": "Memória Postgres",
       "credentials": { "postgres": { "id": "REPLACE_POSTGRES_CRED", "name": "Postgres account" } }
+    },
+    {
+      "parameters": { "mode": "runOnceForAllItems", "jsCode": "const item=$('Placement Engine').first().json;\nconst chatId=$('Normalizar').first().json.chatId;\nconst raw=(item.gabarito && String(item.gabarito).trim().length)?String(item.gabarito):'📋 Gabarito indisponível.';\nconst LIMIT=3500;\nconst esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');\nfunction split(t,limit){ const chunks=[]; let rest=t; while(rest.length>limit){ let cut=rest.lastIndexOf('\\n\\n',limit); if(cut<limit*0.5) cut=rest.lastIndexOf('\\n',limit); if(cut<limit*0.5) cut=rest.lastIndexOf(' ',limit); if(cut<limit*0.5) cut=limit; chunks.push(rest.slice(0,cut)); rest=rest.slice(cut).replace(/^\\s+/,''); } if(rest.length) chunks.push(rest); return chunks; }\nconst parts=split(esc(raw),LIMIT);\nreturn parts.map((p,i)=>({ json:{ messageText:p, chatId, partIndex:i+1, partTotal:parts.length } }));" },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1420, 100],
+      "id": "n63",
+      "name": "Dividir Gabarito"
+    },
+    {
+      "parameters": { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [ { "leftValue": "={{ $json.type }}", "rightValue": "callback", "operator": { "type": "string", "operation": "equals" } } ], "combinator": "and" }, "options": {} },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-250, 380],
+      "id": "n64",
+      "name": "É Callback?"
+    },
+    {
+      "parameters": { "resource": "callback", "operation": "answerQuery", "queryId": "={{ $('Normalizar').first().json.callbackQueryId }}", "additionalFields": {} },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [-250, 540],
+      "id": "n65",
+      "name": "Responder Callback",
+      "webhookId": "n65-wh",
+      "retryOnFail": true, "maxTries": 2, "waitBetweenTries": 1000, "onError": "continueRegularOutput",
+      "credentials": { "telegramApi": { "id": "IOXDZsXhaGzp9pFD", "name": "Telegram account" } }
+    },
+    {
+      "parameters": { "chatId": "={{ $('Normalizar').first().json.chatId }}", "text": "Agora é só escolher como você quer continuar comigo 👇 Eu tenho dois modos:\n\n💬 <b>Conversa</b> — a gente bate papo em inglês sobre assuntos que você curte, de um jeito leve e natural. Eu corrijo seus errinhos no meio do papo, sem te travar.\n\n📚 <b>Professor</b> — eu te passo exercícios focados nos pontos que você mais erra, com correção e explicação. Ideal pra treinar gramática e vocabulário com método.", "additionalFields": { "appendAttribution": false, "parse_mode": "HTML" } },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1640, -180],
+      "id": "n66",
+      "name": "Enviar Explicação Modos",
+      "webhookId": "n66-wh",
+      "retryOnFail": true, "maxTries": 3, "waitBetweenTries": 2000,
+      "credentials": { "telegramApi": { "id": "IOXDZsXhaGzp9pFD", "name": "Telegram account" } }
     }
   ],
   "pinData": {},
@@ -661,7 +689,9 @@
     "Transcrever": { "main": [ [ { "node": "Transcrição OK?", "type": "main", "index": 0 } ] ] },
     "Transcrição OK?": { "main": [ [ { "node": "Injetar Transcrição", "type": "main", "index": 0 } ], [ { "node": "Erro Transcrição", "type": "main", "index": 0 } ] ] },
     "Injetar Transcrição": { "main": [ [ { "node": "Normalizar", "type": "main", "index": 0 } ] ] },
-    "Normalizar": { "main": [ [ { "node": "Carregar Aluno", "type": "main", "index": 0 } ] ] },
+    "Normalizar": { "main": [ [ { "node": "É Callback?", "type": "main", "index": 0 } ] ] },
+    "É Callback?": { "main": [ [ { "node": "Responder Callback", "type": "main", "index": 0 } ], [ { "node": "Carregar Aluno", "type": "main", "index": 0 } ] ] },
+    "Responder Callback": { "main": [ [ { "node": "Carregar Aluno", "type": "main", "index": 0 } ] ] },
     "Carregar Aluno": { "main": [ [ { "node": "Roteador Mestre", "type": "main", "index": 0 } ] ] },
     "Roteador Mestre": { "main": [ [ { "node": "Rota", "type": "main", "index": 0 } ] ] },
     "Rota": { "main": [
@@ -683,13 +713,14 @@
       [ { "node": "Enviar Questão MC", "type": "main", "index": 0 } ],
       [ { "node": "Enviar Questão Escrita", "type": "main", "index": 0 } ],
       [ { "node": "Enviar Pausa", "type": "main", "index": 0 } ],
-      [ { "node": "Enviar Gabarito", "type": "main", "index": 0 } ]
+      [ { "node": "Dividir Gabarito", "type": "main", "index": 0 }, { "node": "Enviar Explicação Modos", "type": "main", "index": 0 } ]
     ] },
-    "Enviar Gabarito": { "main": [ [ { "node": "Enviar Resultado Menu", "type": "main", "index": 0 } ] ] },
+    "Dividir Gabarito": { "main": [ [ { "node": "Enviar Gabarito", "type": "main", "index": 0 } ] ] },
+    "Enviar Explicação Modos": { "main": [ [ { "node": "Enviar Resultado Menu", "type": "main", "index": 0 } ] ] },
+    "Enviar Gabarito": { "main": [ [] ] },
     "Enviar Menu": { "main": [ [] ] },
     "Etapa de Modo": { "main": [ [ { "node": "Atualizar Modo", "type": "main", "index": 0 } ] ] },
-    "Atualizar Modo": { "main": [ [ { "node": "Responder Callback Modo", "type": "main", "index": 0 } ] ] },
-    "Responder Callback Modo": { "main": [ [ { "node": "Enviar Confirmação Modo", "type": "main", "index": 0 } ] ] },
+    "Atualizar Modo": { "main": [ [ { "node": "Enviar Confirmação Modo", "type": "main", "index": 0 } ] ] },
     "Montar Prompt Conversa": { "main": [ [ { "node": "Agente Conversa", "type": "main", "index": 0 } ] ] },
     "Agente Conversa": { "main": [ [ { "node": "Dividir Resposta", "type": "main", "index": 0 } ], [ { "node": "Enviar Erro IA", "type": "main", "index": 0 } ] ] },
     "Dividir Resposta": { "main": [ [ { "node": "Enviar Resposta", "type": "main", "index": 0 } ] ] },

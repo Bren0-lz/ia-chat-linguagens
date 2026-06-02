@@ -4,7 +4,17 @@
       "Bash(node -e ' *)",
       "Bash(node build_v4.js)",
       "Bash(node -e \"const w=require\\('./IAChat_Telegram_v4.json'\\); console.log\\('valid JSON, nodes=',w.nodes.length\\); console.log\\('node names:'\\); w.nodes.forEach\\(n=>console.log\\(' -',n.name\\)\\); console.log\\('--- Load Student RETURNING ---'\\); console.log\\(w.nodes.find\\(n=>n.name==='Load Student'\\).parameters.query.split\\('RETURNING'\\)[1].trim\\(\\)\\); console.log\\('--- Build Prompt tail ---'\\); const c=w.nodes.find\\(n=>n.name==='Build Prompt'\\).parameters.jsCode; console.log\\(c.slice\\(c.indexOf\\('const p ='\\)\\)\\);\")",
-      "Bash(node -e \"const w=require\\('./IAChat_Telegram_v4.json'\\); console.log\\('JSON OK'\\); console.log\\('nodes:', w.nodes.length\\); console.log\\('switch rules:', w.nodes.find\\(n=>n.name==='Route'\\).parameters.rules.values.map\\(v=>v.outputKey\\).join\\(', '\\)\\); console.log\\('Route outputs:', w.connections.Route.main.length\\); console.log\\('has Send Unknown Command node:', !!w.nodes.find\\(n=>n.name==='Send Unknown Command'\\)\\);\")"
+      "Bash(node -e \"const w=require\\('./IAChat_Telegram_v4.json'\\); console.log\\('JSON OK'\\); console.log\\('nodes:', w.nodes.length\\); console.log\\('switch rules:', w.nodes.find\\(n=>n.name==='Route'\\).parameters.rules.values.map\\(v=>v.outputKey\\).join\\(', '\\)\\); console.log\\('Route outputs:', w.connections.Route.main.length\\); console.log\\('has Send Unknown Command node:', !!w.nodes.find\\(n=>n.name==='Send Unknown Command'\\)\\);\")",
+      "Bash(node -e \"const f=require\\('./fluxos/IAChat_Telegram_v6.0.json'\\); const names=f.nodes.map\\(n=>n.name\\); console.log\\('JSON OK — nós:', f.nodes.length\\); const conn=f.connections; const allTargets=new Set\\(\\); for\\(const k in conn\\){for\\(const out of conn[k].main||[]\\){for\\(const c of out||[]\\){allTargets.add\\(c.node\\);}}} const missing=[...allTargets].filter\\(t=>!names.includes\\(t\\)\\); console.log\\('alvos de conexão inexistentes:', missing.length?missing:'nenhum'\\); const srcMissing=Object.keys\\(conn\\).filter\\(s=>!names.includes\\(s\\)\\); console.log\\('fontes de conexão inexistentes:', srcMissing.length?srcMissing:'nenhuma'\\); console.log\\('n30 removido?', !names.includes\\('Responder Callback Modo'\\)\\); console.log\\('novos:', ['Dividir Gabarito','É Callback?','Responder Callback'].filter\\(n=>names.includes\\(n\\)\\)\\);\")",
+      "Bash(node -e \"const f=require\\('./fluxos/IAChat_Telegram_v6.0.json'\\); const n=f.nodes.find\\(x=>x.name==='Professor Engine'\\); const c=n.parameters.jsCode; console.log\\('JSON OK'\\); console.log\\('tem ramo doubt \\(botão\\):', c.includes\\(\\\\\"sub==='doubt'\\){\\\\\"\\)\\); console.log\\('tem ramo doubt_msg \\(texto\\):', c.includes\\(\\\\\"sub==='doubt_msg'\\){\\\\\"\\)\\); console.log\\('doubt usa deterministicText:', /sub==='doubt'\\\\\\)\\\\{[^]*?ask_answer/.test\\(c\\)\\); console.log\\('doubt_msg usa needsLLM:', /sub==='doubt_msg'\\\\\\)\\\\{[^]*?needsLLM=true/.test\\(c\\)\\);\")",
+      "PowerShell($c = Get-Content -Raw -Path 'fluxos/IAChat_Telegram_v6.0.json'; $i = $c.IndexOf\\('out.text=\\(ok?'\\); $c.Substring\\($i, 60\\))",
+      "Bash(node _patch_conversa.js)",
+      "Bash(rm _patch_conversa.js)",
+      "Bash(node _make_v61.js)",
+      "Bash(node _patch_conv61.js)",
+      "Bash(rm _patch_conv61.js)",
+      "Bash(node _patch_lowlevel.js)",
+      "Bash(rm _patch_lowlevel.js)"
     ]
   }
 }

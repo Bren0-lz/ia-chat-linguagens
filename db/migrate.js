@@ -16,7 +16,11 @@ if (!DATABASE_URL) {
 const MIGRATIONS_DIR = path.join(__dirname, 'migrations')
 
 async function run() {
-  const client = new Client({ connectionString: DATABASE_URL, ssl: { rejectUnauthorized: false } })
+  const isLocal = /@(localhost|127\.0\.0\.1|host\.docker\.internal)/.test(DATABASE_URL)
+  const client = new Client({
+    connectionString: DATABASE_URL,
+    ssl: isLocal ? false : { rejectUnauthorized: false },
+  })
 
   try {
     await client.connect()
@@ -58,7 +62,10 @@ async function run() {
       console.log(`\n🎉  ${ran} migration(s) aplicada(s) com sucesso!`)
     }
   } catch (err) {
-    console.error('\n❌  Erro:', err.message)
+    console.error('\n❌  Erro:', err.message || '(sem message)')
+    if (err.code) console.error('   code   :', err.code)
+    if (err.detail) console.error('   detail :', err.detail)
+    if (err.stack) console.error('   stack  :', err.stack.split('\n').slice(0, 3).join('\n'))
     process.exit(1)
   } finally {
     await client.end()
