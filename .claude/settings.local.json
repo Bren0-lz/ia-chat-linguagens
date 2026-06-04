@@ -14,7 +14,30 @@
       "Bash(node _patch_conv61.js)",
       "Bash(rm _patch_conv61.js)",
       "Bash(node _patch_lowlevel.js)",
-      "Bash(rm _patch_lowlevel.js)"
+      "Bash(rm _patch_lowlevel.js)",
+      "Bash(node _persona61.js)",
+      "Bash(rm _persona61.js)",
+      "mcp__985d1520-6b2a-45b2-aa9a-2585002d7d6b__notion-search",
+      "mcp__985d1520-6b2a-45b2-aa9a-2585002d7d6b__notion-fetch",
+      "mcp__985d1520-6b2a-45b2-aa9a-2585002d7d6b__notion-create-pages",
+      "mcp__985d1520-6b2a-45b2-aa9a-2585002d7d6b__notion-update-page",
+      "Bash(node _dedupe61.js)",
+      "Bash(rm _dedupe61.js)",
+      "Bash(node _clearkb61.js)",
+      "Bash(rm _clearkb61.js)",
+      "Bash(node _name61.js)",
+      "Bash(node _order61.js)",
+      "Bash(rm _order61.js)",
+      "Bash(node _personaflow61.js)",
+      "Bash(rm _personaflow61.js)",
+      "Bash(node _personarich61.js)",
+      "Bash(rm _personarich61.js)",
+      "Bash(git show *)",
+      "Bash(rm _v61_head.json)",
+      "Bash(node _split62.js)",
+      "Bash(rm _split62.js)",
+      "Bash(node _interests62.js)",
+      "Bash(rm _interests62.js)"
     ]
   }
 }
