@@ -45,6 +45,15 @@ resposta correta, explicação) no `Placement Engine` e `Professor Engine`.
 Qualquer usuário que digitasse `/restart` perderia tudo.
 **Correção:** removido de ambos os nós.
 
+> ⚠️ **DEV — `/reset` e `/resetfull` (TEMPORÁRIOS, remover na versão final):** comandos de teste.
+> - `/reset`: reinicia o onboarding (volta a pedir nome) e zera `placement_state` + `teacher_state`
+>   (mantém XP, streak, interesses, persona).
+> - `/resetfull`: estado 100% limpo (como usuário novo) — além do acima, zera `profile`, `level`,
+>   `mode`, `xp`, `streak_count`, `last_active`, `badges`, `msg_count`, `name` e `age`.
+>
+> Marcados com `// DEV ... — remover na versao final` no `Roteador Mestre` e na `Etapa de Cadastro`.
+> **Remover antes do lançamento** (apagar as linhas com esse comentário em cada nó).
+
 ### 4. [MÉDIO] Perda de dados do perfil por escrita concorrente
 **Problema:** o `Processar Perfil` (extrator assíncrono) reescrevia o **objeto `profile` inteiro** a
 partir de um snapshot antigo. Mensagens processadas no intervalo (que mudam `profile.conv`, `flags`,
