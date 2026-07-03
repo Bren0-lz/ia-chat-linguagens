@@ -1,0 +1,4 @@
+# artefatos de teste — não versionar
+state_*.json
+tr_*.md
+*.log
