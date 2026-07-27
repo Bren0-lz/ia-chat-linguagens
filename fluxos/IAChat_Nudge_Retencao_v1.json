@@ -1,0 +1,222 @@
+{
+  "name": "IAChat_Nudge_Retencao_v1",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 18
+            }
+          ]
+        }
+      },
+      "id": "nudge-cron",
+      "name": "Todo dia 18h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT user_id, name, COALESCE(streak_count,0) AS streak, last_active,\n       (CURRENT_DATE - last_active) AS dias_parado\nFROM students\nWHERE onboarding = 'done'\n  AND user_id < 900000000\n  AND COALESCE((profile->>'nudge_opt_out')::boolean, false) = false\n  AND COALESCE(profile->>'last_nudge','') <> to_char(CURRENT_DATE,'YYYY-MM-DD')\n  AND last_active IS NOT NULL\n  AND last_active < CURRENT_DATE\n  AND (\n        (last_active = CURRENT_DATE - 1 AND COALESCE(streak_count,0) >= 2)\n     OR (CURRENT_DATE - last_active) BETWEEN 3 AND 14\n      )\nORDER BY (last_active = CURRENT_DATE - 1) DESC, streak DESC\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "nudge-select",
+      "name": "Selecionar Inativos",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "7yVoSD0b3u0DoK0D",
+          "name": "Banco Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "nudge-loop",
+      "name": "Um por vez",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Monta a mensagem do nudge por segmento (1 CTA, 1 mensagem por usuario)\nconst u=$input.item.json;\nconst nome=(u.name||'').split(' ')[0]||'ei';\nconst streak=parseInt(u.streak,10)||0;\nconst dias=parseInt(u.dias_parado,10)||0;\nlet text;\nif(dias===1&&streak>=2){ text='Oi, '+nome+'! 🔥 Você está numa sequência de '+streak+' dias de inglês — não deixa ela cair hoje. Bora 2 minutinhos? É só me mandar um oi.'; }\nelse { text='Ei, '+nome+', senti sua falta! 😊 Que tal voltar com um papo rápido em inglês hoje? Pode começar bem leve — só responder aqui.'; }\ntext+='\n\n<i>(se preferir não receber lembretes, é só mandar /parar)</i>';\nreturn { json:{ ...u, chatId:u.user_id, text } };"
+      },
+      "id": "nudge-msg",
+      "name": "Montar Nudge",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "nudge-send",
+      "name": "Enviar Nudge",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        100
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "IOXDZsXhaGzp9pFD",
+          "name": "Telegram account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE students SET profile = COALESCE(profile,'{}'::jsonb) || jsonb_build_object('last_nudge', to_char(CURRENT_DATE,'YYYY-MM-DD')), updated_at=now() WHERE user_id = {{ $('Montar Nudge').item.json.user_id }};",
+        "options": {}
+      },
+      "id": "nudge-mark",
+      "name": "Marcar Enviado",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1100,
+        100
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "7yVoSD0b3u0DoK0D",
+          "name": "Banco Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "seconds"
+      },
+      "id": "nudge-wait",
+      "name": "Esperar 3s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1320,
+        100
+      ],
+      "webhookId": "nudge-wait-hook"
+    }
+  ],
+  "connections": {
+    "Todo dia 18h": {
+      "main": [
+        [
+          {
+            "node": "Selecionar Inativos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Selecionar Inativos": {
+      "main": [
+        [
+          {
+            "node": "Um por vez",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Um por vez": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Montar Nudge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Nudge": {
+      "main": [
+        [
+          {
+            "node": "Enviar Nudge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Nudge": {
+      "main": [
+        [
+          {
+            "node": "Marcar Enviado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar Enviado": {
+      "main": [
+        [
+          {
+            "node": "Esperar 3s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Esperar 3s": {
+      "main": [
+        [
+          {
+            "node": "Um por vez",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": []
+}
