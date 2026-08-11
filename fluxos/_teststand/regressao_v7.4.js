@@ -19,7 +19,7 @@ function run(nodeName, ctx) {
 }
 
 // ---------- banco fake ----------
-const LEVELS = ['A1','A2','B1','B2','C1'];
+const LEVELS = ['A1','A2','B1','B2','C1','C2'];
 const exam = [];
 let id = 1;
 for (const L of LEVELS) for (let i = 0; i < 10; i++)
@@ -61,7 +61,7 @@ while (cur && turns < 20) {
   const res = pl('answer', { text: qq.answer }, cur);
   turns++;
   const m = res.sql.match(/placement_state='(.*?)'::jsonb/s);
-  if (!m) { ok(/Seu nível estimado: C1/.test(res.gabarito), 'B2: teto C1 acertando tudo'); break; }
+  if (!m) { ok(/Seu nível estimado: C2/.test(res.gabarito), 'B2/B7: acertando tudo chega a C2 (teto habilitado)'); break; }
   cur = JSON.parse(m[1].replace(/''/g, "'")); levels.push(cur.level);
 }
 ok(new Set(levels).size > 1, 'B3: nível oscila durante o teste (' + levels.join('>') + ')');
@@ -143,6 +143,118 @@ const semBanco = parse('...', Object.assign({}, engQ, { practice_bank: [] }));
 ok(!/indispon/i.test(semBanco.finalText) && !semBanco.sqlAns, 'sem banco: mensagem amigável e NÃO grava gabarito vazio');
 const vazio = parse('', Object.assign({}, engQ, { llmTask: 'explain' }));
 ok(vazio.finalText.trim().length > 0, 'explicação vazia nunca vira mensagem em branco');
+
+// ============ BANCO DE RESERVA (T5 nos niveis altos) ============
+// O `Professor Engine` monta o banco com filtro ESTRITO por nivel. Se um nivel da TRACK ficar
+// sem nenhuma questao, o fallback de "(questao indisponivel)" nao tem para onde cair justamente
+// no nivel em que o LLM mais desvia do formato. Estes checks leem os seeds reais.
+console.log('\n== Banco de reserva ==');
+
+function sqlRows(file, table) {
+  const src = fs.readFileSync(file, 'utf8');
+  const at = src.indexOf('INSERT INTO ' + (table || 'practice_questions'));
+  if (at < 0) return [];
+  const body = src.slice(src.indexOf('VALUES', at) + 6);
+  const rows = []; let depth = 0, cur = '', inq = false;
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i];
+    if (inq) {
+      if (ch === "'") { if (body[i + 1] === "'") { cur += "''"; i++; continue; } inq = false; }
+    } else if (ch === "'") inq = true;
+    else if (ch === '(') { depth++; if (depth === 1) { cur = ''; } }   // descarta comentario entre tuplas
+    else if (ch === ')') { depth--; if (depth === 0) { rows.push(cur + ch); cur = ''; continue; } }
+    else if (ch === ';' && depth === 0) break;
+    else if (depth === 0) continue;                                     // fora da tupla nao acumula
+    cur += ch;
+  }
+  // Devolve campos crus. `quoted` distingue '' (string vazia) de NULL sem aspas — a diferenca
+  // que faz a coluna JSONB `options` aceitar ou explodir no cast.
+  return rows.map(r => {
+    const f = []; let c = '', q = false, wasQuoted = false;
+    for (let i = 1; i < r.length - 1; i++) {
+      const ch = r[i];
+      if (q) { if (ch === "'") { if (r[i + 1] === "'") { c += "'"; i++; continue; } q = false; continue; } }
+      else if (ch === "'") { q = true; wasQuoted = true; continue; }
+      else if (ch === ',') { f.push({ v: c.trim(), quoted: wasQuoted }); c = ''; wasQuoted = false; continue; }
+      c += ch;
+    }
+    f.push({ v: c.trim(), quoted: wasQuoted });
+    return f;
+  }).filter(f => f.length >= 7); // descarta parenteses soltos de comentario
+}
+// practice_questions (theme, difficulty, cefr_level, qtype, prompt, options, answer, hint, explanation, track_topic)
+const asPractice = f => ({ theme: f[0].v, cefr_level: f[2].v, qtype: f[3].v, prompt: f[4].v,
+  options: f[5], answer: f[6].v, track_topic: f[9] ? f[9].v : null });
+// exam_questions (cefr_level, skill, qtype, prompt, options, answer, explanation)
+const asExam = f => ({ cefr_level: f[0].v, skill: f[1].v, qtype: f[2].v, prompt: f[3].v,
+  options: f[4], answer: f[5].v });
+
+const mig = path.join(__dirname, '..', '..', 'db', 'migrations');
+const seed006 = sqlRows(path.join(mig, '006_v6_seed_practice.sql')).map(asPractice);
+const seed009 = sqlRows(path.join(mig, '009_seed_practice_b2_c1_c2.sql')).map(asPractice);
+// A 009 faz `DELETE ... WHERE cefr_level IN ('B2','C1','C2')` antes de inserir (reexecucao segura),
+// entao nesses niveis ela substitui o 006 em vez de somar.
+const substituidos = ['B2', 'C1', 'C2'];
+const bank = seed006.filter(b => !substituidos.includes(b.cefr_level)).concat(seed009);
+
+// Espelha exatamente o filtro do `Professor Engine`.
+const engineFilter = (b, lvl) => b && b.cefr_level === lvl && b.prompt && b.answer && String(b.answer).length <= 60;
+
+const TRACK_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+const trackCode = code['Professor Engine'];
+for (const L of TRACK_LEVELS) {
+  const has = new RegExp('"' + L + '":\\[').test(trackCode);
+  if (!has) continue; // nivel sem trilha no Professor nao precisa de reserva
+  const n = bank.filter(b => engineFilter(b, L)).length;
+  ok(n > 0, 'T5: nível ' + L + ' tem banco de reserva (' + n + ' questões)');
+}
+ok(bank.every(b => String(b.answer).length <= 60),
+   'nenhuma resposta do seed passa de 60 chars (o Engine descartaria em silêncio)');
+
+// Preferencia por topico: com o topico corrente no banco, o fallback nao pode sortear outro.
+const bankTopic = [
+  { cefr_level: 'B2', prompt: 'Q do topico certo', answer: 'certo', track_topic: 'Voz passiva' },
+  { cefr_level: 'B2', prompt: 'Q de outro topico', answer: 'errado', track_topic: 'Past perfect' },
+  { cefr_level: 'B2', prompt: 'Q sem topico', answer: 'errado', track_topic: null },
+];
+const engTopic = { llmTask: 'question', feedback: '', userId: 222, recent_q: [], practice_bank: bankTopic, topicTitle: 'Voz passiva' };
+let acertos = 0;
+for (let i = 0; i < 25; i++) if (parse('saida fora do formato', engTopic).answer === 'certo') acertos++;
+ok(acertos === 25, 'fallback prefere a questão do tópico corrente (' + acertos + '/25)');
+
+// Sem questao do topico corrente, amplia para o nivel inteiro em vez de falhar.
+const engSemTopico = Object.assign({}, engTopic, { topicTitle: 'Tópico inexistente' });
+const amplia = parse('saida fora do formato', engSemTopico);
+ok(amplia.pkind === 'question' && !!amplia.answer, 'sem questão do tópico, amplia para o nível em vez de falhar');
+
+// ============ INTEGRIDADE DOS SEEDS ============
+// `options` e JSONB: '' nao e JSON valido e derruba a migration inteira no cast. Questao
+// escrita precisa de NULL sem aspas. Em mc, o gabarito tem de ser exatamente uma das opcoes,
+// senao a questao e ineditavelmente errada (nenhuma resposta do aluno bate).
+console.log('\n== Integridade dos seeds ==');
+const examSeeds = [].concat(
+  sqlRows(path.join(mig, '005_v6_seed_exam.sql'), 'exam_questions').map(asExam),
+  sqlRows(path.join(mig, '011_enable_c2_placement.sql'), 'exam_questions').map(asExam)
+);
+const practiceSeeds = seed006.concat(seed009);
+
+for (const [nome, rows] of [['practice', practiceSeeds], ['exam', examSeeds]]) {
+  const vazio = rows.filter(q => q.qtype === 'written' && q.options.quoted && q.options.v === '');
+  ok(vazio.length === 0, nome + ": questão escrita usa NULL em options, nunca '' (" + rows.length + ' linhas)');
+
+  const mcRuim = rows.filter(q => {
+    if (q.qtype !== 'mc') return false;
+    try { return !JSON.parse(q.options.v).includes(q.answer); } catch (e) { return true; }
+  });
+  ok(mcRuim.length === 0, nome + ': todo gabarito de múltipla escolha está entre as opções' +
+     (mcRuim.length ? ' — ' + mcRuim[0].prompt : ''));
+}
+
+// C2 no nivelamento: sem estas questoes, LEVELS com 'C2' so faz pickNext cair na vizinhanca.
+const c2exam = examSeeds.filter(q => q.cefr_level === 'C2').length;
+ok(c2exam >= 10, 'B7: nivelamento tem questões C2 no banco de prova (' + c2exam + ')');
+ok(/'C2'/.test(code['Placement Engine'].match(/const LEVELS=\[[^\]]*\]/)[0]),
+   'B7: LEVELS do Placement Engine inclui C2 (banco e fluxo alinhados)');
 
 // ============ CONTEXTO CONVERSA ============
 console.log('\n== Conversa ==');
