@@ -192,21 +192,47 @@ const asExam = f => ({ cefr_level: f[0].v, skill: f[1].v, qtype: f[2].v, prompt:
 const mig = path.join(__dirname, '..', '..', 'db', 'migrations');
 const seed006 = sqlRows(path.join(mig, '006_v6_seed_practice.sql')).map(asPractice);
 const seed009 = sqlRows(path.join(mig, '009_seed_practice_b2_c1_c2.sql')).map(asPractice);
+const seed012 = sqlRows(path.join(mig, '012_seed_practice_a1_a2_b1.sql')).map(asPractice);
 // A 009 faz `DELETE ... WHERE cefr_level IN ('B2','C1','C2')` antes de inserir (reexecucao segura),
 // entao nesses niveis ela substitui o 006 em vez de somar.
+// As linhas do 006 nascem sem `track_topic`: a tag vem dos UPDATE de backfill da 009.
+// Sem aplicar esse backfill aqui, o teste mede algo diferente do que existe no banco.
+const backfill = {};
+for (const m of fs.readFileSync(path.join(mig, '009_seed_practice_b2_c1_c2.sql'), 'utf8')
+     .matchAll(/UPDATE practice_questions SET track_topic = '((?:[^']|'')*)'\s+WHERE theme='([a-z_]+)'/g)) {
+  backfill[m[2]] = m[1].replace(/''/g, "'");
+}
+for (const row of seed006) if (!row.track_topic && backfill[row.theme]) row.track_topic = backfill[row.theme];
+
 const substituidos = ['B2', 'C1', 'C2'];
-const bank = seed006.filter(b => !substituidos.includes(b.cefr_level)).concat(seed009);
+// A 012 nao remove nada do 006 (usa prefixo de tema proprio no DELETE), entao soma.
+const bank = seed006.filter(b => !substituidos.includes(b.cefr_level)).concat(seed009, seed012);
+
+// TRACK do `Professor Engine`, para conferir cobertura por topico de verdade.
+const trackSrc = code['Professor Engine'];
+const trackIni = trackSrc.indexOf('{', trackSrc.indexOf('const TRACK'));
+let _d = 0, trackFim;
+for (let p = trackIni; p < trackSrc.length; p++) {
+  if (trackSrc[p] === '{') _d++;
+  else if (trackSrc[p] === '}' && --_d === 0) { trackFim = p + 1; break; }
+}
+const TRACK = JSON.parse(trackSrc.slice(trackIni, trackFim));
 
 // Espelha exatamente o filtro do `Professor Engine`.
 const engineFilter = (b, lvl) => b && b.cefr_level === lvl && b.prompt && b.answer && String(b.answer).length <= 60;
 
-const TRACK_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
-const trackCode = code['Professor Engine'];
-for (const L of TRACK_LEVELS) {
-  const has = new RegExp('"' + L + '":\\[').test(trackCode);
-  if (!has) continue; // nivel sem trilha no Professor nao precisa de reserva
-  const n = bank.filter(b => engineFilter(b, L)).length;
-  ok(n > 0, 'T5: nível ' + L + ' tem banco de reserva (' + n + ' questões)');
+for (const L of Object.keys(TRACK)) {
+  const doNivel = bank.filter(b => engineFilter(b, L));
+  ok(doNivel.length > 0, 'T5: nível ' + L + ' tem banco de reserva (' + doNivel.length + ' questões)');
+
+  // Cobertura por topico: contar so os topicos DA PROPRIA trilha do nivel. Uma questao
+  // marcada com topico de outro nivel serve como reserva do nivel, mas nunca casa por topico.
+  const semCobertura = TRACK[L]
+    .map(t => t[0])
+    .filter(t => doNivel.filter(b => b.track_topic === t).length < 2);
+  ok(semCobertura.length === 0,
+     'T5: todo tópico da trilha ' + L + ' tem ≥2 questões' +
+     (semCobertura.length ? ' — faltam ' + semCobertura.length + ': ' + semCobertura.slice(0, 3).join(', ') : ''));
 }
 ok(bank.every(b => String(b.answer).length <= 60),
    'nenhuma resposta do seed passa de 60 chars (o Engine descartaria em silêncio)');
