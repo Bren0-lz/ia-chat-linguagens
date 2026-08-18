@@ -7,6 +7,18 @@ const KEY = process.env.N8N_API_KEY || '';
 const WEBHOOK = BASE + '/webhook/iachat-test';
 if (!KEY) { console.error('Defina N8N_API_KEY no ambiente (JWT da API do n8n).'); process.exit(1); }
 
+// O TEST Ingress passou a exigir header auth na v7.4 (correção do S1: antes ele
+// aceitava injeção de update sem autenticação nenhuma). O segredo mora no .env
+// da raiz do repo, como IACHAT_TEST_SECRET.
+const TEST_SECRET = process.env.IACHAT_TEST_SECRET || (() => {
+  try {
+    const envTxt = require('fs').readFileSync(require('path').join(__dirname, '..', '..', '.env'), 'utf8');
+    const m = envTxt.match(/^IACHAT_TEST_SECRET=(.+)$/m);
+    return m ? m[1].trim() : '';
+  } catch (e) { return ''; }
+})();
+if (!TEST_SECRET) { console.error('IACHAT_TEST_SECRET ausente (.env da raiz ou variável de ambiente).'); process.exit(1); }
+
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 async function rfetch(url, opts, tries = 5) {
@@ -42,7 +54,7 @@ async function postWebhook(update) {
   try {
     const r = await rfetch(WEBHOOK, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', 'x-iachat-test': TEST_SECRET },
       body: JSON.stringify(update),
     });
     await r.text().catch(() => {});
