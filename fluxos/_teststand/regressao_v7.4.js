@@ -316,5 +316,41 @@ ok(devcmd.route === 'system_msg' && devcmd.subroute === 'unknown', 'S1: comando 
 const resume = rot(base, { type: 'callback', callbackData: 't_resume', updateId: 103 });
 ok(resume.subroute === 'resume_q', 'T11: callback t_resume roteia para resume_q');
 
+// ============ FILTRO ANTI-SPOILER (T7b/T7c) ============
+// Medido ao vivo em 18/08/2026: com q_answered=false e o prompt proibindo
+// explicitamente revelar, o modelo ainda escreveu o gabarito quando o aluno
+// perguntou "por que essa era a resposta certa?". O filtro tira a garantia das
+// mãos do LLM. Os textos abaixo são transcrições reais daquela execução.
+console.log('\n== Filtro Anti-Spoiler ==');
+function filtro(output, ts) {
+  return run('Filtro Anti-Spoiler', {
+    refs: { 'Professor Engine': { teacher_state_new: ts } },
+    item: { output },
+  });
+}
+const VAZOU = 'The verb has to show an action in progress. **Why it works:**\n- *He was driving* → the driving was happening over a period of time.\n- *when it started to snow* → the snow began suddenly.';
+
+const r1 = filtro(VAZOU, { q_answered: false, answer: 'was driving', question: 'He __ (drive) to work.' });
+ok(!/was driving/i.test(r1.output), 'T7c: gabarito da questão ABERTA é mascarado');
+ok(r1.antispoiler === true, 'T7c: filtro sinaliza que mascarou');
+ok(/Segurei a resposta/.test(r1.output), 'T7c: acrescenta o empurrão pedagógico');
+ok(/___/.test(r1.output), 'T7c: substitui por lacuna, não apaga a frase');
+
+const r2 = filtro(VAZOU, { q_answered: true, answer: 'was driving', question: 'He __ (drive) to work.' });
+ok(/was driving/i.test(r2.output) && r2.antispoiler === false,
+  'T10: questão já respondida — o gabarito continua liberado');
+
+const r3 = filtro('Use was/were + verbo-ING para ação em andamento.',
+  { q_answered: false, answer: 'was driving', question: 'x' });
+ok(r3.antispoiler === false && !/Segurei a resposta/.test(r3.output),
+  'T7: resposta que já não revela passa intacta (sem falso positivo)');
+
+const r4 = filtro('The word driving appears inside overdriving here.',
+  { q_answered: false, answer: 'driving', question: 'x' });
+ok(/overdriving/.test(r4.output), 'limite de palavra: não mutila ocorrência dentro de outra palavra');
+
+const r5 = filtro('Resposta qualquer.', { q_answered: false, answer: '', question: '' });
+ok(r5.antispoiler === false, 'sem gabarito no estado, o filtro não faz nada');
+
 console.log('\n' + (fails ? '❌ ' + fails + ' falha(s)' : '✅ todos os checks passaram'));
 process.exit(fails ? 1 : 0);

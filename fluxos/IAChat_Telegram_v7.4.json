@@ -1969,7 +1969,7 @@
     },
     {
       "parameters": {
-        "model": "llama-3.3-70b-versatile",
+        "model": "openai/gpt-oss-120b",
         "options": {
           "temperature": 0.6
         }
@@ -1991,7 +1991,7 @@
     },
     {
       "parameters": {
-        "model": "llama-3.3-70b-versatile",
+        "model": "openai/gpt-oss-120b",
         "options": {
           "temperature": 0.4
         }
@@ -2013,7 +2013,7 @@
     },
     {
       "parameters": {
-        "model": "llama-3.3-70b-versatile",
+        "model": "openai/gpt-oss-120b",
         "options": {
           "temperature": 0.3
         }
@@ -2035,7 +2035,7 @@
     },
     {
       "parameters": {
-        "model": "llama-3.1-8b-instant",
+        "model": "openai/gpt-oss-20b",
         "options": {
           "temperature": 0
         }
@@ -3578,6 +3578,56 @@
           "name": "Banco Local"
         }
       }
+    },
+    {
+      "id": "c444166d-6718-4cac-8b80-b4569516922a",
+      "name": "TEST Ingress",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -2928,
+        2688
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "iachat-test",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "jWllvv87xbyh26O8",
+          "name": "IAChat Test Ingress"
+        }
+      },
+      "notes": "Ingress de teste AUTENTICADO (S1): sem o header x-iachat-test correto o n8n responde 403.",
+      "webhookId": "ac12998d-afac-4a75-8283-36ecd3b8acf6"
+    },
+    {
+      "id": "b9866eeb-6cb3-40be-8f37-fbec28b6ef91",
+      "name": "TEST Shim",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2704,
+        2688
+      ],
+      "parameters": {
+        "jsCode": "return items.map(item => ({ json: item.json.body }));"
+      }
+    },
+    {
+      "id": "d5555555-5555-4555-8555-555555555555",
+      "name": "Filtro Anti-Spoiler",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1900,
+        2900
+      ],
+      "parameters": {
+        "jsCode": "// Filtro Anti-Spoiler (deterministico).\n// A v7.4 confia no LLM para nao revelar o gabarito de uma questao ainda aberta.\n// Medido ao vivo: o prompt e explicito, o estado (q_answered=false) esta correto,\n// e mesmo assim o modelo entrega a resposta quando o aluno pergunta \"por que essa\n// era a resposta certa?\". Aqui a garantia deixa de depender de obediencia.\nconst eng = $('Professor Engine').first().json || {};\nconst ts = eng.teacher_state_new || {};\nconst ans = String(ts.answer || '').trim();\nlet out = String($json.output || '');\nlet mascarou = false;\n\nif (ans && ts.q_answered === false) {\n  const esc = ans.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n  const re = new RegExp('(^|[^\\\\p{L}\\\\p{N}])(' + esc + ')(?![\\\\p{L}\\\\p{N}])', 'giu');\n  const novo = out.replace(re, '$1___');\n  if (novo !== out) { out = novo; mascarou = true; }\n}\nif (mascarou) {\n  out += '\\n\\n😉 Segurei a resposta de proposito — tenta voce primeiro!';\n}\nreturn { json: Object.assign({}, $json, { output: out, antispoiler: mascarou }) };\n"
+      }
     }
   ],
   "pinData": {},
@@ -4056,17 +4106,6 @@
         [
           {
             "node": "Incrementar Contador",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Agente Dúvida": {
-      "main": [
-        [
-          {
-            "node": "Enviar Dúvida",
             "type": "main",
             "index": 0
           }
@@ -4553,6 +4592,50 @@
           {
             "node": "Agente Dúvida",
             "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TEST Ingress": {
+      "main": [
+        [
+          {
+            "node": "TEST Shim",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TEST Shim": {
+      "main": [
+        [
+          {
+            "node": "É Voz?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Dúvida": {
+      "main": [
+        [
+          {
+            "node": "Filtro Anti-Spoiler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro Anti-Spoiler": {
+      "main": [
+        [
+          {
+            "node": "Enviar Dúvida",
+            "type": "main",
             "index": 0
           }
         ]
