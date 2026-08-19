@@ -1,8 +1,10 @@
 # IAChat — Bateria de Testes Diagnósticos
 
-> Roteiro de testes para (a) documentar no artigo a metodologia de avaliação do sistema e (b) localizar
-> problemas atuais. **Este documento é um roteiro; a execução consolidada está em
-> `documentos/Relatorio_Testes_IAChat.txt` (13/07/2026, versão avaliada v7.2).**
+> Roteiro de testes para (a) documentar a metodologia de avaliação do sistema e (b) localizar
+> problemas atuais. **Este é o documento vivo — o estado atual dos vereditos está aqui, na Seção 9.**
+> A execução de 13/07/2026 está em `documentos/Relatorio_Testes_IAChat.txt`, mas ela avaliou a **v7.2**
+> e está **desatualizada** (ver `documentos/LEIA-ME_ANTES.md`): o modelo de LLM daquela medição foi
+> removido da conta Groq e não é mais executável.
 > Referência de versão: `IAChat_Telegram_v7.4.json` (96 nós) — **publicada e ativa no n8n em 18/08/2026**.
 > Data desta revisão: 2026-08-19 (revisão anterior: 2026-07-02, quando a referência era a v7.3 e o ativo
 > era a v7.2 base).

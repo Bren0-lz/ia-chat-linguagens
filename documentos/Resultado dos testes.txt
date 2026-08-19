@@ -1,3 +1,11 @@
+================================================================================
+!! FONTE HISTORICA — notas cruas do avaliador em 13/07/2026, sobre a v7.2.
+
+   Este arquivo NAO deve ser atualizado: e o registro original do que foi
+   observado naquela data, e serve de referencia para o relatorio consolidado.
+   Para o estado atual do sistema, ver documentos/LEIA-ME_ANTES.md
+================================================================================
+
 A1->  Passou  conforme  o  esperado  A2->  Passou  conforme  o  esperado  (não  é  possível  enviar  mensagem  em  branco  no  
 telegram)
  A3->  Passou  conforme  o  esperado  A4->  Passou  conforme  o  esperado  A5->  Passou  conforme  o  esperado  A6->  Reprovou,  por  enquanto  o  banco  é  local  e  uma  solução  temporária,  por  isso  detalhes  

@@ -1,3 +1,21 @@
+================================================================================
+!! DOCUMENTO DESATUALIZADO — descreve a v7.2 em 13/07/2026, NAO o sistema atual.
+
+   Em 18-19/08/2026 varios vereditos deste relatorio mudaram, e um teste aqui
+   marcado como APROVADO (X4) estava, na verdade, quebrado em producao.
+
+   A mudanca de fundo: todos os modelos Llama foram REMOVIDOS da conta Groq em
+   18/08. Todas as chamadas de IA retornavam 404 e o bot respondia vazio. Ou
+   seja, TODO veredito qualitativo deste relatorio foi medido num modelo que
+   nao e mais executavel e nao pode ser reproduzido.
+
+   Estado atual: ver documentos/LEIA-ME_ANTES.md e fluxos/TESTES_DIAGNOSTICOS.md
+
+   Ressalva principal: so ~18 dos 63 testes foram revalidados na v7.4. Os outros
+   ~45 mantem o veredito de julho. Como TODOS os revalidados mudaram de
+   resultado, nao ha base para supor que os demais estejam estaveis.
+================================================================================
+
 IAChat  —  Bateria  de  Testes  Diagnósticos  
 Roteiro  de  testes  para  (a)  documentar  no  artigo  a  metodologia  de  avaliação  do  sistema  e  (b)  
 localizar
