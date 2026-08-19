@@ -316,6 +316,23 @@ ok(devcmd.route === 'system_msg' && devcmd.subroute === 'unknown', 'S1: comando 
 const resume = rot(base, { type: 'callback', callbackData: 't_resume', updateId: 103 });
 ok(resume.subroute === 'resume_q', 'T11: callback t_resume roteia para resume_q');
 
+// ============ SINTAXE DOS NÓS DE CÓDIGO ============
+// Em 19/08 uma edição no `Interests Engine` removeu sem querer o `}` que fechava
+// um bloco `else`. O nó subiu para produção com "Unexpected token 'else'" e a
+// seleção de interesses parou de gravar por completo — só apareceu no teste ao
+// vivo. Um parse de todos os nós de código custa milissegundos e fecha essa
+// classe de erro antes do deploy.
+console.log('\n== Sintaxe dos nós de código ==');
+let nosCod = 0, quebrados = [];
+for (const n of flow.nodes) {
+  if (!(n.parameters && n.parameters.jsCode)) continue;
+  nosCod++;
+  try { new Function(n.parameters.jsCode); }
+  catch (e) { quebrados.push(n.name + ': ' + e.message); }
+}
+ok(quebrados.length === 0, 'todos os ' + nosCod + ' nós de código têm sintaxe válida'
+  + (quebrados.length ? ' — QUEBRADOS: ' + quebrados.join(' | ') : ''));
+
 // ============ FILTRO ANTI-SPOILER (T7b/T7c) ============
 // Medido ao vivo em 18/08/2026: com q_answered=false e o prompt proibindo
 // explicitamente revelar, o modelo ainda escreveu o gabarito quando o aluno
