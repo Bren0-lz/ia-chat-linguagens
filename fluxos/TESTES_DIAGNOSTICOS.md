@@ -1,9 +1,16 @@
 # IAChat — Bateria de Testes Diagnósticos
 
 > Roteiro de testes para (a) documentar no artigo a metodologia de avaliação do sistema e (b) localizar
-> problemas atuais. **Este documento é um roteiro; os testes não foram executados aqui.**
-> Referência de versão: `IAChat_Telegram_v7.3.json` (94 nós; ativo no n8n ainda é a v7.2 base).
-> Data: 2026-07-02.
+> problemas atuais. **Este documento é um roteiro; a execução consolidada está em
+> `documentos/Relatorio_Testes_IAChat.txt` (13/07/2026, versão avaliada v7.2).**
+> Referência de versão: `IAChat_Telegram_v7.4.json` (96 nós) — **publicada e ativa no n8n em 18/08/2026**.
+> Data desta revisão: 2026-08-19 (revisão anterior: 2026-07-02, quando a referência era a v7.3 e o ativo
+> era a v7.2 base).
+>
+> **Como ler os status:** sempre que um teste mudou de veredito, a versão em que ele foi medido está
+> explícita — **v7.2** para os resultados do relatório de 13/07 e **v7.4** para as medições ao vivo de
+> 18–19/08. Comparar vereditos sem a versão não faz sentido, porque entre as duas datas mudaram tanto o
+> fluxo quanto o modelo de LLM (ver Seção 11, "Ameaça à validade").
 
 ---
 
@@ -60,6 +67,17 @@ Combinações que cobrem os eixos da Seção 2. Reutilizáveis em várias bateri
 
 ---
 
+> **Testes excluídos do roteiro (pedido do avaliador na execução de 13/07/2026):**
+> **B4** (atalho `pl_start_B2`), **C11** (variedade a cada 3 turnos), **X5** (mensagens fora de ordem),
+> **R1** (texto de 4000+ caracteres) e **L3** (acúmulo de execuções). Foram removidos das tabelas por não
+> serem testáveis diretamente ou por não terem sido compreendidos na execução.
+> **Consequência metodológica a declarar:** X5 e R1 eram justamente os testes de concorrência e de entrada
+> gigante — ou seja, os mecanismos que sustentariam as afirmações sobre carga (L2) e robustez. Sem eles,
+> essas afirmações ficam sem respaldo experimental direto.
+> **Teste acrescentado:** **A8**, pedido pelo avaliador a partir de comportamento observado.
+
+---
+
 ## 4. Bateria A — Onboarding e Nivelamento (Placement)
 
 ### A. Onboarding (nó `Etapa de Cadastro`, `Carregar Aluno`, `Roteador Mestre`)
@@ -72,17 +90,17 @@ Combinações que cobrem os eixos da Seção 2. Reutilizáveis em várias bateri
 | A5 | P6 (62) | idade 62 | aceita; tom acolhedor | limite superior + adequação etária |
 | A6 | qualquer | reenviar a mesma mensagem (update repetido) | não trata como usuário novo | idempotência de `update_id` (trade-off do fix) |
 | A7 | qualquer | `/reset` no meio | reinicia estado corretamente | (nó DEV — confirmar que será removido no lançamento) |
+| A8 | qualquer | enviar comandos **antes** de concluir o nivelamento | mantém o usuário no fluxo de nivelamento; não executa comandos comuns | roteamento durante `placement in_progress` (teste pedido pelo avaliador; aprovado) |
 
 ### B. Placement adaptativo (nó `Placement Engine`)
 | # | Perfil | Roteiro de respostas | Esperado | Diagnostica |
 |---|--------|---------------------|----------|-------------|
 | B1 | P1 | erra quase tudo | fixa em A1 (clamp inferior) | piso do nível |
-| B2 | P5 | acerta tudo | sobe até C1 e **para** | teto: **C2 é inalcançável** (`LEVELS` sem C2) — problema conhecido |
+| B2 | P5 | acerta tudo | sobe até **C2** | teto — **corrigido na v7.4**: `LEVELS` inclui C2 e `exam_questions` tem 10 questões C2 (migration 011) |
 | B3 | P8 | 2 acertos → sobe; 2 erros → desce | oscila corretamente | regra adaptativa (2 sobe / 2 desce) |
-| B4 | qualquer | escolher `pl_start_B2` e responder dirigido | inicia na faixa certa | botões `pl_start_A1..B2` (só até B2 — não há atalho C1/C2) |
 | B5 | qualquer | `/pausa` no meio → `/continuar` | retoma do ponto exato | persistência de `placement_state` (status paused/in_progress) |
 | B6 | qualquer | mandar texto aleatório durante o teste | trata como resposta ou ignora previsivelmente | roteamento em `in_progress` |
-| B7 | P-C2 | tentar chegar a C2 | **impossível hoje** — documentar | decisão de produto (incluir C2 ou remover trilha/prompt C2) |
+| B7 | P-C2 | tentar chegar a C2 | **alcançável na v7.4** (era impossível na v7.2) | decisão de produto resolvida: o C2 foi habilitado no nivelamento, já que a trilha C2 do Professor e o banco de reserva já existiam |
 
 ---
 
@@ -112,7 +130,6 @@ retenção/engajamento.
 | # | Perfil | Entrada | Esperado | Diagnostica |
 |---|--------|---------|----------|-------------|
 | C10 | P2 (monossilábica) | "ok", "sim", "kk" | bot aplica **reciprocidade** (divide algo + gancho), não vira interrogatório | `Contexto Conversa` reciprocidade |
-| C11 | P3 (ativa) | 3+ turnos seguidos | a cada 3 turnos varia o formato (`spiceLine`, nível-aware) | contador `profile.conv.turns` / variedade |
 | C12 | P5 (streak) | manter sequência ≥3 | comemora streak **1x** (não repete no mesmo dia) | `streakLine` / `profile.conv.celebrated` |
 | C13 | P6 | some por dias e volta | (hoje) sem nudge proativo — confirmar comportamento | nudge só projetado (não construído) |
 | C14 | P4 (formal, pouco tempo) | respostas curtas e diretas | não força prolongar demais | equilíbrio engajamento x respeito ao usuário |
@@ -183,12 +200,10 @@ Nós: `Professor Engine`, `Parse Professor`, `Pos Professor`, `Agente Professor`
 | X2 | P6 | sair e voltar dias depois | continua de onde parou (nível, tópico, interesses) | persistência entre sessões |
 | X3 | qualquer | mensagens com `& < >` (ex.: "5 > 3") | escapadas em HTML, sem quebrar Telegram | `parse_mode: HTML` / escaping |
 | X4 | qualquer | comando desconhecido `/xyz` | mensagem de ajuda/erro previsível | `system_msg` unknown |
-| X5 | qualquer | mensagens fora de ordem (rápidas em sequência) | sem desync de estado | concorrência por usuário |
 
 ### D3. Robustez (entrada adversária/ruído)
 | # | Perfil | Roteiro | Esperado | Diagnostica |
 |---|--------|---------|----------|-------------|
-| R1 | P-ADV | texto de 4000+ caracteres | não quebra; trunca/limita | limites de entrada |
 | R2 | P-ADV | só emojis / só espaços / string vazia | resposta graciosa | validação de entrada |
 | R3 | P-ADV | foto, sticker, áudio (não-texto) | trata como `non_text` sem travar | roteamento non_text |
 | R4 | P7 | palavrão / provocação / off-topic | não repreende; redireciona com leveza | tolerância + não-repreensão |
@@ -208,7 +223,6 @@ Nós: `Professor Engine`, `Parse Professor`, `Pos Professor`, `Agente Professor`
 |---|---------|-------|----------|-------------|
 | L1 | 1 usuário | latência por turno | ~6–8s (latência de envio) — medir | baseline |
 | L2 | N usuários simultâneos | rajada de execuções | **n8n caiu em testes** por volume | fragilidade de carga (serializar por usuário, limitar retry, limpar execuções) |
-| L3 | longo prazo | acúmulo de execuções salvas | crescimento controlado | manutenção/limpeza |
 
 ---
 
@@ -232,20 +246,29 @@ média/desvio e exemplos qualitativos (trechos reais). Comparar entre níveis e 
 
 ## 9. Matriz problema conhecido → teste que o expõe
 
-| Problema conhecido | Status | Teste(s) |
-|---|---|---|
-| Loop de cadastro (`update_id`/`last_update_id`) | corrigido (`GREATEST`) | A1, A6 |
-| C2 inalcançável (`Placement Engine` sem C2) | **aberto (decisão de produto)** | B2, B7, P-C2 |
-| Dúvida alucina / revela gabarito | corrigido v7.3 | T7, T8, T9, T10, R6 |
-| Erro sem explicação | corrigido v7.3 (`wrongSys`) | T12, T13, T14 |
-| Interesses poluídos (manual x inferido) | corrigido no código; **legado sem migração** | C16, C17 |
-| A1 usa forma telegráfica em perguntas do bot | **aberto (candidato v7.2.1)** | C1, C6 |
-| Teto de palavras A1 pode estourar com novas linhas | **a validar ao vivo** | C8 |
-| Nudge proativo de retenção | **só projetado** | C13 |
-| `TEST Ingress` sem autenticação | **remover no lançamento** | S1 |
-| Usuários de teste na base | limpar | S2 |
-| n8n cai sob carga | **aberto (infra)** | L2, L3 |
-| Persona não manifestava | corrigido; **a validar ao vivo** | PS3, PS4, T17 |
+Status conferido em **19/08/2026** sobre a **v7.4 publicada**. A coluna "medido em" é essencial:
+o relatório avaliou a v7.2, e comparar status entre versões diferentes sem dizer qual é enganoso.
+
+| Problema conhecido | Status | Medido em | Teste(s) |
+|---|---|---|---|
+| Loop de cadastro (`update_id`/`last_update_id`) | corrigido (`GREATEST`) | v7.2 | A1, A6 |
+| **Modelos Llama removidos da conta Groq** | **corrigido em 18/08** — `llama-3.3-70b-versatile` e `llama-3.1-8b-instant` saíram da conta e **todas** as chamadas de IA voltavam 404 (Conversa, Professor e Dúvida respondiam vazio). Migrado para `openai/gpt-oss-120b` e `openai/gpt-oss-20b` | v7.4 | qualquer teste com saída de LLM |
+| C2 inalcançável (`Placement Engine` sem C2) | **corrigido** — `LEVELS` inclui C2 e o banco tem 10 questões C2 | v7.4 | B2, B7 |
+| Dúvida alucina / revela gabarito | **corrigido e verificado ao vivo** | v7.4 | T7, T10, R6 |
+| Gabarito vazava quando o aluno perguntava "por que essa era a correta?" | **corrigido** — o estado e o prompt estavam certos; o modelo desobedecia. Resolvido com o nó determinístico `Filtro Anti-Spoiler` | v7.4 | T7b, T7c |
+| "(Questão indisponível)" no Professor | **corrigido e verificado ao vivo** (6/6 questões válidas) | v7.4 | T5 |
+| Quiz reiniciava ao voltar da dúvida | **corrigido e verificado ao vivo** (`t_resume`) | v7.4 | T11 |
+| Erro sem explicação | corrigido (`wrongSys`) | v7.2 | T12, T14 |
+| Interesses poluídos (manual x inferido) | corrigido no código; migração 010 aplicada | v7.4 | C16, C17 |
+| A1 usa forma telegráfica em perguntas do bot | **aberto** | v7.2 | C1, C6 |
+| Teto de palavras A1 | **validado** — o modelo obedece de fato (com teto 30 a parte em inglês ficou em 26,1 palavras, máx. 31) | v7.4 | C8 |
+| **Persona colapsa no A1** | **aberto** — passa em B1 (0,184 ± 0,030) e falha em A1 (0,312 ± 0,030). Causa "teto de palavras" foi **testada e refutada**: subir para 30 piorou. Candidatas restantes: formato bilíngue obrigatório e vocabulário A1 restrito | v7.4 | PS3, PS4 |
+| Persona não manifestava | **corrigido em B1**, ver linha acima | v7.4 | PS3, PS4, T17 |
+| Nudge proativo de retenção | **só projetado** — o workflow existe no repo mas nunca foi importado no n8n | — | C13 |
+| `TEST Ingress` sem autenticação | **corrigido** — o nó voltou com header auth; sem o header o n8n responde 403. A falha original era aceitar injeção sem autenticação nenhuma | v7.4 | S1 |
+| Usuários de teste na base | **fechado** — removidos em 18/08 | v7.4 | S2 |
+| Latência acima do alvo | **em medição** — o relatório afirma ">8s" sem número; instrumentado por rota em `_teststand/mede_latencia.js` | v7.4 | L1 |
+| n8n cai sob carga | **aberto (infra)** | — | L2 |
 
 ---
 
@@ -262,12 +285,40 @@ média/desvio e exemplos qualitativos (trechos reais). Comparar entre níveis e 
 
 ## 11. Notas de reprodutibilidade (para a seção de método do artigo)
 
-- **Ambiente:** n8n local (`http://localhost:5678`), Postgres, LLM via Groq. Ativo hoje = v7.2 base
-  (v7.3 no arquivo, não publicada).
-- **Harness existente:** `fluxos/_teststand/` (`harness.js`, `seed.js`, `tick.js`) — dirige jornadas por
-  nível de forma **resumível**; útil para automatizar boa parte da bateria determinística.
+- **Ambiente:** n8n local (`http://localhost:5678`), Postgres, LLM via Groq.
+  Ativo em 19/08/2026 = **v7.4 (96 nós)**. Modelos: `openai/gpt-oss-120b` (Conversa, Professor, Dúvida),
+  `openai/gpt-oss-20b` (Extrator), `whisper-large-v3` (transcrição).
+- **Autenticação do harness:** o `TEST Ingress` exige o header `x-iachat-test`. O segredo fica em
+  `IACHAT_TEST_SECRET`, no `.env` da raiz (não versionado) — e precisa bater com a credencial
+  `IAChat Test Ingress` do n8n. Sem isso a rota responde 403.
+- **Harness:** `fluxos/_teststand/`
+  - `harness.js` — POST no webhook + captura da execução do próprio usuário + `digest()`
+  - `seed.js` / `tick.js` — jornada resumível por nível
+  - `bateria_critica.js` — R6, T7, T11, T10 com asserção automática
+  - `sonda_t5.js` — conta "(Questão indisponível)" e respostas vazias
+  - `revalida_personas.js` — PS3/PS4 com N repetições, média e desvio
+  - `teste_gate_frase.js` / `teste_gate_nova_questao.js` — vazamento de gabarito na questão seguinte
+  - `inspeciona_duvida.js` — mostra `q_answered` e o system prompt de um turno de dúvida
+  - `mede_latencia.js` — L1 por rota, medido **por nó**
+  - `verifica_llm.js` — checagem rápida de que o modelo responde
 - **Cuidados observados em testes anteriores:** rodar **devagar** (pausa ~2,5s), **um nível por vez**
   (n8n cai sob carga); filtrar execução pelo `user_id` do corpo (há execuções concorrentes); não re-postar
   webhook (causa processamento duplo/desync).
-- **Limitação metodológica:** saídas de LLM não são determinísticas — repetir cada teste qualitativo
-  algumas vezes e reportar variabilidade, não um único exemplo.
+
+### Armadilhas de medição já pagas (não repetir)
+
+- **Resposta vazia não é aprovação.** Testes que verificam "o bot NÃO revelou o gabarito" passam
+  trivialmente quando o bot não responde nada. Em 18/08 isso produziu dois falsos aprovados (R6 e T7)
+  enquanto a Groq devolvia 404. Todo teste desse tipo precisa exigir texto antes de julgar.
+- **Duração total da execução não mede latência.** O harness usa `chat_id` sintético, então todo nó
+  `Enviar *` falha e o n8n faz retry (3 tentativas, 1,5s entre elas), injetando ~8s em **qualquer** turno
+  — inclusive nos que não chamam LLM. Meça `executionTime` **por nó** e descarte os nós de envio.
+- **Comparar status entre versões diferentes engana.** Sempre registrar em que versão o teste foi medido.
+
+- **Limitação metodológica:** saídas de LLM não são determinísticas. **Padrão adotado: N = 3 repetições**
+  para todo teste qualitativo, reportando média e desvio — foi o que as medições de persona de 19/08
+  usaram (`fluxos/MEDICOES_PERSONAS_2026-08-18.md`). A rubrica da Seção 8 foi aplicada **uma única vez**
+  no relatório de 13/07; enquanto não for repetida com N = 3, suas notas são anedóticas.
+- **Limitação que não se resolve com repetição:** o modelo avaliado no relatório
+  (`llama-3.3-70b-versatile`) foi removido da conta Groq e **não é mais executável**. Para todo teste que
+  mudou de status, não é possível separar "a v7.4 corrigiu" de "o modelo novo é melhor".
