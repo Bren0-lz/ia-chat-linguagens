@@ -231,7 +231,7 @@ Resultado em 19/08 sobre a v7.4: **0 perdas em 12 toggles**, com controle preser
 ### D3. Robustez (entrada adversária/ruído)
 | # | Perfil | Roteiro | Esperado | Diagnostica |
 |---|--------|---------|----------|-------------|
-| R1 | P-ADV | texto de 4000+ caracteres (com aspas, HTML, acento e emoji) | não quebra o fluxo **e** trunca/limita | **executado em 19/08 pela 1ª vez** — passa com ressalva: não quebra, mas nada trunca; a entrada inteira vai para `chat_memory` e, com janela de 20 turnos, o prompt pode chegar a ~80 KB. `_teststand/teste_entrada_gigante.js` |
+| R1 | P-ADV | texto de 4000+ caracteres (com aspas, HTML, acento e emoji) | não quebra o fluxo **e** trunca/limita | **executado em 19/08 pela 1ª vez** — reprovava na 2ª metade (nada truncava: 4108 chars iam inteiros para `chat_memory`, prompt de até ~80 KB). **Corrigido**: entrada cortada em 600 chars antes do LLM e da memória. `_teststand/teste_entrada_gigante.js` |
 | R2 | P-ADV | só emojis / só espaços / string vazia | resposta graciosa | validação de entrada |
 | R3 | P-ADV | foto, sticker, áudio (não-texto) | trata como `non_text` sem travar | roteamento non_text |
 | R4 | P7 | palavrão / provocação / off-topic | não repreende; redireciona com leveza | tolerância + não-repreensão |
@@ -296,7 +296,7 @@ o relatório avaliou a v7.2, e comparar status entre versões diferentes sem diz
 | `TEST Ingress` sem autenticação | **corrigido** — o nó voltou com header auth; sem o header o n8n responde 403. A falha original era aceitar injeção sem autenticação nenhuma | v7.4 | S1 |
 | Usuários de teste na base | **fechado** — removidos em 18/08 | v7.4 | S2 |
 | **Comandos de sistema quebrados** (`/help`, `/progresso`, `/xyz`) | **corrigido em 19/08** — o nó `Mensagem Sistema` tinha quebras de linha literais dentro de strings e não executava; **regressão** entre v7.2 e v7.4 | v7.4 | X4 |
-| **Entrada gigante não é truncada** | **aberto** — a mensagem inteira (até 4096 chars) vai para `chat_memory`; com janela de 20 turnos o prompt pode chegar a ~80 KB, encarecendo e desacelerando todos os turnos seguintes. Não quebra hoje | v7.4 | R1 |
+| Entrada gigante não era truncada | **corrigido em 19/08** — corte em 600 chars nos nós `Contexto Conversa` e `Professor Engine`, antes do LLM e da memória. Pior caso de prompt cai de ~80 KB para ~12 KB | v7.4 | R1 |
 | **Perda de escrita sob concorrência** | **corrigido em 19/08** — o `Interests Engine` regravava o array inteiro lido em JS (50% de perda com 4 toggles simultâneos). Agora a escrita é atômica **e** idempotente: 0 perdas em 12 | v7.4 | X5 |
 | Latência acima do alvo | **em medição** — o relatório afirma ">8s" sem número; instrumentado por rota em `_teststand/mede_latencia.js` | v7.4 | L1 |
 | n8n cai sob carga | **aberto (infra)** | — | L2 |
