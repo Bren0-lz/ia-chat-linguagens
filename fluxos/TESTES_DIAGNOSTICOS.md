@@ -290,7 +290,7 @@ o relatório avaliou a v7.2, e comparar status entre versões diferentes sem diz
 | Interesses poluídos (manual x inferido) | corrigido no código; migração 010 aplicada | v7.4 | C16, C17 |
 | A1 usa forma telegráfica em perguntas do bot | **aberto** | v7.2 | C1, C6 |
 | Teto de palavras A1 | **validado** — o modelo obedece de fato (com teto 30 a parte em inglês ficou em 26,1 palavras, máx. 31) | v7.4 | C8 |
-| **Persona colapsa no A1** | **aberto** — passa em B1 (0,184 ± 0,030) e falha em A1 (0,312 ± 0,030). Causa "teto de palavras" foi **testada e refutada**: subir para 30 piorou. Candidatas restantes: formato bilíngue obrigatório e vocabulário A1 restrito | v7.4 | PS3, PS4 |
+| **Persona colapsa no A1** | **aberto** — passa em B1 (0,184 ± 0,030) e falha em A1 (0,312 ± 0,030). **quatro hipóteses testadas** (`INVESTIGACAO_PERSONA_A1_2026-08-19.md`): teto de palavras, pergunta fechada e formato bilíngue **refutadas** com número; vocabulário restrito **inconclusiva** (n=4: 0,250 ± 0,132, desvio 4x o baseline; três coletas interrompidas por cota da Groq). Nenhuma causa única identificada | v7.4 | PS3, PS4 |
 | Persona não manifestava | **corrigido em B1**, ver linha acima | v7.4 | PS3, PS4, T17 |
 | Nudge proativo de retenção | **só projetado** — o workflow existe no repo mas nunca foi importado no n8n | — | C13 |
 | `TEST Ingress` sem autenticação | **corrigido** — o nó voltou com header auth; sem o header o n8n responde 403. A falha original era aceitar injeção sem autenticação nenhuma | v7.4 | S1 |
@@ -299,7 +299,7 @@ o relatório avaliou a v7.2, e comparar status entre versões diferentes sem diz
 | Entrada gigante não era truncada | **corrigido em 19/08** — corte em 600 chars nos nós `Contexto Conversa` e `Professor Engine`, antes do LLM e da memória. Pior caso de prompt cai de ~80 KB para ~12 KB | v7.4 | R1 |
 | **Perda de escrita sob concorrência** | **corrigido em 19/08** — o `Interests Engine` regravava o array inteiro lido em JS (50% de perda com 4 toggles simultâneos). Agora a escrita é atômica **e** idempotente: 0 perdas em 12 | v7.4 | X5 |
 | Latência acima do alvo | **em medição** — o relatório afirma ">8s" sem número; instrumentado por rota em `_teststand/mede_latencia.js` | v7.4 | L1 |
-| n8n cai sob carga | **aberto (infra)** | — | L2 |
+| Cota do Groq não sustenta nem o desenvolvimento | **aberto (infra)** — o plano gratuito interrompeu **duas coletas de medição em dois dias**, com **um único usuário**. O L2 não precisa de N usuários simultâneos para se manifestar: uso sustentado por um só já basta. Na falha o `Enviar Erro IA` dispara corretamente (R7 ok), mas o aluno recebe erro em vez de conteúdo | v7.4 | L2 |
 
 ---
 

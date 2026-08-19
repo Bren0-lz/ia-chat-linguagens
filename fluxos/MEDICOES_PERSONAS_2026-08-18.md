@@ -84,6 +84,12 @@ consegue uma piada, mas o resto da resposta é indistinguível das outras.
 
 ---
 
+> **Atualização de 19/08:** a investigação da causa continuou e está consolidada em
+> `INVESTIGACAO_PERSONA_A1_2026-08-19.md`. Resumo: além do teto, também foram **refutadas** as
+> hipóteses de pergunta fechada e de formato bilíngue; a de vocabulário restrito ficou
+> **inconclusiva** (n=4, três coletas interrompidas por cota da Groq). A medição do A2 foi
+> acrescentada como âncora intermediária: **0,217 ± 0,009**, entre o B1 (0,184) e o A1 (0,312).
+
 ## Experimento: o teto de palavras é a causa? **Não.**
 
 Hipótese testada: o A1 colapsa porque o teto de ~18 palavras não deixa espaço para voz

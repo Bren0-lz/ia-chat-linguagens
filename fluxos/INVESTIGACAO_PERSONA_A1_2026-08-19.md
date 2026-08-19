@@ -2,7 +2,7 @@
 
 As personas se diferenciam bem em B1 (Jaccard 0,184) e A2 (0,217), e **falham só no A1**
 (0,312). Este documento registra a busca pela causa: quatro hipóteses, três refutadas com
-número, uma inconclusiva.
+número, uma inconclusiva. **A causa não foi encontrada.**
 
 Método de cada experimento: alterar **uma única linha** do `Prompt Conversa A1` no fluxo ao vivo,
 medir com N = 3 (mesma mensagem, 5 personas idênticas variando só `profile.persona`, `chat_memory`
@@ -19,7 +19,7 @@ Reprodução: `NIVEL=A1 RUNS=3 node fluxos/_teststand/revalida_personas.js "<men
 | 1 | Teto de palavras | 18 → 30 | **0,373** | **refutada** — piorou |
 | 2 | Pergunta fechada | "fechadas ou de escolha" → variadas | **0,312 ± 0,016** | **refutada** — efeito zero |
 | 3 | Formato bilíngue | bilíngue → só inglês | **0,331 ± 0,069** | **refutada** |
-| 4 | Vocabulário restrito | permite expressões e phrasal verbs comuns | **0,274 ± 0,151** | **inconclusiva** |
+| 4 | Vocabulário restrito | permite expressões e phrasal verbs comuns | **0,250 ± 0,132** (n=4) | **inconclusiva** — única com sinal |
 
 ### 1. Teto de palavras — refutada
 
@@ -43,17 +43,44 @@ moveu. Localizar a repetição não é localizar a causa.
 Removida a exigência de traduzir a mensagem inteira na linha 🇧🇷 (e a "REGRA DE OURO" que a
 reforçava, para o isolamento ser limpo): **0,331 ± 0,069**. Sem ganho, e com o dobro do desvio.
 
-### 4. Vocabulário restrito — inconclusiva
+### 4. Vocabulário restrito — inconclusiva (única hipótese com sinal)
 
-Liberado o uso de expressões e phrasal verbs comuns: **0,274 ± 0,151**. A média cruza o limiar de
-aprovação (< 0,30), mas o desvio é **cinco vezes o do baseline** — rodadas de 0,220, 0,157 e 0,444.
+Liberado o uso de expressões e phrasal verbs comuns. Dados acumulados em **três** tentativas de
+coleta, todas com a mesma variante de prompt e o mesmo estímulo:
 
-Uma tentativa de coletar N = 5 adicional **foi invalidada**: a Groq passou a responder
-`The service is receiving too many requests from you` (429, plano gratuito) e o bot devolveu texto
-vazio. Como o script preenche a resposta ausente com a mesma string de erro para todas as personas,
-o Jaccard foi a 1,000 — respostas idênticas. Números descartados; ver "Achado colateral".
+| Rodada | Jaccard | Tentativa |
+|---|---|---|
+| 1 | 0,220 | 1ª (N=3) |
+| 2 | 0,157 | 1ª |
+| 3 | 0,444 | 1ª |
+| 4 | 0,178 | 3ª (N=8, interrompida) |
 
-**Estado: hipótese não confirmada nem refutada.** Precisa de N ≥ 8 coletado sem rate limit.
+**n = 4 → média 0,250 ± 0,132** · baseline: 0,312 ± 0,030
+
+A média fica abaixo do baseline e abaixo do limiar de aprovação (< 0,30), mas o desvio é **4x o do
+baseline** e uma das quatro rodadas (0,444) foi pior que qualquer rodada de qualquer configuração
+testada. Com n = 4 e essa dispersão, não é possível separar melhora real de sorte em três de quatro.
+
+**Três tentativas de fechar, três interrompidas por infraestrutura:**
+
+1. **N = 5 adicional (18/08)** — invalidada por rate limit: sem resposta do LLM, o script preenchia
+   com a mesma string de erro para as 5 personas e o Jaccard ia a 1,000, o que *parece* colapso
+   total de persona e é artefato. Números descartados. Desde então o script **aborta** nesse caso.
+2. **N = 8 (19/08, 1ª)** — abortada na rodada 2 por falha de conexão do n8n com a Groq
+   (`Connection error`), transitória: a máquina alcançava `api.groq.com` normalmente.
+3. **N = 8 (19/08, 2ª)** — abortada na rodada 1 por rate limit de novo.
+
+**Estado: não confirmada nem refutada.** Precisa de N ≥ 8 coletado sem interrupção — cerca de
+6 minutos ininterruptos de cota disponível.
+
+#### Um padrão que os dados sugerem, mas não provam
+
+Nos três experimentos **refutados** o desvio ficou entre 0,016 e 0,069: o sistema respondia de forma
+consistente, e consistentemente pouco diferenciada. Ao liberar o vocabulário o desvio salta para
+0,132 — o comportamento muda de "consistentemente indiferenciado" para **instável**. É o que se
+esperaria de uma restrição que era de fato limitante: removê-la abre a possibilidade de a persona
+aparecer, sem garantir que apareça. Mas isso é leitura de padrão, não medição conclusiva, e não deve
+ser reportado como causa estabelecida.
 
 ---
 
@@ -64,11 +91,11 @@ não importa**. Mexer no comprimento, na estrutura da pergunta e na duplicação
 resultado entre 0,31 e 0,37 em todas as configurações. O que muda o número é sair do A1: A2 dá
 0,217 e B1 dá 0,184.
 
-Há um contraste de comportamento que vale registrar. Nos três experimentos refutados o desvio ficou
-entre 0,016 e 0,069 — o sistema respondia de forma consistente, e consistentemente pouco
-diferenciada. Ao liberar o vocabulário o desvio saltou para 0,151: o modelo passou a **às vezes**
-diferenciar bem. É o que se esperaria de uma restrição que era de fato limitante — remover o teto
-abre a possibilidade sem garanti-la. Mas isso é interpretação, não medição.
+Dito de outro jeito: das quatro restrições que definem o A1, três foram removidas uma a uma sem que
+o número se movesse. Isso torna improvável que exista uma causa única e simples — e é a razão de a
+recomendação abaixo não ser "relaxe a restrição X".
+
+(O contraste de desvio entre as hipóteses refutadas e a hipótese 4 está discutido na Seção 4.)
 
 ## Recomendação
 
@@ -90,7 +117,7 @@ objetivos em tensão** — um limite do nível, não um defeito de implementaç�
 
 ## Achado colateral: evidência direta do L2
 
-O rate limit que invalidou a última coleta é **a primeira evidência direta do L2** neste ambiente.
+O rate limit é **a evidência mais direta do L2** que o projeto tem. Ele interrompeu **duas** coletas distintas em dois dias, sempre com **um único usuário** de teste.
 O relatório afirmava "não suporta muitos usuários por estarmos utilizando uma assinatura gratuita
 do Groq" sem demonstração; aqui um único usuário, em uso sustentado por algumas horas, esgotou a
 cota e o bot passou a responder vazio.
@@ -101,6 +128,10 @@ amigável do **R7 funciona**. Mas o usuário recebe uma mensagem de erro, não c
 Implicação para o roteiro: o L2 não precisa de teste de carga com N usuários simultâneos para se
 manifestar — **uso sustentado por um só usuário já basta** no plano gratuito. Isso é mais fácil de
 reproduzir e deveria substituir o desenho atual do teste.
+
+Implicação prática, e mais séria: a cota não sustenta nem o **desenvolvimento**. Fechar a hipótese 4
+exige ~6 minutos ininterruptos de cota, e três tentativas falharam. Enquanto o projeto roda local,
+o plano pago não serve para atender usuários (não há usuários) — serve para conseguir medir.
 
 ## Limitações
 

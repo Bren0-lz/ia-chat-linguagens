@@ -77,6 +77,16 @@ async function semear() {
       const d = digest(await msg(BASE_ID + i, TEXTO));
       const m = d.reply.match(/\[CONVERSA\][\s\S]*/);
       const txt = m ? m[0].replace('[CONVERSA] ', '').trim() : '(sem resposta) ' + (d.errs || []).join('; ');
+      // GUARDA: se o LLM nao responde (rate limit da Groq, modelo 404), o texto
+      // vira a MESMA string de erro para as 5 personas e o Jaccard vai a 1,000 —
+      // que parece "colapso total de persona" e nao e. Isso corrompeu uma coleta
+      // em 19/08. Aborta em vez de produzir numero falso.
+      if (!m) {
+        console.error('\nABORTADO: o bot nao respondeu (persona ' + p + ', rodada ' + r + ').');
+        console.error('erros: ' + JSON.stringify(d.errs));
+        console.error('Sem resposta do LLM o Jaccard e artefato, nao medicao.');
+        process.exit(2);
+      }
       out[p] = txt;
       // No A1 o formato é bilíngue: inglês + uma linha 🇧🇷 com a tradução.
       // O teto de palavras vale para a parte em inglês, então mede-se as duas
