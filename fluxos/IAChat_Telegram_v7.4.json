@@ -3628,6 +3628,29 @@
       "parameters": {
         "jsCode": "// Filtro Anti-Spoiler (deterministico).\n// A v7.4 confia no LLM para nao revelar o gabarito de uma questao ainda aberta.\n// Medido ao vivo: o prompt e explicito, o estado (q_answered=false) esta correto,\n// e mesmo assim o modelo entrega a resposta quando o aluno pergunta \"por que essa\n// era a resposta certa?\". Aqui a garantia deixa de depender de obediencia.\nconst eng = $('Professor Engine').first().json || {};\nconst ts = eng.teacher_state_new || {};\nconst ans = String(ts.answer || '').trim();\nlet out = String($json.output || '');\nlet mascarou = false;\n\nif (ans && ts.q_answered === false) {\n  const esc = ans.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n  const re = new RegExp('(^|[^\\\\p{L}\\\\p{N}])(' + esc + ')(?![\\\\p{L}\\\\p{N}])', 'giu');\n  const novo = out.replace(re, '$1___');\n  if (novo !== out) { out = novo; mascarou = true; }\n}\nif (mascarou) {\n  out += '\\n\\n😉 Segurei a resposta de proposito — tenta voce primeiro!';\n}\nreturn { json: Object.assign({}, $json, { output: out, antispoiler: mascarou }) };\n"
       }
+    },
+    {
+      "id": "e7777777-7777-4777-8777-777777777777",
+      "name": "Typing Professor",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        432,
+        2560
+      ],
+      "parameters": {
+        "resource": "chat",
+        "operation": "sendChatAction",
+        "chatId": "={{ $('Normalizar').first().json.chatId }}"
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "IOXDZsXhaGzp9pFD",
+          "name": "Telegram account"
+        }
+      },
+      "notes": "Mostra 'digitando...' nas rotas do Professor. A Conversa ja tinha (Typing Conversa); o Professor nao tinha nenhum, entao explicacao/questao/duvida/correcao ficavam mudas por 2-4s. Cosmetico: nao reduz latencia. onError=continueRegularOutput para uma falha aqui nunca derrubar o turno.",
+      "onError": "continueRegularOutput"
     }
   ],
   "pinData": {},
@@ -4084,6 +4107,11 @@
         [
           {
             "node": "Salvar Professor State",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Typing Professor",
             "type": "main",
             "index": 0
           }

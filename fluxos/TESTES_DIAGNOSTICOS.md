@@ -298,7 +298,7 @@ o relatório avaliou a v7.2, e comparar status entre versões diferentes sem diz
 | **Comandos de sistema quebrados** (`/help`, `/progresso`, `/xyz`) | **corrigido em 19/08** — o nó `Mensagem Sistema` tinha quebras de linha literais dentro de strings e não executava; **regressão** entre v7.2 e v7.4 | v7.4 | X4 |
 | Entrada gigante não era truncada | **corrigido em 19/08** — corte em 600 chars nos nós `Contexto Conversa` e `Professor Engine`, antes do LLM e da memória. Pior caso de prompt cai de ~80 KB para ~12 KB | v7.4 | R1 |
 | **Perda de escrita sob concorrência** | **corrigido em 19/08** — o `Interests Engine` regravava o array inteiro lido em JS (50% de perda com 4 toggles simultâneos). Agora a escrita é atômica **e** idempotente: 0 perdas em 12 | v7.4 | X5 |
-| Latência acima do alvo | **em medição** — o relatório afirma ">8s" sem número; instrumentado por rota em `_teststand/mede_latencia.js` | v7.4 | L1 |
+| Latência acima do alvo | **medido em 19/08** — mediana **2,2s** com entrega real; processamento custa 2,2–3,4s (LLM) + 0,1–0,65s (infra). A cauda está na **entrega ao Telegram**: 1 turno em 6 chegou a 26,3s, dos quais 24,6s foram o envio, com o LLM normal. Não é a complexidade da interação. `sendChatAction` acrescentado nas rotas do Professor em 19/08 (nó `Typing Professor`) — polimento de percepção, **não corrige a cauda** | v7.4 | L1 |
 | Cota do Groq não sustenta nem o desenvolvimento | **aberto (infra)** — o plano gratuito interrompeu **duas coletas de medição em dois dias**, com **um único usuário**. O L2 não precisa de N usuários simultâneos para se manifestar: uso sustentado por um só já basta. Na falha o `Enviar Erro IA` dispara corretamente (R7 ok), mas o aluno recebe erro em vez de conteúdo | v7.4 | L2 |
 
 ---

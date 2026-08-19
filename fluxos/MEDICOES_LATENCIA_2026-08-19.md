@@ -68,22 +68,93 @@ A infraestrutura (código, Postgres, roteamento) custa **0,2 a 0,7s** por turno.
    candidata nº 1. A explicação custa 3,92s; a conversa, 4,25s — e a conversa tem o maior desvio
    (1,84), ou seja, é a que mais varia.
 3. **As rotas determinísticas são praticamente instantâneas** (0,2s). Não há gordura de arquitetura
-   a cortar: otimizar latência aqui significa mexer em modelo ou em prompt, não em nós.
+   a cortar no processamento.
+4. *(Acrescentado após a medição com `chat_id` real:)* **a cauda de latência está na entrega ao
+   Telegram, não no processamento** — um turno chegou a 26,3s com o LLM levando 2,3s. Ver a seção
+   final.
 
 ## Limitações
 
 - **Não mede a entrega ao Telegram.** O harness usa `chat_id` sintético, então o envio real nunca
-  acontece. A latência que o usuário sente é `processamento + envio real`. O relatório mediu com
-  entrega real; estas medições, não. Os dois números **não são diretamente comparáveis**, e essa é
-  a razão mais provável da diferença em relação ao "6–8s" original.
+  acontece. **Essa lacuna foi fechada depois** — ver "Medição com `chat_id` real" abaixo, que
+  confirma a suspeita: a diferença em relação ao "6–8s" do relatório está na entrega, não no
+  processamento.
 - **Modelo diferente.** O relatório mediu com `llama-3.3-70b-versatile`, removido da conta Groq.
   Parte da melhora pode ser do modelo novo, e isso não é separável.
 - **Ambiente local, um usuário por vez.** Nada aqui diz respeito a carga — o L2 continua aberto.
 - `Memória Dúvida` aparece com 1,11s em **n = 1**. Amostra insuficiente para concluir; se se
   confirmar em amostra maior, é um alvo barato (a janela de contexto pode cair de 20 para 10).
 
+---
+
+## Medição com `chat_id` real (19/08, complemento)
+
+A medição acima não inclui a entrega ao Telegram — o harness usa `chat_id` sintético e o envio
+falha. Esta seção fecha a lacuna: mesmo fluxo, mesmo instrumento, mas mandando para uma conta
+real, com o envio acontecendo de verdade. `_teststand/mede_latencia_real.js`.
+
+| Repetição | menu (sem LLM) | conversa | do qual, envio |
+|---|---|---|---|
+| 1 | 1,67s | 3,91s | 1,52s |
+| 2 | 0,85s | 2,79s | 1,38s |
+| 3 | 0,85s | **26,32s** | **24,58s** |
+
+**Mediana: 2,2s.** Cinco dos seis turnos ficaram entre 0,85s e 3,91s; um explodiu para 26,32s, e
+**24,58s disso foi o envio**, com zero erro em qualquer nó. O processamento nesse turno foi normal
+(LLM 2,34s).
+
+A média (6,06s) e o desvio (9,99) são ditados pelo outlier e enganam — por isso a mediana.
+
+### Decomposição do custo real
+
+| Componente | Custo |
+|---|---|
+| LLM | 2,2 – 3,4s |
+| Infra (código, Postgres, roteamento) | 0,1 – 0,65s |
+| Envio ao Telegram, caso típico | ~1s |
+| Envio ao Telegram, cauda observada | **24,6s** |
+
+### O que isso resolve sobre o L1
+
+O relatório afirmava *"ultrapassa 8 segundos em determinadas interações mais complexas"*, o que
+sugere que o custo cresce com a complexidade. Os dados contradizem: **o turno que estourou não era
+mais complexo que os outros** — era a mesma mensagem, no mesmo nível. A latência alta vem da
+**variância na entrega ao Telegram**, não do processamento.
+
+Isso também reconcilia os dois números que pareciam se contradizer: a medição por nó (3,23s) mede
+processamento, a do relatório (>8s) mede percepção. As duas estavam certas, medindo coisas
+diferentes.
+
+**Implicação prática:** otimizar prompt ou trocar de modelo não ataca o problema real. O que melhora
+a percepção é mascarar a espera com `sendChatAction: typing` antes da chamada ao LLM.
+
+Isso já existia na rota de Conversa (nó `Typing Conversa`) e **não existia em nenhuma rota do
+Professor**: explicação (3,92s), questão, dúvida e correção passavam pelo LLM sem nenhum sinal de
+atividade. **Corrigido em 19/08** com o nó `Typing Professor`, ligado ao `Professor Engine` como
+ramo paralelo sem saída, com `onError: continueRegularOutput` — uma falha no indicador nunca
+derruba o turno. Verificado ao vivo: executa em 0,73s, sem erro, turno conclui normalmente.
+
+**O que isso resolve e o que não resolve.** O indicador dura ~5s no Telegram, então cobre bem a
+espera típica de 2–4s do Professor. Mas **não ataca a cauda**: no outlier de 26,3s ele expiraria
+aos 5s e o aluno ficaria ~20s no vazio. Pior, o gargalo naquele turno foi a própria API do
+Telegram, e não há razão para supor que a chamada de `sendChatAction`, que vai para a mesma API,
+seria rápida naquele momento. **É polimento de percepção, não correção do L1.**
+
+### Limitações desta medição
+
+- **n = 6.** É pouco para caracterizar cauda: um evento em seis pode significar 15% de frequência
+  ou azar isolado, e não há como distinguir. Um número confiável exigiria ~30 amostras — ou seja,
+  30 mensagens reais no Telegram de alguém.
+- Uma única conta, uma única sessão, uma única rede.
+- O estado da conta usada foi salvo antes e restaurado ao final; o teste não deixou alteração.
+
 ## Próximo passo sugerido
 
-Medir a **latência percebida** de ponta a ponta com um `chat_id` real, em uma conta de teste do
-Telegram. É o único jeito de fechar o L1 com o mesmo instrumento que o relatório usou. Enquanto
-isso, o dado defensável é: **o processamento custa ~3,2s e não justifica a reprovação do L1.**
+~~Medir a latência percebida com `chat_id` real~~ — **feito**, ver seção acima.
+
+Resta:
+
+1. **Caracterizar a frequência do outlier de entrega** — n=6 é insuficiente; ~30 amostras dariam um
+   número, ao custo de 30 mensagens reais no Telegram de alguém.
+2. **Acrescentar `sendChatAction` nas rotas do Professor**, que hoje não têm nenhum. É um nó novo,
+   não mexe em modelo nem em prompt, e ataca exatamente o que o aluno sente.
