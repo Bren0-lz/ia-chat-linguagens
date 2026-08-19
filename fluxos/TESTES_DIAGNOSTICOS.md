@@ -68,12 +68,16 @@ Combinações que cobrem os eixos da Seção 2. Reutilizáveis em várias bateri
 ---
 
 > **Testes excluídos do roteiro (pedido do avaliador na execução de 13/07/2026):**
-> **B4** (atalho `pl_start_B2`), **C11** (variedade a cada 3 turnos), **X5** (mensagens fora de ordem),
-> **R1** (texto de 4000+ caracteres) e **L3** (acúmulo de execuções). Foram removidos das tabelas por não
-> serem testáveis diretamente ou por não terem sido compreendidos na execução.
-> **Consequência metodológica a declarar:** X5 e R1 eram justamente os testes de concorrência e de entrada
-> gigante — ou seja, os mecanismos que sustentariam as afirmações sobre carga (L2) e robustez. Sem eles,
-> essas afirmações ficam sem respaldo experimental direto.
+> **B4** (atalho `pl_start_B2`), **C11** (variedade a cada 3 turnos), **R1** (texto de 4000+ caracteres)
+> e **L3** (acúmulo de execuções) foram removidos das tabelas por não serem testáveis diretamente ou
+> por não terem sido compreendidos na execução.
+> O **X5** também havia sido excluído, mas foi **REINCLUÍDO em 19/08**: quando finalmente testado,
+> expôs **50% de perda de escrita** no menu de interesses (ver D2).
+> **Consequência metodológica a declarar:** dois dos cinco excluídos eram os testes de concorrência (X5) e
+> de entrada gigante (R1) — os mecanismos que sustentariam as afirmações sobre carga (L2) e robustez.
+> O X5 foi reincluído e achou defeito na primeira execução; o **R1 continua sem cobertura**, então a
+> afirmação de robustez a entrada gigante segue sem respaldo experimental. A exclusão foi por
+> dificuldade de execução, não por irrelevância.
 > **Teste acrescentado:** **A8**, pedido pelo avaliador a partir de comportamento observado.
 
 ---
@@ -199,7 +203,30 @@ Nós: `Professor Engine`, `Parse Professor`, `Pos Professor`, `Agente Professor`
 | X1 | P4 | trocar de modo (`mode_chat`/`mode_teacher`) no meio | troca limpa, estado preservado | `mode_switch` |
 | X2 | P6 | sair e voltar dias depois | continua de onde parou (nível, tópico, interesses) | persistência entre sessões |
 | X3 | qualquer | mensagens com `& < >` (ex.: "5 > 3") | escapadas em HTML, sem quebrar Telegram | `parse_mode: HTML` / escaping |
-| X4 | qualquer | comando desconhecido `/xyz` | mensagem de ajuda/erro previsível | `system_msg` unknown |
+| X4 | qualquer | `/help`, `/progresso` e comando desconhecido `/xyz` | cada um responde com o texto do nó `Mensagem Sistema` | **regrediu entre v7.2 e v7.4** (quebras de linha literais dentro de strings inviabilizavam o nó); corrigido e coberto por `_teststand/teste_comandos_sistema.js` |
+| X5 | qualquer | **4 toggles de interesse simultâneos** (`int_travel`, `int_games`, `int_music`, `int_sports`) disparados sem espaçamento | os 4 sobrevivem — nenhuma escrita perdida | concorrência por usuário; ver desenho abaixo |
+
+#### X5 — como testar concorrência sem se enganar
+
+Este teste tinha sido **excluído** da bateria em 13/07 por não ter sido compreendido na execução.
+Reincluído em 19/08 depois de expor um defeito real: **50% de perda de escrita** no uso normal do
+menu de interesses. Script: `_teststand/teste_concorrencia.js`.
+
+- **Detector:** os toggles de interesse. O nó `Interests Engine` lia `profile.interests` para um
+  array em JavaScript, alterava e regravava o **array inteiro** — leitura-modificação-escrita
+  clássica, em que toggles concorrentes se sobrescrevem.
+- **Não use `msg_count` como detector:** o nó `Incrementar Contador` faz `msg_count + 1` no próprio
+  SQL, que é atômico no Postgres. Não perde escrita nem sob corrida, então não detecta nada.
+- **Exige um controle sequencial.** Cada execução leva ~8s por causa do retry de envio ao Telegram
+  (`chat_id` sintético, ver §11). Com espaçamento de 2,5s o "controle" ainda fica sobreposto e
+  também perde escritas — deixando de ser controle. Use **≥12s**. Sem esse controle não é possível
+  distinguir perda por concorrência de falha do próprio fluxo: quando uma edição subiu com erro de
+  sintaxe, o resultado foi 0/4 em tudo, e só o controle revelou que o problema não era corrida.
+- **Perda determinística não é corrida.** Se sempre o *mesmo* item se perde, procure outra causa.
+  Foi assim que apareceu o segundo defeito: a correção atômica não era idempotente e o
+  `retryOnFail=3` do nó de escrita desfazia o toggle.
+
+Resultado em 19/08 sobre a v7.4: **0 perdas em 12 toggles**, com controle preservando 4/4.
 
 ### D3. Robustez (entrada adversária/ruído)
 | # | Perfil | Roteiro | Esperado | Diagnostica |
@@ -267,6 +294,8 @@ o relatório avaliou a v7.2, e comparar status entre versões diferentes sem diz
 | Nudge proativo de retenção | **só projetado** — o workflow existe no repo mas nunca foi importado no n8n | — | C13 |
 | `TEST Ingress` sem autenticação | **corrigido** — o nó voltou com header auth; sem o header o n8n responde 403. A falha original era aceitar injeção sem autenticação nenhuma | v7.4 | S1 |
 | Usuários de teste na base | **fechado** — removidos em 18/08 | v7.4 | S2 |
+| **Comandos de sistema quebrados** (`/help`, `/progresso`, `/xyz`) | **corrigido em 19/08** — o nó `Mensagem Sistema` tinha quebras de linha literais dentro de strings e não executava; **regressão** entre v7.2 e v7.4 | v7.4 | X4 |
+| **Perda de escrita sob concorrência** | **corrigido em 19/08** — o `Interests Engine` regravava o array inteiro lido em JS (50% de perda com 4 toggles simultâneos). Agora a escrita é atômica **e** idempotente: 0 perdas em 12 | v7.4 | X5 |
 | Latência acima do alvo | **em medição** — o relatório afirma ">8s" sem número; instrumentado por rota em `_teststand/mede_latencia.js` | v7.4 | L1 |
 | n8n cai sob carga | **aberto (infra)** | — | L2 |
 
