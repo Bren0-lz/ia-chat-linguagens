@@ -1,5 +1,11 @@
 # HANDOFF — IAChat (estado em 2026-07-01)
 
+> ⚠️ **DOCUMENTO HISTÓRICO (01/07/2026).** Várias afirmações aqui foram superadas — em especial a
+> versão ativa (hoje é a **v7.4**, não a v7.2) e o modelo de LLM (os Llama saíram da conta Groq em
+> 18/08). **Para retomar o trabalho, leia `HANDOFF_2026-08-19.md` primeiro.** Este arquivo continua
+> útil como histórico das versões 6.x/7.x e do fix do loop de cadastro.
+
+
 Documento para retomar o trabalho num novo chat **exatamente de onde paramos**. Leia isto primeiro,
 depois `ANALISE_UX_v7.1.md` e `CHANGELOG_v7.2.md`.
 
