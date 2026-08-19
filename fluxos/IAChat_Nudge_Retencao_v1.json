@@ -23,7 +23,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT user_id, name, COALESCE(streak_count,0) AS streak, last_active,\n       (CURRENT_DATE - last_active) AS dias_parado\nFROM students\nWHERE onboarding = 'done'\n  AND user_id < 900000000\n  AND COALESCE((profile->>'nudge_opt_out')::boolean, false) = false\n  AND COALESCE(profile->>'last_nudge','') <> to_char(CURRENT_DATE,'YYYY-MM-DD')\n  AND last_active IS NOT NULL\n  AND last_active < CURRENT_DATE\n  AND (\n        (last_active = CURRENT_DATE - 1 AND COALESCE(streak_count,0) >= 2)\n     OR (CURRENT_DATE - last_active) BETWEEN 3 AND 14\n      )\nORDER BY (last_active = CURRENT_DATE - 1) DESC, streak DESC\nLIMIT 1;",
+        "query": "SELECT user_id, name, COALESCE(streak_count,0) AS streak, last_active,\n       (CURRENT_DATE - last_active) AS dias_parado\nFROM students\nWHERE onboarding = 'done'\n  AND NOT (user_id >= 990000000 AND user_id < 1000000000)  -- exclui SO a faixa do harness; IDs reais do Telegram tem 10 digitos e passavam do teto antigo (900000000), o que fazia o nudge nunca alcancar ninguem\n  AND COALESCE((profile->>'nudge_opt_out')::boolean, false) = false\n  AND COALESCE(profile->>'last_nudge','') <> to_char(CURRENT_DATE,'YYYY-MM-DD')\n  AND last_active IS NOT NULL\n  AND last_active < CURRENT_DATE\n  AND (\n        (last_active = CURRENT_DATE - 1 AND COALESCE(streak_count,0) >= 2)\n     OR (CURRENT_DATE - last_active) BETWEEN 3 AND 14\n      )\nORDER BY (last_active = CURRENT_DATE - 1) DESC, streak DESC\nLIMIT 1;",
         "options": {}
       },
       "id": "nudge-select",
