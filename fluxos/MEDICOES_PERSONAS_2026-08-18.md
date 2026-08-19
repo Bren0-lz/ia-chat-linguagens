@@ -121,14 +121,15 @@ relatório ("respeita o teto de ~18 palavras"), e não leniência do parser.
    com rubrica 0. A evidência é média, desvio e transcrição de 3 rodadas.
 2. **PS3/PS4 continuam falhando em A1**, mas por causa localizada — não é "as personas não
    funcionam", é "as personas não sobrevivem à restrição de formato do A1".
-3. **A causa não é o teto de palavras**, o que foi testado e refutado. As candidatas
-   restantes são o formato bilíngue obrigatório (tudo dito duas vezes) e o vocabulário A1
-   em si — "só presente simples e as palavras mais básicas", com expressões e phrasal
-   verbs proibidos, que é justamente o material de que uma voz é feita.
-4. Se a causa for o vocabulário, **persona forte e A1 puro são objetivos em tensão** e o
-   design deveria assumir isso. O caminho barato são marcadores não-lexicais — emoji,
+3. **A causa não é o teto de palavras**, o que foi testado e refutado.
+   *(Atualizado em 19/08: o formato bilíngue e a pergunta fechada também foram testados e
+   refutados. Restou o vocabulário restrito, inconclusivo. Nenhuma causa única foi
+   identificada — ver `INVESTIGACAO_PERSONA_A1_2026-08-19.md`.)*
+4. **Persona forte e A1 puro são provavelmente objetivos em tensão** e o design deveria
+   assumir isso. Com três das quatro restrições do nível removidas uma a uma sem o número
+   se mover, o caminho não é relaxar o A1 e sim usar marcadores não-lexicais — emoji,
    comprimento de frase, reagir antes de perguntar — que cabem em qualquer teto, como o
-   `formal` já demonstra.
+   `formal` já demonstra com 0,0 emoji.
 
 ## Limitações
 
