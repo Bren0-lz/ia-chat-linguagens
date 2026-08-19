@@ -68,16 +68,16 @@ Combinações que cobrem os eixos da Seção 2. Reutilizáveis em várias bateri
 ---
 
 > **Testes excluídos do roteiro (pedido do avaliador na execução de 13/07/2026):**
-> **B4** (atalho `pl_start_B2`), **C11** (variedade a cada 3 turnos), **R1** (texto de 4000+ caracteres)
-> e **L3** (acúmulo de execuções) foram removidos das tabelas por não serem testáveis diretamente ou
-> por não terem sido compreendidos na execução.
-> O **X5** também havia sido excluído, mas foi **REINCLUÍDO em 19/08**: quando finalmente testado,
-> expôs **50% de perda de escrita** no menu de interesses (ver D2).
-> **Consequência metodológica a declarar:** dois dos cinco excluídos eram os testes de concorrência (X5) e
-> de entrada gigante (R1) — os mecanismos que sustentariam as afirmações sobre carga (L2) e robustez.
-> O X5 foi reincluído e achou defeito na primeira execução; o **R1 continua sem cobertura**, então a
-> afirmação de robustez a entrada gigante segue sem respaldo experimental. A exclusão foi por
-> dificuldade de execução, não por irrelevância.
+> **B4** (atalho `pl_start_B2`), **C11** (variedade a cada 3 turnos) e **L3** (acúmulo de execuções)
+> foram removidos das tabelas por não serem testáveis diretamente ou por não terem sido compreendidos
+> na execução.
+> **X5** e **R1** também haviam sido excluídos e foram **REINCLUÍDOS em 19/08**, os dois com achado na
+> primeira execução: o X5 expôs **50% de perda de escrita** no menu de interesses (ver D2) e o R1
+> mostrou que **nada trunca** a entrada (ver D3).
+> **Consequência metodológica:** os dois excluídos que foram recuperados (X5 e R1) acharam problema na
+> primeira execução. A exclusão tinha sido por dificuldade de execução, não por irrelevância — o que
+> recomenda tratar teste descartado como dívida, não como escopo resolvido. Os três que continuam fora
+> (B4, C11, L3) seguem sem respaldo experimental.
 > **Teste acrescentado:** **A8**, pedido pelo avaliador a partir de comportamento observado.
 
 ---
@@ -231,6 +231,7 @@ Resultado em 19/08 sobre a v7.4: **0 perdas em 12 toggles**, com controle preser
 ### D3. Robustez (entrada adversária/ruído)
 | # | Perfil | Roteiro | Esperado | Diagnostica |
 |---|--------|---------|----------|-------------|
+| R1 | P-ADV | texto de 4000+ caracteres (com aspas, HTML, acento e emoji) | não quebra o fluxo **e** trunca/limita | **executado em 19/08 pela 1ª vez** — passa com ressalva: não quebra, mas nada trunca; a entrada inteira vai para `chat_memory` e, com janela de 20 turnos, o prompt pode chegar a ~80 KB. `_teststand/teste_entrada_gigante.js` |
 | R2 | P-ADV | só emojis / só espaços / string vazia | resposta graciosa | validação de entrada |
 | R3 | P-ADV | foto, sticker, áudio (não-texto) | trata como `non_text` sem travar | roteamento non_text |
 | R4 | P7 | palavrão / provocação / off-topic | não repreende; redireciona com leveza | tolerância + não-repreensão |
@@ -295,6 +296,7 @@ o relatório avaliou a v7.2, e comparar status entre versões diferentes sem diz
 | `TEST Ingress` sem autenticação | **corrigido** — o nó voltou com header auth; sem o header o n8n responde 403. A falha original era aceitar injeção sem autenticação nenhuma | v7.4 | S1 |
 | Usuários de teste na base | **fechado** — removidos em 18/08 | v7.4 | S2 |
 | **Comandos de sistema quebrados** (`/help`, `/progresso`, `/xyz`) | **corrigido em 19/08** — o nó `Mensagem Sistema` tinha quebras de linha literais dentro de strings e não executava; **regressão** entre v7.2 e v7.4 | v7.4 | X4 |
+| **Entrada gigante não é truncada** | **aberto** — a mensagem inteira (até 4096 chars) vai para `chat_memory`; com janela de 20 turnos o prompt pode chegar a ~80 KB, encarecendo e desacelerando todos os turnos seguintes. Não quebra hoje | v7.4 | R1 |
 | **Perda de escrita sob concorrência** | **corrigido em 19/08** — o `Interests Engine` regravava o array inteiro lido em JS (50% de perda com 4 toggles simultâneos). Agora a escrita é atômica **e** idempotente: 0 perdas em 12 | v7.4 | X5 |
 | Latência acima do alvo | **em medição** — o relatório afirma ">8s" sem número; instrumentado por rota em `_teststand/mede_latencia.js` | v7.4 | L1 |
 | n8n cai sob carga | **aberto (infra)** | — | L2 |
