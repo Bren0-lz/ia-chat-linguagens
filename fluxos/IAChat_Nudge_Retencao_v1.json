@@ -57,7 +57,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Monta a mensagem do nudge por segmento (1 CTA, 1 mensagem por usuario)\nconst u=$input.item.json;\nconst nome=(u.name||'').split(' ')[0]||'ei';\nconst streak=parseInt(u.streak,10)||0;\nconst dias=parseInt(u.dias_parado,10)||0;\nlet text;\nif(dias===1&&streak>=2){ text='Oi, '+nome+'! 🔥 Você está numa sequência de '+streak+' dias de inglês — não deixa ela cair hoje. Bora 2 minutinhos? É só me mandar um oi.'; }\nelse { text='Ei, '+nome+', senti sua falta! 😊 Que tal voltar com um papo rápido em inglês hoje? Pode começar bem leve — só responder aqui.'; }\ntext+='\n\n<i>(se preferir não receber lembretes, é só mandar /parar)</i>';\nreturn { json:{ ...u, chatId:u.user_id, text } };"
+        "jsCode": "// Monta a mensagem do nudge por segmento (1 CTA, 1 mensagem por usuario)\nconst u=$input.item.json;\nconst nome=(u.name||'').split(' ')[0]||'ei';\nconst streak=parseInt(u.streak,10)||0;\nconst dias=parseInt(u.dias_parado,10)||0;\nlet text;\nif(dias===1&&streak>=2){ text='Oi, '+nome+'! 🔥 Você está numa sequência de '+streak+' dias de inglês — não deixa ela cair hoje. Bora 2 minutinhos? É só me mandar um oi.'; }\nelse { text='Ei, '+nome+', senti sua falta! 😊 Que tal voltar com um papo rápido em inglês hoje? Pode começar bem leve — só responder aqui.'; }\ntext+='\\n\\n<i>(se preferir não receber lembretes, é só mandar /parar)</i>';\nreturn { json:{ ...u, chatId:u.user_id, text } };"
       },
       "id": "nudge-msg",
       "name": "Montar Nudge",
