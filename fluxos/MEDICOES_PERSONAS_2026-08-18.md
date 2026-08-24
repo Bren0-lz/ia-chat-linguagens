@@ -1,7 +1,7 @@
 # Medições de persona (PS3/PS4) — 18/08/2026
 
 Revalidação dos testes de persona sobre a **v7.4 publicada**, com o modelo que está em
-produção hoje. O relatório de 13/07 (`documentos/Relatorio_Testes_IAChat.txt`) reprovou
+produção hoje. O relatório de 13/07 (removido em 24/08; esta no historico do git) reprovou
 PS3 e PS4 e deu **rubrica 0** em "fidelidade à persona"; estas medições refazem a
 comparação e chegam a um resultado diferente.
 

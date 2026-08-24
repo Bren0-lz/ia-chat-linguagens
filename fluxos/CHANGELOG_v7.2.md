@@ -1,7 +1,7 @@
 # IAChat_Telegram_v7.2 — Changelog
 
 > Base: v7.1 (id `zAjCM0ZcastWElOo`). v7.2 criado como workflow novo (id `H0Xfipr424xkejcd`).
-> Motivação: correções de UX encontradas em **teste real por nível** (ver `ANALISE_UX_v7.1.md`).
+> Motivação: correções de UX encontradas em **teste real por nível** (a analise que as originou foi removida em 24/08; esta no historico do git).
 > Todas as mudanças foram **validadas ao vivo** contra o modelo (Groq llama-3.3-70b) em A1, A2, B1, C1.
 > Data: 2026-07-01.
 

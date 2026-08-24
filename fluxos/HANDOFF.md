@@ -1,114 +1,276 @@
-# HANDOFF — IAChat (estado em 2026-07-01)
+# HANDOFF — IAChat
 
-> ⚠️ **DOCUMENTO HISTÓRICO (01/07/2026).** Várias afirmações aqui foram superadas — em especial a
-> versão ativa (hoje é a **v7.4**, não a v7.2) e o modelo de LLM (os Llama saíram da conta Groq em
-> 18/08). **Para retomar o trabalho, leia `HANDOFF_2026-08-19.md` primeiro.** Este arquivo continua
-> útil como histórico das versões 6.x/7.x e do fix do loop de cadastro.
-
-
-Documento para retomar o trabalho num novo chat **exatamente de onde paramos**. Leia isto primeiro,
-depois `ANALISE_UX_v7.1.md` e `CHANGELOG_v7.2.md`.
+> **Estado em 24/08/2026.** Este é o **único** handoff do projeto: em vez de criar um arquivo
+> datado por sessão, atualize este. A proliferação de handoffs datados foi justamente o que
+> gerou documentos contraditórios em julho e agosto.
+>
+> Leia isto primeiro. Depois: `PLANO_2026-08-24.md` (o que fazer a seguir) e
+> `TESTES_DIAGNOSTICOS.md` (o roteiro completo dos testes).
 
 ---
 
 ## 1. TL;DR — onde estamos
-- **Versão ativa: `IAChat_Telegram_v7.2`** (n8n id `H0Xfipr424xkejcd`, 94 nós). É o bot de produção.
-- v7.2 = v7.1 + **5 correções de UX**, todas **validadas ao vivo** (A1, A2, B1, C1) contra o Groq real.
-- **v7.1** (id `zAjCM0ZcastWElOo`) está **inativa**. Não deixe as duas ativas ao mesmo tempo (mesmo
-  bot/token → respostas duplicadas).
-- Testei o agente como **adolescente de 16 anos** em cada nível, nos dois modos (Conversa e Professor).
 
-## 1.1. Correção pós-v7.2 (2026-07-02) — loop de cadastro
-- **Bug:** no onboarding, o usuário mandava o nome e o bot repetia "qual é o seu nome?" em loop.
-- **Causa:** o nó `Carregar Aluno` tinha o guard `WHERE ... students.last_update_id < EXCLUDED.last_update_id`.
-  Quando o `update_id` recebido não era maior que o gravado, o `RETURNING` voltava 0 linhas (o nó
-  Postgres devolve `{"success":true}`), e o `Roteador Mestre` via `onboarding=undefined` → tratava como
-  usuário novo toda mensagem. O `last_update_id` ficou corrompido/alto porque o `harness.js` gera
-  `update_id = Date.now()/1000 ≈ 1,77e9`, acima dos ~4e8 do Telegram real → guard reprovava sempre.
-- **Fix (aplicado ao vivo na v7.2):** removido o `WHERE`; `last_update_id` passou a usar
-  `GREATEST(COALESCE(students.last_update_id,0), COALESCE(EXCLUDED.last_update_id,0))`. Sempre retorna a
-  linha e nunca regride. Backup: `fluxos/_teststand/backup_v7.2_2026-07-02T01-18-19-991Z.json`.
-- **Trade-off:** perdeu-se a dedup de re-entregas de webhook (raro). Ver memória `onboarding-loop-fix.md`.
+| | |
+|---|---|
+| **Fluxo ativo** | `IAChat_Telegram_v7.4` — n8n id `9MA0o1XJjD33BnKc`, **97 nós** |
+| **Arquivo de edição** | `fluxos/IAChat_Telegram_v7.4.json` |
+| **Nudge** | `IAChat_Nudge_Retencao_v1` — id `DBF6NoEXRXrHAy85`, **DESATIVADO** de propósito |
+| **Modelos** | `openai/gpt-oss-120b` (Conversa, Professor, Dúvida), `openai/gpt-oss-20b` (Extrator), `whisper-large-v3` |
+| **Banco** | Postgres em `127.0.0.1:5433` (Docker, container `iachat-pg`), 13 migrations |
+| **Regressão offline** | `node fluxos/_teststand/regressao_v7.4.js` |
+| **Bateria Fase A** | **16/16** (determinísticos) |
+| **Bateria Fase B** | escrita, 29 testes; 4 já verdes, 25 esperando cota |
 
-## 2. O que foi corrigido no v7.2 (validado)
-1. **Concordância/countable/tempo verbal** agora são sinalizados explicitamente na Conversa
-   (`video games ARE`, `the number of people`, `We played... not we play`). — Prompts Conversa A1–C2.
-2. **A1 não repete mais o erro do aluno** (`i like play` → *"We say I like playing"*). — Prompt Conversa A1.
-3. **A1 "não entendi"** reformula em inglês correto sem trocar de pergunta. — Prompt Conversa A1.
-4. **Dúvida do Professor não erra mais o conceito** (o `-ed` do passado deixou de ser confundido com o
-   `-s` da 3ª pessoa); `dSys` reescrito + **Modelo Groq Dúvida temperatura 0.5→0.3**. — Professor Engine.
-Detalhes e trechos em `CHANGELOG_v7.2.md`.
+**Nunca deixe duas versões ativas** — v7.2, v7.3 e v7.4 usam o mesmo `webhookId`
+(`telegram-iachat-webhook`).
 
-## 3. Pendências / decisões em aberto (próximos passos)
-- **[A1 — resíduo menor]** o tutor corrige o aluno, mas em algumas **perguntas dele mesmo** ainda usa
-  forma telegráfica (*"You like play games?"*). Ajuste candidato a **v7.2.1**: 1 linha no Prompt Conversa A1
-  sobre forma de pergunta (*"Do you like...?"* em vez de *"You like play"*). É testável de leve
-  (reaproveitar um usuário A1 já existente, sem refazer placement).
-- **[C2 inalcançável — decisão de produto]** `Placement Engine` usa `LEVELS=['A1','A2','B1','B2','C1']`
-  (sem C2) e é o único ponto que grava `students.level`. Logo **Prompt Conversa C2 + trilha C2 do Professor
-  são código morto**. Opções: (a) incluir C2 no placement, (b) remover os prompts/trilha C2. Botões de
-  auto-avaliação também vão só até `pl_start_B2`. Ver memória `c2-inalcancavel.md`.
-- **[Segurança — remover antes do lançamento]** nós `TEST Ingress` (webhook `POST /iachat-test`) + `TEST
-  Shim` injetam updates **sem autenticação do Telegram** no fluxo ativo. (Foi o que usei para testar.)
-- **[Limpeza]** criei usuários de teste na tabela `students` com `user_id` na faixa ~`9930000000`–`9939999999`
-  (e alguns `99xxxxxxxx`). Apagar antes de olhar métricas.
-- **[Infra — atenção]** o **n8n caiu** durante os testes por volume de execuções (precisou reiniciar).
-  Instância sensível a carga. Se o bot crescer: limitar `retryOnFail` dos nós de envio, serializar
-  processamento por usuário (advisory lock), e limpar execuções salvas.
+---
 
-## 4. Fatos técnicos essenciais (para reproduzir/testar)
-- **n8n API:** `http://localhost:5678`. A API key (JWT) está em `~/.claude.json` →
-  `projects["C:/Users/breno"].mcpServers["n8n-mcp"].env.N8N_API_KEY`. (O MCP `n8n-mcp` existe mas está
-  no escopo da home `C:/Users/breno`, **não** neste projeto — por isso as ferramentas MCP não aparecem
-  automaticamente numa sessão aberta na pasta do projeto.)
-- **Banco:** o n8n usa um Postgres cuja senha **não** consegui obter (a leitura do store de credenciais do
-  n8n foi bloqueada, corretamente). O `.env` do repo aponta `postgres:iachat@127.0.0.1:5433` (Docker, que
-  estava **desligado**); há um Postgres nativo em `5432` com senha diferente. **Não tive acesso de escrita
-  ao banco** — por isso setei os níveis **dirigindo o placement real**, não via SQL. Para testar C2 (ou
-  setar níveis direto) seria preciso a connection string do banco que o n8n usa.
-- **Como testar sem Telegram real:** `POST http://localhost:5678/webhook/iachat-test` com um update do
-  Telegram como corpo (o nó `TEST Shim` faz `item.json.body`). O fluxo processa normalmente e **tenta
-  enviar ao Telegram** — com `chatId` falso esse envio **falha** (400), mas todos os nós a montante rodam;
-  a resposta gerada é lida de `GET /api/v1/executions/{id}?includeData=true` (nós `Agente Conversa`,
-  `Parse Professor`, `Agente Dúvida`, `Placement Engine`, `Etapa de Cadastro`, etc.).
-- **Como setar cada nível (A1–C1):** passar pelo onboarding (`oi`→nome→idade), escolher `pl_start_<nível>`
-  e responder as 10 questões do placement de forma **dirigida** — o teste é adaptativo (2 acertos seguidos
-  sobem 1 nível, 2 erros descem; clamp A1–C1). As respostas do seed estão em
-  `db/migrations/005_v6_seed_exam.sql`. Para **ficar** num nível: alternar acerto/erro; para **subir**
-  (ex.: C1 a partir de B2): 2 acertos e depois alternar.
-- **Callbacks úteis:** `pl_start_A1..B2`, `ans_A..D`, `persona_buddy`, `int_games/int_music/int_done`,
-  `mode_chat`, `mode_teacher`, `t_start`, `t_doubt`.
+## 2. O que está fechado
 
-## 5. Armadilhas descobertas (NÃO repita os erros)
-- **Sobrecarga derruba o n8n.** Rode **devagar** (pausa ~2,5s entre chamadas) e **um nível por vez**.
-- **Tarefas de background são mortas pelo ambiente após ~2–3 min.** Use execuções **curtas e resumíveis**
-  (o `tick.js` salva estado e faz poucos passos por invocação — ver §6).
-- **Cada chamada leva ~6–8s** (a latência é do envio ao Telegram falhando). Normal.
-- **Captura de execução:** filtre a execução **pelo `user_id` do corpo** (há execuções concorrentes/órfãs);
-  não pegue "a mais nova" cegamente. E **não re-poste** o webhook (causa processamento duplo → desync).
-- **`update_id` deve ser estritamente crescente por usuário** — ERA armadilha: o `Carregar Aluno` só
-  retornava a linha se `last_update_id` aumentasse; senão o RETURNING vinha vazio e o fluxo tratava como
-  usuário novo. **Corrigido em 2026-07-02** (guard removido + `GREATEST`; ver §1.1). O harness ainda gera
-  `update_id` altíssimo, mas agora isso é inofensivo (não trava mais o usuário).
-- **`fetch` pode dar ECONNRESET sob carga** — use retry/backoff nas chamadas HTTP.
+### Bateria Fase A — 16/16
 
-## 6. Test-harness persistido
-As ferramentas de teste que construí ficam em **`fluxos/_teststand/`** (persistidas do scratchpad, que é
-efêmero). Veja `fluxos/_teststand/README.md`. Resumo:
-- `harness.js` — POSTa update no webhook, espera a execução do **meu** user, extrai a resposta. Lê a
-  API key de `process.env.N8N_API_KEY` (exporte antes de usar).
-- `seed.js` — respostas do exame de placement (para dirigir o nível).
-- `tick.js` — driver **resumível** de uma jornada completa por nível (onboarding→placement→conversa→
-  professor), salva estado em `state_<nível>.json` e transcrição em `tr_<nível>.md`. Rode em blocos:
-  `PACE=2500 MAXACT=6 node tick.js A1` várias vezes até `phase=done`.
+`node fluxos/_teststand/bateria_completa_a.js` cobre A1 A2 A3 A4 A6 A8 · B1 B3 B5 B6 ·
+X1 X2 X3 · R2 R3 S1. Não consome cota da Groq.
 
-## 7. Documentos deste trabalho
-- `fluxos/ANALISE_UX_v7.1.md` — análise por nível que originou as correções (com trechos reais).
-- `fluxos/CHANGELOG_v7.2.md` — o que mudou no v7.2 + pendências.
-- `fluxos/CHANGELOG_v7.0.md` — histórico anterior (contexto).
-- Memórias (auto-carregadas): `flow-versioning.md`, `c2-inalcancavel.md`.
+Dos 11 testes que nunca haviam rodado, **todos passam**. O nivelamento adaptativo funciona nas
+duas direções, o estado sobrevive à troca de modo e a 7 dias de inatividade, e o S1 confirma o
+ingress de teste devolvendo 403 sem header.
 
-## 8. Sugestão de primeiro passo no próximo chat
-1. Confirmar que só o v7.2 está ativo (`GET /api/v1/workflows?active=true`).
-2. Decidir: aplicar o **ajuste A1 (v7.2.1)** e/ou tratar o **C2**.
-3. Se for testar de novo: **ritmo lento**, `tick.js` em blocos, e **limpar os usuários de teste** ao fim.
+**Consequência para a leitura do risco:** nas revalidações de 18–19/08 *todos* os testes
+mudaram de veredito, o que sugeria que os demais estariam podres. No bloco determinístico isso
+**não** se repetiu. A fragilidade está concentrada nas rotas que dependem do LLM.
+
+### Bateria Fase B — escrita, parcialmente executada
+
+`node fluxos/_teststand/bateria_completa_b.js` cobre 29 testes: A5, C1–C4, C7, C9, C10, C12,
+C14–C17, T1–T4, T6, T8, T9, T12–T17, PS1, R4, R5.
+
+**Quatro não tocam o LLM e já passaram:** A5, PS1, C16, C17. O C17 confirma que a blindagem
+anti-fantasma funciona — a chave crua `travel`, que vazou da inferência no bug histórico, é
+removida do campo manual enquanto os interesses legítimos sobrevivem.
+
+Os outros 25 **nunca rodaram** — dependem de cota. A primeira execução real vai revelar
+assertivas mal calibradas; a Fase A precisou de três rodadas para assentar.
+
+Flags úteis: `--only=C1,C3` (subconjunto), `--from=T1` (retomar), `PACE=4000` (mais devagar).
+
+---
+
+## 3. Três classes de veredito — e por que isso importa
+
+A Fase B distingue deliberadamente:
+
+| Classe | Significado |
+|---|---|
+| **AUTO** (22 testes) | Asserção objetiva: formato, idioma, estado no banco, gate |
+| **REVISAR** (7 testes) | A saída é capturada na transcrição com a rubrica ao lado, para leitura humana. **Não é aprovação nem falha.** |
+| **INCONCLUSIVO** | O LLM não respondeu. **Nunca vira PASSOU.** |
+
+Os 7 de REVISAR (C9, C10, C14, T1, T2, T8, T9, T17) são qualidade pedagógica e tom. Regex não
+julga isso, e inventar veredito automático produziria o mesmo falso PASSOU que já apareceu duas
+vezes neste projeto. **Isso é honestidade sobre o que é medível, não uma lacuna a fechar.**
+
+---
+
+## 4. Armadilhas já pagas — NÃO repetir
+
+As dez primeiras vêm das sessões de julho e agosto; as duas últimas são de 24/08.
+
+1. **Resposta vazia não é aprovação.** Testes de negativa ("não revelou o gabarito") passam
+   trivialmente quando o bot não responde. Gerou dois falsos PASSOU enquanto a Groq dava 404.
+   Hoje o guard da Fase B torna isso impossível por construção.
+2. **Duração total de execução não mede latência.** O `chat_id` sintético faz o envio falhar e
+   o retry injeta 7–27s em qualquer turno. Meça `executionTime` **por nó** e descarte os nós de
+   envio.
+3. **Não rotule o turno pela ordem de envio.** Há corrida entre semear o `mode` e o fluxo
+   anterior gravando estado. Classifique pelo que o `Roteador Mestre` registrou.
+4. **Perda determinística não é corrida.** Sempre o mesmo item se perdendo indica outra causa —
+   foi assim que apareceu a falta de idempotência sob `retryOnFail`.
+5. **Detector de correção precisa cobrir a forma curta.** O teto de 18 palavras do A1 força
+   `"We say 'are', not 'is'"`; regex só com a forma longa dá falso negativo.
+6. **`msg_count` não detecta corrida** — o incremento é feito no SQL e é atômico.
+7. **Controle sequencial precisa de ≥12s de espaçamento**, senão ele próprio fica sobreposto.
+8. **Localizar a repetição não é localizar a causa.** A pergunta final do A1 era 3,5x mais
+   repetida que a do B1; liberá-la não moveu o número.
+9. **Sempre abrir a transcrição antes de reportar.** Todo falso resultado destas sessões
+   sobreviveu ao agregado e morreu na evidência bruta.
+10. **ID alto não significa usuário de teste.** IDs reais do Telegram têm 10 dígitos. O engano
+    apareceu em dois lugares: o cleanup **apagaria** contas reais e o nudge as **ignorava**.
+11. **Base suja faz o teste medir resíduo, não o fluxo.** O `bateria_completa_a.js` usava
+    `uidSeq` fixo e herdava os usuários da rodada anterior. O efeito não era falhar: o A1
+    reprovou reportando `nome=Lucas idade=16` — valores corretos, gravados na semana anterior.
+    Um falso positivo escondido dentro de uma reprovação. **Corrigido:** o ID vem do relógio.
+    Se escrever um script novo, derive o ID igual — e mantenha na faixa `990000000–999999999`,
+    que é a que o `cleanup_test_users.js` apaga.
+12. **Teste que sorteia a própria condição mede sorte.** O B6 exigia que texto sem sentido não
+    avançasse a questão. Em múltipla escolha o motor rejeita corretamente; em resposta livre ele
+    não tem como separar nonsense de erro. Como o pool A1 tem 6 MC e 4 written, o teste
+    reprovava em ~40% das rodadas. **Corrigido:** o teste força MC.
+
+---
+
+## 5. Ambiente — o que quebra
+
+### `WEBHOOK_URL` (o mais caro de todos)
+
+Sem `WEBHOOK_URL` no ambiente do processo, o n8n oferece `http://localhost:5678/` ao Telegram,
+que **recusa não-HTTPS**. A falha derruba a **ativação inteira do workflow** e leva junto o
+`TEST Ingress`, que nem depende do Telegram — o sintoma é 404 em *todos* os webhooks, com o
+workflow marcado `active: true` no banco.
+
+Subir assim, tudo na **mesma** janela:
+
+```powershell
+$env:WEBHOOK_URL="https://SUA-URL.ngrok-free.dev"
+$env:N8N_PROTOCOL="https"
+$env:N8N_HOST="SUA-URL.ngrok-free.dev"
+npx n8n
+```
+
+A URL do ngrok muda a cada restart do túnel no plano gratuito, então **isso reincide**. É a
+razão de a hospedagem ter subido de prioridade no plano.
+
+Confirme a URL corrente em `http://localhost:4040/api/tunnels`.
+
+### Outros
+
+- **Cota da Groq (plano gratuito):** interrompeu duas medições em dois dias com um único
+  usuário. Some sozinha depois de algumas horas.
+- **Docker/Postgres:** quando cai, a conexão **pendura** em vez de recusar — scripts travam
+  minutos. Se um teste parar de escrever no log, cheque o Postgres antes do código.
+- **Ativação via MCP que falha desativa o workflow.** Mesmo com `rollbackPerformed: false`.
+  Confira `active` depois de qualquer update e reative.
+- **MCP do n8n:** precisa de `WEBHOOK_SECURITY_MODE=moderate` no env do servidor, lido no
+  startup.
+
+---
+
+## 6. Ferramental (`fluxos/_teststand/`)
+
+Todos leem `N8N_API_KEY` do ambiente ou do `.env` da raiz, e o `IACHAT_TEST_SECRET` do `.env`.
+
+| Script | Para quê |
+|---|---|
+| `harness.js` | base: POST no ingress + captura da execução + `digest()` |
+| `bateria_completa_a.js` | **Fase A** (16 determinísticos, sem cota) |
+| `bateria_completa_b.js` | **Fase B** (29 dependentes do LLM) |
+| `set_telegram_commands.js` | registra o menu de comandos (`setMyCommands`) |
+| `regressao_v7.4.js` | regressão offline; faz parse dos nós de código |
+| `revalida_personas.js` | PS3/PS4 com N repetições, média e desvio |
+| `revalida_niveis.js` | C5/C6 — idioma e coerência por nível |
+| `teste_concorrencia.js` | X5 — perda de escrita sob concorrência |
+| `teste_entrada_gigante.js` | R1 |
+| `mede_latencia_real.js` | L1 com `chat_id` real (**envia mensagens de verdade**) |
+| `analisa_latencia.js` | L1 por rota, a partir das execuções gravadas |
+| `dryrun_nudge.js` | C13 sem enviar mensagem |
+| `db/cleanup_test_users.js` | limpeza, dry-run por padrão |
+
+---
+
+## 7. Convenções acertadas
+
+- **Commits sem atribuição a ferramenta.** O histórico registra só a autoria do dono do
+  projeto. Sem `Co-Authored-By`, sem trailer de sessão, sem menção a assistente.
+- **Não publicar nem ativar sem pedido explícito.** Vale para ativar workflow, `git push` e
+  qualquer coisa que mande mensagem real no Telegram.
+- **Protocolo de experimento no fluxo ao vivo:** baseline com N=3 → alterar **uma** linha →
+  medir → **reverter** → conferir com `git diff`. Nunca reverter com rodada em voo.
+- **Nunca editar o fluxo com bateria rodando** — contamina a medição.
+- **Limpar usuários de teste ao fim:** `node db/cleanup_test_users.js --apply`.
+- **Validar sintaxe antes de publicar** (`node --check`) — uma edição já subiu quebrada para
+  produção por um `}` removido sem querer.
+- **`/reset` e `/resetfull` ficam no fluxo.** Decisão de 24/08. Estão desligados por
+  `DEV_COMMANDS = false`, o comportamento visível já é o correto, e mantê-los preserva o atalho
+  de desenvolvimento.
+- **Credenciais não passam pelo assistente.** O token do bot e a chave da API ficam no `.env`
+  (ignorado pelo git). O store de credenciais do n8n não deve ser decifrado, mesmo com a
+  `encryptionKey` à mão.
+
+---
+
+## 8. O que vem a seguir
+
+Detalhe completo em **`PLANO_2026-08-24.md`**. Resumo da ordem:
+
+| # | Item | Bloqueado por |
+|---|---|---|
+| 1 | **Menu de comandos do Telegram** — script pronto | `TELEGRAM_BOT_TOKEN` no `.env` |
+| 2 | **Plano pago da Groq** | decisão |
+| 3 | **Rodar a Fase B** (25 testes restantes) | cota (§2) |
+| 4 | Pendências com diagnóstico pronto | cota, em parte |
+| 5 | **Hospedagem** | decisão |
+
+### Pendências com diagnóstico pronto
+
+| Item | Estado |
+|---|---|
+| Persona no A1 (PS3/PS4) | 3 hipóteses refutadas, 1 inconclusiva (n=4: 0,250 ± 0,132) |
+| C1/C6 — forma telegráfica no A1 | aberto desde a v7.2, **nunca investigado** |
+| Cauda de latência (L1) | causa identificada (entrega ao Telegram, 24,6s num turno); frequência desconhecida, n=6 |
+| C13 — envio real do nudge | tudo verificado menos o envio |
+| S3 | **nunca executado** |
+
+### O menu de comandos, em uma linha
+
+Nenhum fluxo chama `setMyCommands`: o `Roteador Mestre` trata **19** comandos, o `/help` lista
+**9**, e o Telegram mostra **0**. O script registra os 11 canônicos. Falta só o token.
+
+---
+
+## 9. Como reproduzir (detalhes operacionais)
+
+### Testar sem Telegram real
+
+`POST http://localhost:5678/webhook/iachat-test` com um update do Telegram no corpo (o nó
+`TEST Shim` faz `item.json.body`). **Exige o header `x-iachat-test`** com o valor de
+`IACHAT_TEST_SECRET` — sem ele o n8n responde 403 (é o teste S1).
+
+O fluxo processa normalmente e **tenta enviar ao Telegram**; com `chatId` sintético esse envio
+falha (400), mas todos os nós a montante rodam. A resposta gerada é lida de
+`GET /api/v1/executions/{id}?includeData=true` — é o que o `digest()` do harness faz.
+
+**Filtre a execução pelo `user_id` do corpo**, nunca pegue "a mais nova" cegamente: há
+execuções concorrentes e órfãs. E não re-poste o mesmo webhook (processamento duplo → desync).
+
+### Callbacks úteis
+
+`pl_start_A1` … `pl_start_B2` · `ans_A` … `ans_D` · `pl_pause` / `pl_resume` ·
+`persona_buddy` / `persona_coach` / `persona_comedian` / `persona_debater` / `persona_formal` ·
+`int_open` / `int_games` / `int_music` / `int_other` / `int_done` ·
+`mode_chat` / `mode_teacher` · `t_start` / `t_doubt` / `t_next` / `t_resume` · `cfg_open`
+
+### Chegar a um nível específico
+
+Duas formas:
+
+1. **Dirigindo o placement real** — o teste é adaptativo (2 acertos seguidos sobem um nível,
+   2 erros descem; clamp A1–C2). Para *ficar* num nível, alterne acerto e erro; para *subir*,
+   2 acertos e depois alterne. As respostas do seed estão em
+   `db/migrations/005_v6_seed_exam.sql`.
+2. **Semeando direto no banco** — é o que a Fase B faz (`semear()`), com as personas P1–P8 do
+   roteiro. Muito mais barato: passar por onboarding + nivelamento custa ~13 chamadas de LLM
+   por teste só para chegar ao ponto de interesse.
+
+---
+
+## 10. Evidência preservada
+
+Não apague, não são regeneráveis:
+
+- `MEDICOES_PERSONAS_2026-08-18.md`, `MEDICOES_NIVEIS_2026-08-19.md`,
+  `MEDICOES_LATENCIA_2026-08-19.md`, `INVESTIGACAO_PERSONA_A1_2026-08-19.md`
+- `documentos/transcricoes/` — transcrições brutas das medições
+- `documentos/Resultado dos testes.txt` / `.pdf` — notas cruas do avaliador, fonte primária
+- `CHANGELOG_v7.*.md` — histórico das versões
+
+### Descoberta metodológica que vale manter
+
+Em 13/07 três testes foram **excluídos** do roteiro por dificuldade de execução (X5, R1 e
+outros). Dois foram recuperados em 19/08 e **os dois acharam defeito na primeira execução**: o
+X5 expôs 50% de perda de escrita no menu de interesses; o R1 mostrou que nada truncava a
+entrada, com prompt chegando a ~80 KB.
+
+**Teste descartado é dívida, não escopo resolvido.** Os que continuam fora (B4, C11, L3) seguem
+sem respaldo experimental.

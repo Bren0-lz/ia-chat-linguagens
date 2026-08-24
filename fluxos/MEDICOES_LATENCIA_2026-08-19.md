@@ -64,7 +64,7 @@ A infraestrutura (código, Postgres, roteamento) custa **0,2 a 0,7s** por turno.
 1. **O processamento não é o gargalo.** Com `openai/gpt-oss-120b`, a média por turno é 3,2s e o p90
    é 5,9s — dentro da faixa-alvo de 6–8s que o próprio relatório definiu como aceitável.
 2. **A rota mais cara é a Conversa**, não a explicação do Professor. Isso contraria a suspeita
-   registrada no `PLANO_CORRECOES_v7.5.md`, que apontava a explicação de ~2500 caracteres como
+   registrada no antigo plano da v7.5 (removido em 24/08, ver historico do git), que apontava a explicação de ~2500 caracteres como
    candidata nº 1. A explicação custa 3,92s; a conversa, 4,25s — e a conversa tem o maior desvio
    (1,84), ou seja, é a que mais varia.
 3. **As rotas determinísticas são praticamente instantâneas** (0,2s). Não há gordura de arquitetura
