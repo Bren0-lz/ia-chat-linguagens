@@ -24,8 +24,18 @@ const TEST_SECRET = (() => {
   } catch (e) { return ''; }
 })();
 
-let uidSeq = 994100000;
+// ID base derivado do relogio: cada rodada ocupa uma faixa nova, entao o script
+// nunca herda usuarios da rodada anterior. Com o ID fixo antigo (994100000) a
+// segunda execucao media RESIDUO em vez do fluxo — e pior que falhar: o A1
+// chegou a reportar nome/idade corretos vindos da rodada passada, um falso
+// positivo escondido dentro de uma reprovacao.
+// A faixa TEM de ficar em 990000000-999999999, que e a que db/cleanup_test_users.js
+// apaga; sair dela deixaria usuario de teste permanente no banco. Por isso NAO se
+// usa Date.now()%1e9 como no harness (daria ~575818000, fora da faixa).
+const UID_BASE = 990000000 + (Date.now() % 9000000);
+let uidSeq = UID_BASE;
 const novoUid = () => ++uidSeq;
+console.log("faixa de user_id desta rodada: " + (UID_BASE+1) + "+");
 const resultados = [];
 
 function reg(id, ok, detalhe) {
