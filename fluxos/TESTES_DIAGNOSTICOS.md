@@ -5,7 +5,8 @@
 > A execução de 13/07/2026 avaliou a **v7.2** e seu relatório foi removido em 24/08 (permanece
 > no histórico do git). Ela está **desatualizada**: o modelo de LLM daquela medição foi
 > removido da conta Groq e não é mais executável.
-> Referência de versão: `IAChat_Telegram_v7.4.json` (96 nós) — **publicada e ativa no n8n em 18/08/2026**.
+> Referência de versão: `IAChat_Telegram_v7.4.json` (**97 nós**) — publicada e ativa no n8n em 18/08/2026
+> (eram 96 nós na publicação; o `Typing Professor` entrou em 19/08).
 > Data desta revisão: 2026-08-19 (revisão anterior: 2026-07-02, quando a referência era a v7.3 e o ativo
 > era a v7.2 base).
 >
@@ -95,7 +96,7 @@ Combinações que cobrem os eixos da Seção 2. Reutilizáveis em várias bateri
 | A4 | edge | idade 15, 81, 999, "abc", "16 anos" | 15/81/999 → pede de novo; extrai 16 de "16 anos"? | faixa 16–80; regex `\d{1,3}` (999 não vira 99) |
 | A5 | P6 (62) | idade 62 | aceita; tom acolhedor | limite superior + adequação etária |
 | A6 | qualquer | reenviar a mesma mensagem (update repetido) | não trata como usuário novo | idempotência de `update_id` (trade-off do fix) |
-| A7 | qualquer | `/reset` no meio | reinicia estado corretamente | (nó DEV — confirmar que será removido no lançamento) |
+| A7 | qualquer | `/reset` no meio | reinicia estado corretamente | comando DEV — **decisão de 24/08: fica no fluxo**, desligado por `DEV_COMMANDS = false` (o usuário recebe "não reconheço esse comando"). Só testável virando a flag |
 | A8 | qualquer | enviar comandos **antes** de concluir o nivelamento | mantém o usuário no fluxo de nivelamento; não executa comandos comuns | roteamento durante `placement in_progress` (teste pedido pelo avaliador; aprovado) |
 
 ### B. Placement adaptativo (nó `Placement Engine`)
@@ -137,7 +138,7 @@ retenção/engajamento.
 |---|--------|---------|----------|-------------|
 | C10 | P2 (monossilábica) | "ok", "sim", "kk" | bot aplica **reciprocidade** (divide algo + gancho), não vira interrogatório | `Contexto Conversa` reciprocidade |
 | C12 | P5 (streak) | manter sequência ≥3 | comemora streak **1x** (não repete no mesmo dia) | `streakLine` / `profile.conv.celebrated` |
-| C13 | P6 | some por dias e volta | (hoje) sem nudge proativo — confirmar comportamento | nudge só projetado (não construído) |
+| C13 | P6 | some por dias e volta | recebe o nudge de retenção | nudge **construído** (`IAChat_Nudge_Retencao_v1`, id `DBF6NoEXRXrHAy85`, **desativado** de propósito). Dry-run aprovado em 19/08; **falta só o envio real** — ver §9 |
 | C14 | P4 (formal, pouco tempo) | respostas curtas e diretas | não força prolongar demais | equilíbrio engajamento x respeito ao usuário |
 
 ### B4. Interesses na conversa
@@ -244,7 +245,7 @@ Resultado em 19/08 sobre a v7.4: **0 perdas em 12 toggles**, com controle preser
 ### D4. Segurança
 | # | Alvo | Teste | Esperado | Diagnostica |
 |---|------|-------|----------|-------------|
-| S1 | `TEST Ingress` (`POST /iachat-test`) + `TEST Shim` | chamar sem auth do Telegram | **hoje aceita** (injeta update sem autenticação) | **remover antes do lançamento** (problema conhecido) |
+| S1 | `TEST Ingress` (`POST /iachat-test`) + `TEST Shim` | chamar sem o header `x-iachat-test` | **403** | **corrigido** — o nó ganhou header auth; verificado ao vivo na Fase A de 24/08. Continua valendo removê-lo antes do lançamento público |
 | S2 | dados de teste | usuários `~99xxxxxxxx` na tabela `students` | limpar antes de métricas | higiene de dados |
 | S3 | credenciais | tentar ler store de credenciais do n8n | bloqueado | (já bloqueado — confirmar) |
 
@@ -319,7 +320,7 @@ o relatório avaliou a v7.2, e comparar status entre versões diferentes sem diz
 ## 11. Notas de reprodutibilidade (para a seção de método do artigo)
 
 - **Ambiente:** n8n local (`http://localhost:5678`), Postgres, LLM via Groq.
-  Ativo em 19/08/2026 = **v7.4 (96 nós)**. Modelos: `openai/gpt-oss-120b` (Conversa, Professor, Dúvida),
+  Ativo em 19/08/2026 = **v7.4 (96 nós)**; em 24/08/2026 o fluxo está em **97 nós**. Modelos: `openai/gpt-oss-120b` (Conversa, Professor, Dúvida),
   `openai/gpt-oss-20b` (Extrator), `whisper-large-v3` (transcrição).
 - **Autenticação do harness:** o `TEST Ingress` exige o header `x-iachat-test`. O segredo fica em
   `IACHAT_TEST_SECRET`, no `.env` da raiz (não versionado) — e precisa bater com a credencial
