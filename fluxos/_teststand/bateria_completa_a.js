@@ -216,17 +216,42 @@ async function semear(uid, campos) {
       'status pausado=' + (pausado.placement_state && pausado.placement_state.status) + '; idx ' + idxAntes + ' -> ' + idxDep);
   }
 
-  // B6: texto aleatório durante o teste
+  // B6: texto aleatório durante o teste.
+  //
+  // O teste força uma questão de MÚLTIPLA ESCOLHA, de propósito.
+  //
+  // Em questão `written` o Placement Engine não tem como distinguir "texto sem
+  // sentido" de "resposta errada": isAnswerAttempt() só rejeita pedido de ajuda,
+  // texto com '?' ou com mais de 15 palavras. "batata frita com queijo" são 4
+  // palavras sem '?', então conta como tentativa, é corrigida como erro e a
+  // questão avança. Isso é comportamento defensável — separar nonsense de erro
+  // exigiria semântica que o motor não tem — e não um defeito.
+  //
+  // Sem forçar o tipo, o resultado saía no sorteio do pickNext: o pool A1 tem
+  // 6 MC e 4 written, então o teste reprovava em ~40% das rodadas medindo sorte,
+  // não regressão. Em MC a exigência é real e verificável (o motor só aceita
+  // letra ou o texto de uma alternativa), e é isso que se testa aqui.
   {
     const u = novoUid();
     await msg(u, 'oi'); await msg(u, 'Teste'); await msg(u, '20');
     await cb(u, 'pl_start_A1');
-    const antes = await estado(u);
-    const d = digest(await msg(u, 'batata frita com queijo'));
-    const dep = await estado(u);
-    const idxA = antes.placement_state && antes.placement_state.idx;
-    const idxD = dep.placement_state && dep.placement_state.idx;
-    reg('B6', idxD === idxA, 'texto fora de contexto não avançou a questão (idx ' + idxA + ' -> ' + idxD + '); reenviou enunciado: ' + /❓|\?/.test(d.reply));
+    // Aponta a questão corrente para uma MC do mesmo nível, sem mexer no idx.
+    const mc = await db(c => c.query(
+      "SELECT id FROM exam_questions WHERE cefr_level='A1' AND qtype='mc' ORDER BY id LIMIT 1"));
+    const qid = mc.rows[0] && mc.rows[0].id;
+    if (qid == null) {
+      reg('B6', null, 'sem questão MC de A1 no banco — não dá para avaliar');
+    } else {
+      await db(c => c.query(
+        "UPDATE students SET placement_state = jsonb_set(placement_state, '{cur}', to_jsonb($2::int)) WHERE user_id = $1",
+        [u, qid]));
+      const antes = await estado(u);
+      const d = digest(await msg(u, 'batata frita com queijo'));
+      const dep = await estado(u);
+      const idxA = antes.placement_state && antes.placement_state.idx;
+      const idxD = dep.placement_state && dep.placement_state.idx;
+      reg('B6', idxD === idxA, 'MC: texto fora de contexto não avançou a questão (idx ' + idxA + ' -> ' + idxD + '); reenviou enunciado: ' + /❓|\?/.test(d.reply));
+    }
   }
 
   // ============ X. TRANSVERSAIS ============
