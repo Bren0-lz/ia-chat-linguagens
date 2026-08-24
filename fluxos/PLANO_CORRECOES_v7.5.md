@@ -1,5 +1,18 @@
 # Plano de correções pós-bateria diagnóstica
 
+> ⚠️ **DOCUMENTO SUPERADO (escrito em 11/08/2026).** O item central daqui — o **Bloco 0,
+> "publicar e revalidar"** — **foi executado em 18/08**: a v7.4 está ativa no n8n
+> (`9MA0o1XJjD33BnKc`) e é a única ativa. Os números do cabeçalho abaixo também envelheceram
+> (o fluxo tem **97 nós**, não 93). **Para o plano atual, leia `PLANO_2026-08-24.md` primeiro.**
+>
+> Este arquivo continua útil por duas razões: a tabela do §0, que mapeia cada marcador da v7.4
+> ao teste que ele endereça, e o registro do raciocínio que levou a concluir que o maior
+> impacto não era escrever código novo, e sim publicar o que já estava escrito.
+>
+> Uma ressalva ao ler o resto: ele foi redigido quando o n8n ainda rodava a v7.2 e quando os
+> modelos Llama ainda existiam na conta Groq. Ambas as premissas caíram em 18/08 — ver
+> `HANDOFF_2026-08-19.md`.
+
 Base: `documentos/Relatorio_Testes_IAChat.txt` (relatório de 13/07/2026, versão avaliada **v7.2**) e
 `documentos/Resultado dos testes.txt` (notas cruas do avaliador).
 Estado do repositório na análise: `fluxos/IAChat_Telegram_v7.4.json` (93 nós), regressão offline
