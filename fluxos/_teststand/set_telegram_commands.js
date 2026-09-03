@@ -43,14 +43,14 @@ const APLICAR = process.argv.includes('--apply');
 // [a-z0-9_], 1-32 chars (por isso /nivel sem acento); descricao ate 256 chars;
 // ate 100 comandos.
 const COMANDOS = [
-  { command: 'start',      description: 'Comecar ou reabrir o menu' },
+  { command: 'start',      description: 'Começar ou reabrir o menu' },
   { command: 'menu',       description: 'Trocar entre Conversa e Professor' },
-  { command: 'nivel',      description: 'Refazer o teste de nivel' },
+  { command: 'nivel',      description: 'Refazer o teste de nível' },
   { command: 'config',     description: 'Mudar a personalidade do tutor' },
   { command: 'interesses', description: 'Escolher seus temas de conversa' },
-  { command: 'progresso',  description: 'Ver nivel, XP e sequencia' },
-  { command: 'pausa',      description: 'Pausar o teste de nivel' },
-  { command: 'continuar',  description: 'Retomar o teste de nivel' },
+  { command: 'progresso',  description: 'Ver nível, XP e sequência' },
+  { command: 'pausa',      description: 'Pausar o teste de nível' },
+  { command: 'continuar',  description: 'Retomar o teste de nível' },
   { command: 'parar',      description: 'Desligar os lembretes' },
   { command: 'voltar',     description: 'Religar os lembretes' },
   { command: 'help',       description: 'Ver todos os comandos' },

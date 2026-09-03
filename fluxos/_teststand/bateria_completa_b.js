@@ -319,7 +319,17 @@ const RUBRICA = {
       const d2 = digest(await msg(u, 'and how are you'));
       const st2 = await estado(u);
       const cel2 = (((st2 || {}).profile || {}).conv || {}).celebrated;
-      reg('C12', cel1 === 4 && cel2 === 4, 'celebrated apos 1o turno=' + cel1 + ', apos 2o=' + cel2 + ' (esperado 4 e 4)');
+      // A assertiva NAO fixa o numero: semear streak=4 com lastActive ontem faz
+      // o turno de hoje avancar para 5, e esperar 4 reprovava comportamento
+      // correto. O que a §5 pede e "comemora 1x e nao repete no mesmo dia":
+      // celebrated acompanha o streak corrente e nao muda no 2o turno.
+      const streak = (st1 || {}).streak_count;
+      reg(
+        'C12',
+        cel1 === streak && cel2 === cel1,
+        'streak=' + streak + ' celebrated apos 1o turno=' + cel1 + ', apos 2o=' + cel2 +
+          ' (esperado: igual ao streak e sem recomemorar)'
+      );
     }
   }
 

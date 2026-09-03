@@ -1,0 +1,286 @@
+{
+  "name": "IAChat_SetCommands_oneshot",
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Executar manualmente",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "modo",
+      "name": "Modo",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "aplicar",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "notes": "DRY-RUN por padrao. Vire para true so quando for gravar de verdade."
+    },
+    {
+      "id": "getme",
+      "name": "Telegram getMe",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/getMe",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "notes": "Token vem de $env.TELEGRAM_BOT_TOKEN -- nunca gravado neste JSON."
+    },
+    {
+      "id": "getbefore",
+      "name": "Telegram getMyCommands (antes)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/getMyCommands",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "notes": "Token vem de $env.TELEGRAM_BOT_TOKEN -- nunca gravado neste JSON."
+    },
+    {
+      "id": "comparar",
+      "name": "Comparar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Monta a lista canonica, valida contra as regras da API do Telegram e\n// compara com o que o bot tem hoje. Nao grava nada -- so decide.\nconst COMANDOS = [\n  {\n    \"command\": \"start\",\n    \"description\": \"Começar ou reabrir o menu\"\n  },\n  {\n    \"command\": \"menu\",\n    \"description\": \"Trocar entre Conversa e Professor\"\n  },\n  {\n    \"command\": \"nivel\",\n    \"description\": \"Refazer o teste de nível\"\n  },\n  {\n    \"command\": \"config\",\n    \"description\": \"Mudar a personalidade do tutor\"\n  },\n  {\n    \"command\": \"interesses\",\n    \"description\": \"Escolher seus temas de conversa\"\n  },\n  {\n    \"command\": \"progresso\",\n    \"description\": \"Ver nível, XP e sequência\"\n  },\n  {\n    \"command\": \"pausa\",\n    \"description\": \"Pausar o teste de nível\"\n  },\n  {\n    \"command\": \"continuar\",\n    \"description\": \"Retomar o teste de nível\"\n  },\n  {\n    \"command\": \"parar\",\n    \"description\": \"Desligar os lembretes\"\n  },\n  {\n    \"command\": \"voltar\",\n    \"description\": \"Religar os lembretes\"\n  },\n  {\n    \"command\": \"help\",\n    \"description\": \"Ver todos os comandos\"\n  }\n];\n\nconst RE_NOME = /^[a-z0-9_]{1,32}$/;\nconst invalidos = COMANDOS.filter(\n  (c) => !RE_NOME.test(c.command) || !c.description || c.description.length > 256\n);\nif (invalidos.length) {\n  throw new Error(\"Comandos invalidos para a API: \" + JSON.stringify(invalidos));\n}\nif (COMANDOS.length > 100) {\n  throw new Error(\"Mais de 100 comandos -- a API rejeita.\");\n}\n\nconst eu = $(\"Telegram getMe\").first().json.result || {};\nconst atuais = $(\"Telegram getMyCommands (antes)\").first().json.result || [];\nconst aplicar = $(\"Modo\").first().json.aplicar === true;\n\nconst fmt = (cs) => (cs.length ? cs.map((c) => \"/\" + c.command + \" -- \" + c.description) : [\"(vazio)\"]);\n\nreturn [{\n  json: {\n    bot: \"@\" + (eu.username || \"?\") + \" (id \" + (eu.id || \"?\") + \")\",\n    aplicar: aplicar,\n    menu_atual: fmt(atuais),\n    menu_proposto: fmt(COMANDOS),\n    commands: COMANDOS,\n    aviso: aplicar\n      ? \"APLICAR=true -- o proximo no grava de verdade.\"\n      : \"DRY-RUN -- nada sera alterado. Vire aplicar=true no no Modo para gravar.\",\n  },\n}];"
+      }
+    },
+    {
+      "id": "ifaplicar",
+      "name": "Aplicar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond1",
+              "leftValue": "={{ $json.aplicar }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "setcmds",
+      "name": "Telegram setMyCommands",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        180
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/setMyCommands",
+        "options": {
+          "timeout": 15000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ commands: $json.commands }) }}"
+      },
+      "notes": "Token vem de $env.TELEGRAM_BOT_TOKEN -- nunca gravado neste JSON."
+    },
+    {
+      "id": "getafter",
+      "name": "Telegram getMyCommands (depois)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        180
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/getMyCommands",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "notes": "Token vem de $env.TELEGRAM_BOT_TOKEN -- nunca gravado neste JSON."
+    },
+    {
+      "id": "conferir",
+      "name": "Conferir",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        180
+      ],
+      "parameters": {
+        "jsCode": "// Le de volta em vez de confiar no ok:true -- mesmo principio das outras\n// medicoes do projeto: verificar nas duas pontas.\nconst esperados = $(\"Comparar\").first().json.commands || [];\nconst depois = $input.first().json.result || [];\n\nconst faltando = esperados.filter((c) => !depois.some((d) => d.command === c.command));\nconst sobrando = depois.filter((d) => !esperados.some((c) => c.command === d.command));\n\nif (faltando.length || sobrando.length) {\n  throw new Error(\n    \"Menu divergente apos gravar. Faltando: \" +\n      (faltando.map((c) => \"/\" + c.command).join(\", \") || \"-\") +\n      \" | Sobrando: \" +\n      (sobrando.map((d) => \"/\" + d.command).join(\", \") || \"-\")\n  );\n}\n\nreturn [{\n  json: {\n    status: \"OK\",\n    registrados: depois.length,\n    menu: depois.map((c) => \"/\" + c.command + \" -- \" + c.description),\n  },\n}];"
+      }
+    },
+    {
+      "id": "dryrun",
+      "name": "Dry-run (nada gravado)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        420
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Executar manualmente": {
+      "main": [
+        [
+          {
+            "node": "Modo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modo": {
+      "main": [
+        [
+          {
+            "node": "Telegram getMe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram getMe": {
+      "main": [
+        [
+          {
+            "node": "Telegram getMyCommands (antes)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram getMyCommands (antes)": {
+      "main": [
+        [
+          {
+            "node": "Comparar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comparar": {
+      "main": [
+        [
+          {
+            "node": "Aplicar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aplicar?": {
+      "main": [
+        [
+          {
+            "node": "Telegram setMyCommands",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dry-run (nada gravado)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram setMyCommands": {
+      "main": [
+        [
+          {
+            "node": "Telegram getMyCommands (depois)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram getMyCommands (depois)": {
+      "main": [
+        [
+          {
+            "node": "Conferir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
