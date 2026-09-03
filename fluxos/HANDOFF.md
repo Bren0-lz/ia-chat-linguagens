@@ -16,7 +16,7 @@
 | **Fluxo ativo** | `IAChat_Telegram_v7.4` — n8n id `9MA0o1XJjD33BnKc`, **97 nós** |
 | **Arquivo de edição** | `fluxos/IAChat_Telegram_v7.4.json` |
 | **Nudge** | `IAChat_Nudge_Retencao_v1` — id `DBF6NoEXRXrHAy85`, **DESATIVADO** de propósito |
-| **Modelos** | `openai/gpt-oss-120b` (Conversa, Professor, Dúvida), `openai/gpt-oss-20b` (Extrator), `whisper-large-v3` |
+| **Modelos** | **Gemini desde 03/09**: `gemini-2.5-flash` (Conversa, Professor, Dúvida), `gemini-2.5-flash-lite` (Extrator, Validar Nome). Áudio segue na Groq: `whisper-large-v3` |
 | **Banco** | Postgres em `127.0.0.1:5433` (Docker, container `iachat-pg`), 13 migrations |
 | **Regressão offline** | `node fluxos/_teststand/regressao_v7.4.js` |
 | **Bateria Fase A** | **16/16** (determinísticos) |
