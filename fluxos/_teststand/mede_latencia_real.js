@@ -28,7 +28,7 @@ if (!CHAT_ID) {
 }
 
 const ehEnvio = n => /^(Enviar|Typing|Responder Callback|Limpar Botões|Editar Menu)/.test(n);
-const ehLLM = n => /^(Agente |Modelo Groq|Transcrever)/.test(n);
+const ehLLM = n => /^(Agente |Modelo (Groq|Vertex)|Transcrever|Validar Nome)/.test(n);
 const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
 const sd = a => a.length < 2 ? 0
   : Math.sqrt(a.map(v => Math.pow(v - mean(a), 2)).reduce((x, y) => x + y, 0) / (a.length - 1));

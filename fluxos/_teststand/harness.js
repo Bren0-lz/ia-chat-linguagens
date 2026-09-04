@@ -3,20 +3,24 @@
 // Configure via env: N8N_API_KEY (obrigatório), N8N_URL (opcional, default localhost:5678).
 const BASE = process.env.N8N_URL || 'http://localhost:5678';
 const API = BASE + '/api/v1';
-const KEY = process.env.N8N_API_KEY || '';
 const WEBHOOK = BASE + '/webhook/iachat-test';
-if (!KEY) { console.error('Defina N8N_API_KEY no ambiente (JWT da API do n8n).'); process.exit(1); }
+
+// Le uma chave do .env da raiz do repo (mesmo lugar do IACHAT_TEST_SECRET).
+function fromDotEnv(name) {
+  try {
+    const envTxt = require('fs').readFileSync(require('path').join(__dirname, '..', '..', '.env'), 'utf8');
+    const m = envTxt.match(new RegExp('^' + name + '=(.+)$', 'm'));
+    return m ? m[1].trim() : '';
+  } catch (e) { return ''; }
+}
+
+const KEY = process.env.N8N_API_KEY || fromDotEnv('N8N_API_KEY');
+if (!KEY) { console.error('N8N_API_KEY ausente (.env da raiz ou variável de ambiente) — JWT da API do n8n.'); process.exit(1); }
 
 // O TEST Ingress passou a exigir header auth na v7.4 (correção do S1: antes ele
 // aceitava injeção de update sem autenticação nenhuma). O segredo mora no .env
 // da raiz do repo, como IACHAT_TEST_SECRET.
-const TEST_SECRET = process.env.IACHAT_TEST_SECRET || (() => {
-  try {
-    const envTxt = require('fs').readFileSync(require('path').join(__dirname, '..', '..', '.env'), 'utf8');
-    const m = envTxt.match(/^IACHAT_TEST_SECRET=(.+)$/m);
-    return m ? m[1].trim() : '';
-  } catch (e) { return ''; }
-})();
+const TEST_SECRET = process.env.IACHAT_TEST_SECRET || fromDotEnv('IACHAT_TEST_SECRET');
 if (!TEST_SECRET) { console.error('IACHAT_TEST_SECRET ausente (.env da raiz ou variável de ambiente).'); process.exit(1); }
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -117,14 +121,32 @@ function digest(exec) {
   const conv = nodeOut(rd, 'Agente Conversa'); if (conv) push('CONVERSA', conv.output);
   const peng = nodeOut(rd, 'Professor Engine'); if (peng) { push('prof.feedback', peng.feedback); push('prof.det', peng.deterministicText); }
   const pp = nodeOut(rd, 'Parse Professor'); if (pp) push('PROFESSOR', pp.finalText);
-  const duv = nodeOut(rd, 'Agente Dúvida'); if (duv) push('DUVIDA', duv.output);
+  // DUVIDA: o texto que o ALUNO recebe e o do `Filtro Anti-Spoiler`, nao o do
+  // agente. O filtro roda depois e mascara o gabarito pendente. Ler o agente
+  // aqui fazia todo teste de vazamento julgar a string errada: dava alarme
+  // falso quando a protecao tinha funcionado, e passava sem nunca exercita-la.
+  const duvFiltrada = nodeOut(rd, 'Filtro Anti-Spoiler');
+  const duvAgente = nodeOut(rd, 'Agente Dúvida');
+  if (duvFiltrada) push('DUVIDA', duvFiltrada.output);
+  else if (duvAgente) push('DUVIDA', duvAgente.output);
+  const antispoiler = duvFiltrada ? !!duvFiltrada.antispoiler : undefined;
   const expectedAnswer = (pp && pp.answer) || (peng && peng.teacher_state_new && peng.teacher_state_new.answer) || null;
   const pkind = pp && pp.pkind;
   const cfg = nodeOut(rd, 'Config Engine'); if (cfg) { push('config', cfg.reply); push('config', cfg.text); push('config', cfg.menuText); }
-  const modo = nodeOut(rd, 'Etapa de Modo'); if (modo) { push('modo', modo.reply); push('modo', modo.text); }
+  // `Etapa de Modo` publica o texto em `confirm` — nao em reply/text. Sem isto a
+  // troca de modo aparecia sempre como resposta vazia.
+  const modo = nodeOut(rd, 'Etapa de Modo'); if (modo) { push('modo', modo.reply); push('modo', modo.text); push('modo', modo.confirm); }
+  // `Mensagem Sistema` (/help, /progresso, comando desconhecido, "no meio do teste")
+  // e `Interests Engine` tambem nao estavam cobertos.
+  const sis = nodeOut(rd, 'Mensagem Sistema'); if (sis) push('sistema', sis.sysText);
+  const inte = nodeOut(rd, 'Interests Engine'); if (inte) { push('interesses', inte.text); push('interesses', inte.menuText); push('interesses', inte.deterministicText); }
   // node-level errors
   const errs = ran.filter(n => rd[n][0] && rd[n][0].error).map(n => n + ': ' + (rd[n][0].error.message || '').slice(0, 80));
-  return { id: exec.id, ran, reply: parts.join('\n'), student, errs, expectedAnswer, pkind };
+  // `duvidaCrua` fica exposta para quem precise comparar as duas pontas (ex.: medir
+  // com que frequencia o agente tenta vazar e o filtro segura). Nao use `duvidaCrua`
+  // para julgar o que o aluno recebeu — para isso, `reply`.
+  const duvidaCrua = duvAgente ? duvAgente.output : null;
+  return { id: exec.id, ran, reply: parts.join('\n'), student, errs, expectedAnswer, pkind, antispoiler, duvidaCrua };
 }
 
 async function msg(userId, text) {

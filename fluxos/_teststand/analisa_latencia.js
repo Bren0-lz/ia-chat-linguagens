@@ -18,7 +18,10 @@ const { jget, API } = require('./harness');
 
 const LIMITE = Number(process.argv[2] || 60);
 const ehEnvio = n => /^(Enviar|Typing|Responder Callback|Limpar Botões|Editar Menu)/.test(n);
-const ehLLM = n => /^(Agente |Modelo Groq|Transcrever)/.test(n);
+// "Modelo Groq" ficou do tempo pre-Vertex: depois da migracao de 03/09 os nos de
+// modelo se chamam "Modelo Vertex ...", e sem isto eles caiam no balde de infra,
+// tirando o custo real do turno da conta de LLM. "Validar Nome (IA)" tambem e LLM.
+const ehLLM = n => /^(Agente |Modelo (Groq|Vertex)|Transcrever|Validar Nome)/.test(n);
 const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
 const sd = a => a.length < 2 ? 0
   : Math.sqrt(a.map(v => Math.pow(v - mean(a), 2)).reduce((x, y) => x + y, 0) / (a.length - 1));

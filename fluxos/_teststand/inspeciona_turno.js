@@ -32,7 +32,7 @@ const { jget, API } = require('./harness');
     const nos = Object.keys(rd);
     const erros = nos.filter(n => rd[n][0] && rd[n][0].error)
       .map(n => n + ': ' + String(rd[n][0].error.message || '').slice(0, 60));
-    const llm = nos.filter(n => /^(Agente |Modelo Groq)/.test(n));
+    const llm = nos.filter(n => /^(Agente |Modelo (Groq|Vertex))/.test(n));
 
     console.log('exec ' + m.id + ' | ' + m.status + ' | entrada ' + entrada);
     console.log('   rota=' + rota + ' subrota=' + sub + ' | nós=' + nos.length + ' | LLM: ' + (llm.join(', ') || 'nenhum'));
