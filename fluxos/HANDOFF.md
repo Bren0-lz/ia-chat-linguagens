@@ -1,10 +1,10 @@
 # HANDOFF — IAChat
 
-> **Estado em 24/08/2026.** Este é o **único** handoff do projeto: em vez de criar um arquivo
+> **Estado em 04/09/2026.** Este é o **único** handoff do projeto: em vez de criar um arquivo
 > datado por sessão, atualize este. A proliferação de handoffs datados foi justamente o que
 > gerou documentos contraditórios em julho e agosto.
 >
-> Leia isto primeiro. Depois: `PLANO_2026-08-24.md` (o que fazer a seguir) e
+> Leia isto primeiro. Depois: `PLANO_v8_2026-09-04.md` (o que fazer a seguir) e
 > `TESTES_DIAGNOSTICOS.md` (o roteiro completo dos testes).
 
 ---
@@ -13,14 +13,19 @@
 
 | | |
 |---|---|
-| **Fluxo ativo** | `IAChat_Telegram_v7.4` — n8n id `9MA0o1XJjD33BnKc`, **97 nós** |
-| **Arquivo de edição** | `fluxos/IAChat_Telegram_v7.4.json` |
+| **Fluxo ativo** | `IAChat_Telegram_v7.4` — n8n id `9MA0o1XJjD33BnKc`, **101 nós** (publicado em 04/09 com a validação de nome) |
+| **Arquivo de edição** | `fluxos/IAChat_Telegram_v7.4.json` — **arquivo e live estão iguais** |
 | **Nudge** | `IAChat_Nudge_Retencao_v1` — id `DBF6NoEXRXrHAy85`, **DESATIVADO** de propósito |
 | **Modelos** | **Gemini desde 03/09**: `gemini-2.5-flash` (Conversa, Professor, Dúvida), `gemini-2.5-flash-lite` (Extrator, Validar Nome). Áudio segue na Groq: `whisper-large-v3` |
 | **Banco** | Postgres em `127.0.0.1:5433` (Docker, container `iachat-pg`), 13 migrations |
 | **Regressão offline** | `node fluxos/_teststand/regressao_v7.4.js` |
-| **Bateria Fase A** | **16/16** (determinísticos) |
-| **Bateria Fase B** | escrita, 29 testes; 4 já verdes, 25 esperando cota |
+| **Bateria Fase A** | **16/16** (determinísticos) — reconfirmado em 04/09 |
+| **Bateria Fase B** | **rodou inteira**: 16 passaram · 2 falharam (C1, C15) · 11 para revisar · 0 inconclusivos |
+| **Jornada de usuário** | `jornada_usuario.js` — achou 2 defeitos P0 que as duas fases não veem |
+| **Latência (L1)** | fechado com n=80: média **4,83 s**, p90 **11,59 s**; infra ≤0,48 s, todo o custo é LLM |
+
+**A cota da Groq deixou de ser gargalo.** Depois da migração para o Vertex, da Groq sobrou só o
+Whisper. Qualquer documento que trate "plano pago da Groq" como desbloqueador está velho.
 
 **Nunca deixe duas versões ativas** — v7.2, v7.3 e v7.4 usam o mesmo `webhookId`
 (`telegram-iachat-webhook`).
@@ -42,19 +47,41 @@ ingress de teste devolvendo 403 sem header.
 mudaram de veredito, o que sugeria que os demais estariam podres. No bloco determinístico isso
 **não** se repetiu. A fragilidade está concentrada nas rotas que dependem do LLM.
 
-### Bateria Fase B — escrita, parcialmente executada
+### Bateria Fase B — executada por inteiro
 
 `node fluxos/_teststand/bateria_completa_b.js` cobre 29 testes: A5, C1–C4, C7, C9, C10, C12,
 C14–C17, T1–T4, T6, T8, T9, T12–T17, PS1, R4, R5.
 
-**Quatro não tocam o LLM e já passaram:** A5, PS1, C16, C17. O C17 confirma que a blindagem
-anti-fantasma funciona — a chave crua `travel`, que vazou da inferência no bug histórico, é
-removida do campo manual enquanto os interesses legítimos sobrevivem.
+Rodou inteira **duas vezes** (03/09 e 04/09), com o mesmo desenho de resultado — os vereditos
+são estáveis, não ruído de amostragem:
 
-Os outros 25 **nunca rodaram** — dependem de cota. A primeira execução real vai revelar
-assertivas mal calibradas; a Fase A precisou de três rodadas para assentar.
+| | |
+|---|---|
+| Passaram | **16** |
+| Falharam | **2** — C1 e C15, os dois em A1 |
+| Para revisar (leitura humana) | **11** |
+| Inconclusivos | **0** — o LLM respondeu em todos os turnos |
+
+**C1 e C15 estão diagnosticados, não em aberto.** A própria bateria contém o controle: no mesmo
+nível e mesma persona, um erro que **está** na lista `ERROS QUE CONTAM` é corrigido (C3 passa) e
+um que **não está** não é (C1 falha, 0/9 acumulado). A jornada acrescentou que no nível **C1** o
+mesmo erro fora da lista **é** corrigido — ou seja, a lista fechada só limita em A1. Hipótese
+(n=1 em C1): saturação de restrições no prompt A1. O experimento está no `PLANO_v8`.
+
+**T15 fechou.** Em 03/09 a Fase B rodou às 19:11 e o fix do `answersMatch` só foi publicado às
+20:18 — por isso ela mediu o comportamento antigo. Em 04/09, com o fix no ar, `"haves"` para o
+gabarito `"have"` é corretamente recusado.
 
 Flags úteis: `--only=C1,C3` (subconjunto), `--from=T1` (retomar), `PACE=4000` (mais devagar).
+
+### Jornada de usuário — o que as duas fases não veem
+
+`node fluxos/_teststand/jornada_usuario.js` percorre o produto inteiro na ordem, sem semear
+estado: primeiro contato → nivelamento → persona → interesses → conversa → professor → comandos.
+
+Achou **os dois defeitos P0 de 04/09**, ambos com 45 testes verdes ao lado. O padrão importa
+mais que os defeitos: as duas fases semeiam estado direto no banco para poupar chamadas, e com
+isso **pulam as transições do fluxo** — que é exatamente onde os dois estavam.
 
 ---
 
@@ -64,13 +91,17 @@ A Fase B distingue deliberadamente:
 
 | Classe | Significado |
 |---|---|
-| **AUTO** (22 testes) | Asserção objetiva: formato, idioma, estado no banco, gate |
-| **REVISAR** (7 testes) | A saída é capturada na transcrição com a rubrica ao lado, para leitura humana. **Não é aprovação nem falha.** |
+| **AUTO** (18 testes) | Asserção objetiva: formato, idioma, estado no banco, gate |
+| **REVISAR** (11 testes) | A saída é capturada na transcrição com a rubrica ao lado, para leitura humana. **Não é aprovação nem falha.** |
 | **INCONCLUSIVO** | O LLM não respondeu. **Nunca vira PASSOU.** |
 
-Os 7 de REVISAR (C9, C10, C14, T1, T2, T8, T9, T17) são qualidade pedagógica e tom. Regex não
-julga isso, e inventar veredito automático produziria o mesmo falso PASSOU que já apareceu duas
-vezes neste projeto. **Isso é honestidade sobre o que é medível, não uma lacuna a fechar.**
+Os 11 de REVISAR (C2, C9, C10, C14, R4, T1, T2, T8, T9, T15, T17) são qualidade pedagógica e
+tom. Regex não julga isso, e inventar veredito automático produziria o mesmo falso PASSOU que já
+apareceu duas vezes neste projeto. **Isso é honestidade sobre o que é medível, não uma lacuna a
+fechar.**
+
+**O T15 pode sair de REVISAR:** o comportamento desejado (recusar `"haves"` para `"have"`) está
+confirmado ao vivo desde 04/09, então ele virou asserção objetiva.
 
 ---
 
@@ -108,6 +139,24 @@ As dez primeiras vêm das sessões de julho e agosto; as duas últimas são de 2
     avançasse a questão. Em múltipla escolha o motor rejeita corretamente; em resposta livre ele
     não tem como separar nonsense de erro. Como o pool A1 tem 6 MC e 4 written, o teste
     reprovava em ~40% das rodadas. **Corrigido:** o teste força MC.
+13. **O instrumento pode julgar a string errada.** O `digest()` montava o texto da dúvida a
+    partir do **`Agente Dúvida`**, que roda ANTES do `Filtro Anti-Spoiler`. Consomem esse campo o
+    `smoke.js` (teste "PR5 dúvida NÃO revela o gabarito"), o `bateria_critica.js` (que cobre
+    **T7 e R6**), `teste_gate_frase.js`, `teste_gate_nova_questao.js` e `tick.js` — ou seja, a
+    proteção que de fato chega ao aluno **nunca foi validada ao vivo**, só por unitário offline.
+    Ao vivo esses testes davam alarme falso, ou passavam sem exercitar o filtro. **Corrigido:**
+    o `digest()` prefere a saída do filtro e expõe `duvidaCrua` à parte.
+14. **Resposta "vazia" pode ser cegueira do digest, não silêncio do bot.** `Etapa de Modo`
+    publica em `confirm` (não `reply`/`text`), e `Mensagem Sistema` e `Interests Engine` não eram
+    lidos — então troca de modo, `/help` e menu de interesses apareciam como vazio. É a armadilha
+    nº 1 embutida no instrumento. **Corrigido**, mas o texto de nós Telegram estáticos (ex.:
+    `Enviar Menu`) continua invisível por construção: confira na execução antes de acusar.
+15. **Turno iniciado por CALLBACK precisa de ~35 s de espaçamento**, não os 12 s da nº 7. O
+    `Responder Callback` também é nó Telegram e entra em retry com o callback sintético,
+    atrasando toda a escrita a jusante. Em 04/09 isso fez um teste de interesse personalizado
+    parecer falhar: o `int_await_ts` gravado marcava `14:50:31` e a execução seguinte começou
+    `14:50:18` — leu o aluno 13 s **antes** da escrita existir. **Sempre confira o relógio do
+    campo gravado contra o `startedAt` da execução antes de culpar o produto.**
 
 ---
 
@@ -136,8 +185,9 @@ Confirme a URL corrente em `http://localhost:4040/api/tunnels`.
 
 ### Outros
 
-- **Cota da Groq (plano gratuito):** interrompeu duas medições em dois dias com um único
-  usuário. Some sozinha depois de algumas horas.
+- ~~**Cota da Groq (plano gratuito)**~~ — **deixou de ser problema em 03/09.** Os quatro agentes
+  foram para o Vertex; da Groq sobrou só o Whisper, que uma bateria inteira mal encosta. As duas
+  rodadas completas da Fase B em 03 e 04/09 não bateram em cota nenhuma.
 - **Docker/Postgres:** quando cai, a conexão **pendura** em vez de recusar — scripts travam
   minutos. Se um teste parar de escrever no log, cheque o Postgres antes do código.
 - **Ativação via MCP que falha desativa o workflow.** Mesmo com `rollbackPerformed: false`.
@@ -153,9 +203,12 @@ Todos leem `N8N_API_KEY` do ambiente ou do `.env` da raiz, e o `IACHAT_TEST_SECR
 
 | Script | Para quê |
 |---|---|
-| `harness.js` | base: POST no ingress + captura da execução + `digest()` |
-| `bateria_completa_a.js` | **Fase A** (16 determinísticos, sem cota) |
+| `harness.js` | base: POST no ingress + captura da execução + `digest()`. Lê `N8N_API_KEY` do `.env` ou do ambiente |
+| `bateria_completa_a.js` | **Fase A** (16 determinísticos) |
 | `bateria_completa_b.js` | **Fase B** (29 dependentes do LLM) |
+| `jornada_usuario.js` | **jornada contínua**, sem semear estado — achou os dois P0 de 04/09 |
+| `testa_cadastro_nome.js` | A2 com entradas reais: saudação, palavra comum, palavrão, leet |
+| `mede_c8_teto_a1.js` | C8 — teto de palavras do A1, por distribuição (média, desvio, estouros) |
 | `set_telegram_commands.js` | registra o menu de comandos (`setMyCommands`) |
 | `regressao_v7.4.js` | regressão offline; faz parse dos nós de código |
 | `revalida_personas.js` | PS3/PS4 com N repetições, média e desvio |
@@ -171,8 +224,10 @@ Todos leem `N8N_API_KEY` do ambiente ou do `.env` da raiz, e o `IACHAT_TEST_SECR
 
 ## 7. Convenções acertadas
 
-- **Commits sem atribuição a ferramenta.** O histórico registra só a autoria do dono do
-  projeto. Sem `Co-Authored-By`, sem trailer de sessão, sem menção a assistente.
+- **Commits COM atribuição** (`Co-Authored-By` + `Claude-Session`). A regra mudou no commit
+  `125fd88`: os anteriores não têm os trailers, os de 03/09 em diante têm. Esta linha dizia o
+  contrário até 04/09 e contradizia o próprio histórico — se a decisão for voltar a não atribuir,
+  mude aqui **e** avise, senão a divergência volta.
 - **Não publicar nem ativar sem pedido explícito.** Vale para ativar workflow, `git push` e
   qualquer coisa que mande mensagem real no Telegram.
 - **Protocolo de experimento no fluxo ao vivo:** baseline com N=3 → alterar **uma** linha →
@@ -192,30 +247,38 @@ Todos leem `N8N_API_KEY` do ambiente ou do `.env` da raiz, e o `IACHAT_TEST_SECR
 
 ## 8. O que vem a seguir
 
-Detalhe completo em **`PLANO_2026-08-24.md`**. Resumo da ordem:
+Detalhe completo em **`PLANO_v8_2026-09-04.md`**. Resumo da ordem:
 
-| # | Item | Bloqueado por |
+| # | Item | Estado |
 |---|---|---|
-| 1 | **Menu de comandos do Telegram** — script pronto | `TELEGRAM_BOT_TOKEN` no `.env` |
-| 2 | **Plano pago da Groq** | decisão |
-| 3 | **Rodar a Fase B** (25 testes restantes) | cota (§2) |
-| 4 | Pendências com diagnóstico pronto | cota, em parte |
-| 5 | **Hospedagem** | decisão |
+| 1 | Cast do `int_await_ts` (interesse personalizado) | ✅ **feito e publicado em 04/09** |
+| 2 | `Etapa de Cadastro` consumir o `nameCheck` | ✅ **feito e publicado em 04/09** |
+| 3 | Testes que teriam pego os dois | ✅ escritos; **falta ligá-los à Fase A** |
+| 4 | **Sincronizar handoff e roteiro** | este documento; falta o `TESTES_DIAGNOSTICOS.md` |
+| 5 | **Menu de comandos do Telegram** | falta `TELEGRAM_BOT_TOKEN` no ambiente do n8n |
+| 6 | **Experimento de A1** (C1 e C15) | diagnóstico pronto, experimento desenhado |
+| 7 | `professor:intro` — p90 de 17,8 s | só se for inaceitável para o lançamento |
+| 8 | Higiene do repo e decisão sobre `web/` | `web/` **não compila** |
+| 9 | **Hospedagem** | decisão |
 
 ### Pendências com diagnóstico pronto
 
 | Item | Estado |
 |---|---|
+| **Credencial do `Validar Nome (IA)`** | nó **sem credencial**: a camada 2 fica sempre em fail-open. A camada 1 (que barra as 27 entradas ruins) funciona |
+| C1 e C15 no A1 | **causa isolada** — a lista fechada `ERROS QUE CONTAM`. Em C1 (nível) o mesmo erro é corrigido |
 | Persona no A1 (PS3/PS4) | 3 hipóteses refutadas, 1 inconclusiva (n=4: 0,250 ± 0,132) |
-| C1/C6 — forma telegráfica no A1 | aberto desde a v7.2, **nunca investigado** |
-| Cauda de latência (L1) | causa identificada (entrega ao Telegram, 24,6s num turno); frequência desconhecida, n=6 |
+| Cauda de latência (L1) | **fechado**: n=80, média 4,83 s, p90 11,59 s. O alvo é `professor:intro` |
 | C13 — envio real do nudge | tudo verificado menos o envio |
 | S3 | **nunca executado** |
 
 ### O menu de comandos, em uma linha
 
 Nenhum fluxo chama `setMyCommands`: o `Roteador Mestre` trata **19** comandos, o `/help` lista
-**9**, e o Telegram mostra **0**. O script registra os 11 canônicos. Falta só o token.
+**11**, e o Telegram mostra **0**. O `IAChat_SetCommands_oneshot.json` faz o trabalho (getMe →
+diff → aplicar → conferir, com ramo dry-run), mas **nunca foi importado no n8n** e usa
+`$env.TELEGRAM_BOT_TOKEN`. Basta exportar o token no mesmo bloco de startup que já exporta
+`WEBHOOK_URL` — zero código novo.
 
 ---
 
@@ -264,6 +327,11 @@ Não apague, não são regeneráveis:
 - `documentos/transcricoes/` — transcrições brutas das medições
 - `documentos/Resultado dos testes.txt` / `.pdf` — notas cruas do avaliador, fonte primária
 - `CHANGELOG_v7.*.md` — histórico das versões
+- `tr_bateria_a.md` / `tr_bateria_b.md` — vereditos das duas fases ao vivo
+- `tr_jornada.md` — a conversa inteira da jornada de usuário, do jeito que o aluno a veria
+- `tr_experimento_a1.md` / `tr_experimento_persona.md` — os experimentos com baseline e reversão
+- `_teststand/backup_live_v7.4_2026-09-04T14-47-04.json` — o live **antes** da publicação dos
+  dois P0. É o caminho de volta se algo aparecer depois.
 
 ### Descoberta metodológica que vale manter
 
