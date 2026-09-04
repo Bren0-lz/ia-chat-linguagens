@@ -5,7 +5,7 @@
 // Como não chamam o modelo (ou chamam pouco), não consomem cota da Groq e o
 // resultado não varia entre execuções.
 //
-// Cobre: A1 A2 A3 A4 A6 A8 B1 B3 B5 B6 X1 X2 X3 R2 R3 S1
+// Cobre: A1 A2 A2b A3 A4 A6 A8 B1 B3 B5 B6 X1 X2 X3 R2 R3 S1
 // (a Fase B cobre os que dependem do LLM)
 //
 //   N8N_API_KEY=... node bateria_completa_a.js
@@ -35,6 +35,16 @@ const TEST_SECRET = (() => {
 const UID_BASE = 990000000 + (Date.now() % 9000000);
 let uidSeq = UID_BASE;
 const novoUid = () => ++uidSeq;
+
+// Nome DIGITADO no onboarding pelos testes que so precisam atravessar o cadastro.
+// Ate 04/09 era 'Teste' -- e a validacao de nome publicada nesse dia passou a
+// recusa-lo (esta na lista LIXO, junto com 'oi', 'admin', 'kkkk'). O onboarding
+// nunca completava e TODO o bloco de nivelamento reprovava por causa do fixture,
+// nao do produto: B1, B3, B5 e A8 caíram de uma vez.
+// Cuidado ao trocar: tem de ser um nome que a Triagem aceite de fato.
+// `semear()` continua usando 'Teste' de proposito -- escreve direto no banco e
+// nao passa pela validacao, entao serve para checar preservacao de estado (X1).
+const NOME_VALIDO = 'Rafael';
 console.log("faixa de user_id desta rodada: " + (UID_BASE+1) + "+");
 const resultados = [];
 
@@ -83,18 +93,54 @@ async function semear(uid, campos) {
   }
 
   // A2: nomes inválidos
+  //
+  // Ate 04/09 este teste usava so ['A','123','@#'] -- forma, nunca conteudo. Por
+  // isso passou verde enquanto o bot aceitava "oi", "bom dia", "teste", "kkkk",
+  // "admin" e palavroes como nome do aluno, e gravava no banco pra sempre.
+  // A lista agora cobre as quatro familias que um usuario real digita:
+  // saudacao, resposta generica, lixo/teclado, e palavrao (inclusive com leet).
+  // UM USUARIO NOVO POR ENTRADA. A primeira versao deste teste mandava as 10
+  // entradas para o MESMO aluno e reprovava: na 3a recusa o escape do loop (A2b)
+  // aceita o nome do Telegram de proposito, e da em diante toda mensagem vira
+  // resposta de idade. O teste estava medindo o proprio escape -- armadilha n.12.
+  {
+    const invalidos = ['A', '123', '@#', 'oi', 'bom dia', 'teste', 'kkkk', 'admin', 'merda', 'p3nis'];
+    const passaram = [];
+    for (const nome of invalidos) {
+      const u = novoUid();
+      await msg(u, 'oi');
+      const d = digest(await msg(u, nome));
+      const st = await estado(u);
+      if (/quantos anos/i.test(d.reply) || (st && st.name)) passaram.push(nome + (st && st.name ? '->' + st.name : ''));
+    }
+    reg('A2', passaram.length === 0,
+      passaram.length
+        ? 'ACEITOU como nome: ' + JSON.stringify(passaram)
+        : 'rejeitou os ' + invalidos.length + ' (saudação, genérica, lixo, palavrão), um aluno novo por entrada');
+  }
+
+  // A2b: o escape do loop nao pode prender o aluno
+  //
+  // A Triagem expoe `tries` e `fallback` justamente para isto. Sem o escape, um
+  // nome raro recusado pela IA deixaria o aluno preso no cadastro para sempre.
+  //
+  // Usa 'oi', que a camada 1 recusa SEMPRE. A primeira versao usava 'asdfgh', que
+  // cai em ask_ai -- e como o no `Validar Nome (IA)` esta sem credencial, o
+  // fail-open aceitava na primeira tentativa. O teste passava sem nunca chegar a
+  // 3 recusas, ou seja, passava sem testar o escape.
   {
     const u = novoUid();
     await msg(u, 'oi');
-    const invalidos = ['A', '123', '@#'];
-    let rejeitou = true, gravou = null;
-    for (const nome of invalidos) {
-      const d = digest(await msg(u, nome));
-      if (!/nome/i.test(d.reply)) rejeitou = false;
-      const st = await estado(u);
-      if (st && st.name) gravou = st.name;
+    let nomeAposDuas = null;
+    for (let i = 0; i < 3; i++) {
+      await msg(u, 'oi');
+      if (i === 1) { const s = await estado(u); nomeAposDuas = s && s.name; }
     }
-    reg('A2', rejeitou && !gravou, 'rejeitou ' + JSON.stringify(invalidos) + '; name gravado: ' + JSON.stringify(gravou));
+    const st = await estado(u);
+    const esperado = 'Teen'; // first_name que o harness envia
+    reg('A2b', !nomeAposDuas && st && st.name === esperado,
+      'apos 2 recusas name=' + JSON.stringify(nomeAposDuas) + ' (deve ser null); '
+      + 'apos a 3a, name=' + JSON.stringify(st && st.name) + ' (deve ser o first_name do Telegram, "' + esperado + '")');
   }
 
   // A3: nomes legítimos com acento/hífen/apóstrofo
@@ -113,7 +159,7 @@ async function semear(uid, campos) {
   // A4: validação de idade
   {
     const u = novoUid();
-    await msg(u, 'oi'); await msg(u, 'Teste');
+    await msg(u, 'oi'); await msg(u, NOME_VALIDO);
     const casos = [];
     for (const idade of ['15', '81', '999', 'abc']) {
       const d = digest(await msg(u, idade));
@@ -150,7 +196,7 @@ async function semear(uid, campos) {
   // A8: comandos durante o nivelamento
   {
     const u = novoUid();
-    await msg(u, 'oi'); await msg(u, 'Teste'); await msg(u, '20');
+    await msg(u, 'oi'); await msg(u, NOME_VALIDO); await msg(u, '20');
     await cb(u, 'pl_start_A1');
     const antes = await estado(u);
     const d = digest(await msg(u, '/menu'));
@@ -163,7 +209,7 @@ async function semear(uid, campos) {
   console.log('\n== Bateria B — Nivelamento ==');
 
   async function jornadaPlacement(u, decidir) {
-    await msg(u, 'oi'); await msg(u, 'Teste'); await msg(u, '20');
+    await msg(u, 'oi'); await msg(u, NOME_VALIDO); await msg(u, '20');
     let d = digest(await cb(u, 'pl_start_A1'));
     let last = d.reply, n = 0;
     const niveis = [];
@@ -203,7 +249,7 @@ async function semear(uid, campos) {
   // B5: pausa e retomada
   {
     const u = novoUid();
-    await msg(u, 'oi'); await msg(u, 'Teste'); await msg(u, '20');
+    await msg(u, 'oi'); await msg(u, NOME_VALIDO); await msg(u, '20');
     await cb(u, 'pl_start_A1');
     const antes = await estado(u);
     const idxAntes = antes.placement_state && antes.placement_state.idx;
@@ -233,7 +279,7 @@ async function semear(uid, campos) {
   // letra ou o texto de uma alternativa), e é isso que se testa aqui.
   {
     const u = novoUid();
-    await msg(u, 'oi'); await msg(u, 'Teste'); await msg(u, '20');
+    await msg(u, 'oi'); await msg(u, NOME_VALIDO); await msg(u, '20');
     await cb(u, 'pl_start_A1');
     // Aponta a questão corrente para uma MC do mesmo nível, sem mexer no idx.
     const mc = await db(c => c.query(

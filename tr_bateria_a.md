@@ -1,7 +1,8 @@
 # Bateria completa — Fase A (determinísticos) — v7.4
 
 - **A1**: PASSOU — nome=Lucas idade=16 (sem loop)
-- **A2**: PASSOU — rejeitou ["A","123","@#"]; name gravado: null
+- **A2**: PASSOU — rejeitou os 10 (saudação, genérica, lixo, palavrão), um aluno novo por entrada
+- **A2b**: PASSOU — apos 2 recusas name=null (deve ser null); apos a 3a, name="Teen" (deve ser o first_name do Telegram, "Teen")
 - **A3**: PASSOU — José-Maria=ok, D'Ávila=ok, Ana Luíza=ok
 - **A4**: PASSOU — rejeitou 15/81/999/abc; "16 anos" -> idade=16
 - **A6**: PASSOU — reenvio do mesmo update_id não recomeçou o cadastro (onboarding=done)
@@ -17,4 +18,4 @@
 - **R3**: PASSOU — foto aceita (HTTP 200) sem travar o fluxo
 - **S1**: PASSOU — chamada sem header -> HTTP 403 (esperado 403)
 
-**Resumo:** 16 passaram, 0 falharam, 0 inconclusivos
+**Resumo:** 17 passaram, 0 falharam, 0 inconclusivos
