@@ -311,8 +311,27 @@ const dup = rot(base, { type: 'text', text: 'oi', updateId: 100, isCommand: fals
 ok(dup.route === 'ignore', 'A6: update repetido é descartado');
 const novo = rot(base, { type: 'text', text: 'oi', updateId: 101, isCommand: false });
 ok(novo.route === 'professor' && novo.subroute === 'check' && novo.first_today === true, 'update novo segue o fluxo e marca first_today');
+// S1 — comandos de desenvolvimento.
+//
+// `DEV_COMMANDS` liga /reset e /resetfull, que apagam a conta do aluno e NAO
+// verificam quem digitou. Com a flag ligada, qualquer usuario pode se apagar.
+//
+// O guard tem dois modos de proposito. Desligada, ele EXIGE que /resetfull caia
+// em "nao reconheco esse comando" -- e a garantia de lancamento. Ligada, ele nao
+// reprova (o estado e deliberado), mas grita, para que a flag nao chegue ao
+// lancamento por esquecimento. Um teste permanentemente vermelho vira ruido e
+// para de ser lido; um aviso alto continua sendo informacao.
+const DEV_ON = /const DEV_COMMANDS\s*=\s*true/.test(code['Roteador Mestre']);
 const devcmd = rot(base, { type: 'text', text: '/resetfull', updateId: 102, isCommand: true, command: '/resetfull' });
-ok(devcmd.route === 'system_msg' && devcmd.subroute === 'unknown', 'S1: comando de dev desativado na versão de lançamento');
+if (DEV_ON) {
+  console.log('  ⚠  S1: DEV_COMMANDS está LIGADA — /reset e /resetfull ativos para QUALQUER usuário.');
+  console.log('     Estado deliberado (pedido em 04/09). DESLIGAR ANTES DO LANÇAMENTO.');
+  ok(devcmd.route === 'onboarding' && devcmd.subroute === 'reset',
+    'S1: com a flag ligada, /resetfull realmente executa o reset');
+} else {
+  ok(devcmd.route === 'system_msg' && devcmd.subroute === 'unknown',
+    'S1: comando de dev desativado na versão de lançamento');
+}
 const resume = rot(base, { type: 'callback', callbackData: 't_resume', updateId: 103 });
 ok(resume.subroute === 'resume_q', 'T11: callback t_resume roteia para resume_q');
 
