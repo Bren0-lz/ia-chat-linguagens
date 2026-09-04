@@ -369,5 +369,48 @@ ok(/overdriving/.test(r4.output), 'limite de palavra: não mutila ocorrência de
 const r5 = filtro('Resposta qualquer.', { q_answered: false, answer: '', question: '' });
 ok(r5.antispoiler === false, 'sem gabarito no estado, o filtro não faz nada');
 
+// ============ INTERESSES ============
+//
+// Regressao do defeito achado em 04/09 pela jornada de usuario: o ramo 'other'
+// gerava `jsonb_set(..., '{int_await_ts}', 1788531542825::jsonb)`, e o Postgres
+// NAO converte bigint para jsonb. O UPDATE inteiro falhava, entao nem `int_await`
+// era gravado -- e a execucao abortava em `Salvar Interesses`, de modo que
+// `Enviar Pedir Outro` nunca rodava: o aluno tocava em "Outro" e nao recebia NADA.
+// No turno seguinte o guard do Roteador nao passava e o tema digitado era perdido.
+//
+// A bateria nao pegava porque C16/C17 semeiam `interests` direto no banco e so
+// abrem o menu -- ninguem percorria other -> digitar -> salvar.
+console.log('\n== Interesses ==');
+function inter(sub, profile, extra) {
+  return run('Interests Engine', {
+    item: Object.assign({ userId: 42, subroute: sub, profile: profile || {}, onboarding: 'pick_interests' }, extra),
+  });
+}
+
+const other = inter('other', { interests: ['🎮 Games'] });
+ok(!/\d+::jsonb/.test(other.sql),
+  'int_other: nao usa <numero>::jsonb (Postgres nao converte bigint para jsonb)');
+ok(/to_jsonb\(\s*\d+/.test(other.sql) || /'\d+'::jsonb/.test(other.sql),
+  'int_other: grava int_await_ts por to_jsonb (ou literal entre aspas)');
+ok(/'\{int_await\}'\s*,\s*'true'::jsonb/.test(other.sql),
+  'int_other: marca int_await=true no mesmo UPDATE');
+
+// Encadeamento: o SQL do ramo 'other' precisa satisfazer o guard EXATO que o
+// Roteador Mestre avalia para rotear o texto seguinte como add_custom.
+const mTs = other.sql.match(/to_jsonb\(\s*(\d+)|'(\d+)'::jsonb/);
+const tsGravado = mTs ? Number(mTs[1] || mTs[2]) : 0;
+const guardPassa = tsGravado > 0 && (Date.now() - tsGravado) < 600000;
+ok(guardPassa, 'int_other: o timestamp gravado satisfaz o guard de 10 min do Roteador');
+
+const addCustom = rot(
+  { userId: 42, onboarding: 'pick_interests', mode: 'chat',
+    profile: { int_await: true, int_await_ts: tsGravado }, prev_update_id: 1, teacher_state: null },
+  { type: 'text', text: 'skate', updateId: 2, isCommand: false });
+ok(addCustom.route === 'interests' && addCustom.subroute === 'add_custom',
+  'int_other -> texto seguinte roteia para add_custom (rota=' + addCustom.route + ':' + addCustom.subroute + ')');
+
+const salvo = inter('add_custom', { interests: ['🎮 Games'], int_await: true }, { text: 'skate' });
+ok(/skate/.test(salvo.sql), 'add_custom: o tema digitado entra no SQL de gravacao');
+
 console.log('\n' + (fails ? '❌ ' + fails + ' falha(s)' : '✅ todos os checks passaram'));
 process.exit(fails ? 1 : 0);
