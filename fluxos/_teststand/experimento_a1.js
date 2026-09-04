@@ -52,6 +52,21 @@ const soConversa = (d) => {
 // palavras do bloco em ingles (tudo antes da linha 🇧🇷), que e o que o teto limita
 const palavrasIngles = (t) => String(t).split('🇧🇷')[0].trim().split(/\s+/).filter(Boolean).length;
 
+// Detector do C1: o aluno escreveu "i like play games".
+//
+// Depois de "like", as DUAS formas sao corretas: "like to play" e "like playing".
+// O detector original so aceitava /playing/, e em 04/09 marcou ok=false numa
+// resposta que corrigia certinho ("We say 'I like TO play games'"). Isso e falso
+// negativo, e a Fase B usava o mesmo teste -- ou seja, parte do FALHOU do C1 era
+// do instrumento. Aceita as duas formas, mas exige o REPARO explicito (o bot
+// apontando a forma certa), nao apenas o bot usando "to play" na propria frase.
+function corrigiuLikePlay(t) {
+  const s = String(t || '');
+  const reparo = /\b(we say|say|it'?s|correct|not)\b/i.test(s);
+  const formaCerta = /\blike\s+to\s+play\b/i.test(s) || /\blike\s+playing\b/i.test(s) || /\bplaying\b/i.test(s);
+  return reparo && formaCerta;
+}
+
 (async () => {
   const linhas = [];
   const reg = (s) => { console.log(s); linhas.push(s); };
@@ -64,7 +79,7 @@ const palavrasIngles = (t) => String(t).split('🇧🇷')[0].trim().split(/\s+/)
     const d = digest(await msg(u, 'i like play games'));
     const t = soConversa(d);
     if (!t.trim()) { corr.push({ vazio: true }); continue; } // vazio nunca vira aprovacao
-    corr.push({ ok: /playing/i.test(t), pal: palavrasIngles(t), t });
+    corr.push({ ok: corrigiuLikePlay(t), pal: palavrasIngles(t), t });
   }
 
   // --- interesses (mesma entrada e mesmo detector do C15) ---

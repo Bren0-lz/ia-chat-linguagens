@@ -240,7 +240,13 @@ const RUBRICA = {
     const d = digest(await msg(u, 'i like play games'));
     if (llmRespondeu(d, 'C1')) {
       const t = soConversa(d);
-      const corrigiu = /playing/i.test(t);
+      // Depois de "like" as DUAS formas sao corretas: "like to play" e "like
+      // playing". So /playing/ dava falso negativo -- em 04/09 marcou ok=false
+      // numa resposta que corrigia certinho ("We say 'I like TO play games'").
+      // Exige o REPARO explicito, nao apenas o bot usando a forma certa na
+      // propria frase (que e o que o contrato de correcao pede).
+      const corrigiu = /\b(we say|say|it'?s|correct|not)\b/i.test(t)
+        && (/\blike\s+to\s+play\b/i.test(t) || /\blike\s+playing\b/i.test(t) || /\bplaying\b/i.test(t));
       const repetiuErro = /\bi like play\b(?!\w)/i.test(t.replace(/not\s+.i like play./gi, ''));
       const bilingue = /🇧🇷/.test(t);
       reg('C1', corrigiu && !repetiuErro && bilingue,
