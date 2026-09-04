@@ -8,3 +8,9 @@ db/node_modules/
 .env
 .env.*
 !.env.example
+# scratch de maio; as deps nao pertencem ao historico (removidas do indice em 04/09)
+pgtest/node_modules/
+
+# saida de medicao que cai na raiz quando se roda do diretorio errado;
+# a versao boa mora em fluxos/_teststand/
+/lat_por_rota.json
