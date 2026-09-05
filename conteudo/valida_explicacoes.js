@@ -18,8 +18,9 @@
 //   GABARITO     nao entrega a resposta de uma QUESTAO especifica daquele topico
 //
 // IDIOMA NAO E CONSTANTE AQUI. Vem do `const LANG` do no "Professor Engine", extraido do
-// fluxo do mesmo jeito que o `valida_track.js` reextrai o TRACK. Hoje o LANG manda A1/A2 em
-// portugues e B1..C2 inteiramente em ingles; se o Breno mudar essa politica no fluxo, o
+// fluxo do mesmo jeito que o `valida_track.js` reextrai o TRACK. Desde o T005b o LANG manda a
+// EXPLICACAO em portugues nos seis niveis (as PERGUNTAS seguem em ingles de B1 para cima, e nao
+// sao julgadas aqui); se o Breno mudar essa politica no fluxo, o
 // validador e o gerador seguem juntos, sem uma terceira verdade para envelhecer.
 // Quem edita o TRACK precisa rodar `node conteudo/extrai_track.js`; o LANG e lido direto do
 // fluxo a cada rodada, entao nao precisa de regeracao.
@@ -79,8 +80,7 @@ function tokens(s) {
 
 // Palavras da META-LINGUAGEM portuguesa das descricoes do TRACK (e as glosas: "hello = oi").
 // Nao sao conteudo a ensinar, entao nao entram na cobertura exigida. Errar para o lado de
-// EXCLUIR e seguro (afrouxa a exigencia); manter uma palavra PT aqui de fora reprovaria
-// injustamente as explicacoes de B1+, que sao escritas em ingles.
+// EXCLUIR e seguro (afrouxa a exigencia).
 const PT_META = new Set(('acao acoes academico adjetivo adjetivos adoentado adverbio adverbios afirm afirmacoes ' +
   'afirmativa afirmativas afirmativo agente ainda alem alfabeto algo alguem amanha ambigua ambiguidade ambos ' +
   'amarelo andamento animais animal anna anos antecedente antes apos apostrofo aprox apropriado arrastar assim ' +

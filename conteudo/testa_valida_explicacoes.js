@@ -6,11 +6,12 @@
 //   1. FIXTURES  — `conteudo/_fixtures_explicacoes/<caso>/<NIVEL>/<arquivo>.md`, um caso por
 //      classe de defeito. Cada caso declara o CODIGO que espera: fixture que reprova pelo
 //      motivo errado nao vale como prova (o instrumento pode estar julgando a string errada,
-//      handoff sec.6 nº13). O caso `ok-b1-ingles` tem de PASSAR — sem ele, um validador que
+//      handoff sec.6 nº13). O caso `ok-b1-portugues` tem de PASSAR — sem ele, um validador que
 //      reprova tudo passaria neste teste.
 //   2. IDIOMA VEM DO FLUXO — a expectativa de lingua e derivada do `const LANG` do no
 //      "Professor Engine", nao cravada aqui. O teste inverte a diretiva e confere que a
-//      derivacao acompanha.
+//      derivacao acompanha — e, no 2b, que o VEREDITO DE UM .md REAL acompanha junto: e o que
+//      reprova quem voltar a cravar o mapa de idiomas dentro do validador.
 //   3. GABARITO — vazar e entregar o ITEM ESPECIFICO da questao, nao usar o vocabulario do
 //      topico. Os dois lados sao testados: a explicacao que reproduz o enunciado resolvido
 //      reprova; a que fala da mesma materia com as mesmas palavras passa.
@@ -38,7 +39,7 @@ const ctx = contexto();
 // ---------------------------------------------------------------- 1. fixtures
 // caso -> codigo que DEVE aparecer entre os problemas; null = tem de passar limpo.
 const CASOS = {
-  'ok-b1-ingles': null,
+  'ok-b1-portugues': null,
   'frontmatter-incompleto': 'FRONTMATTER',
   'slug-divergente': 'SLUG',
   'corpo-truncado': 'FRONTMATTER',
@@ -48,7 +49,7 @@ const CASOS = {
   'e-comercial': 'HTML_AMP',
   'sem-erro-comum': 'ERRO_COMUM',
   'idioma-a1-em-ingles': 'IDIOMA',
-  'idioma-b1-em-portugues': 'IDIOMA',
+  'idioma-b1-em-ingles': 'IDIOMA',
   'vaza-gabarito': 'GABARITO',
   'nao-vaza-mesmo-assunto': null
 };
@@ -79,10 +80,11 @@ for (const caso of Object.keys(CASOS)) {
 // ---------------------------------------------------------------- 2. idioma vem do fluxo (bloco 2)
 console.log('\n== 2. Idioma derivado do LANG do fluxo ==');
 const idi = idiomaPorNivel();
-ok(JSON.stringify(idi) === JSON.stringify({ A1: 'pt', A2: 'pt', B1: 'en', B2: 'en', C1: 'en', C2: 'en' }),
-  'politica de hoje lida do v8: ' + JSON.stringify(idi));
-ok(JSON.stringify(idiomaPorNivel(path.join(RAIZ, 'fluxos', 'IAChat_Telegram_v7.4.json'))) === JSON.stringify(idi),
-  'v7.4 e v8 declaram a mesma politica de idioma');
+ok(JSON.stringify(idi) === JSON.stringify({ A1: 'pt', A2: 'pt', B1: 'pt', B2: 'pt', C1: 'pt', C2: 'pt' }),
+  'politica de hoje lida do v8 (T005b: todos os seis explicam em PT): ' + JSON.stringify(idi));
+const idi74 = idiomaPorNivel(path.join(RAIZ, 'fluxos', 'IAChat_Telegram_v7.4.json'));
+ok(JSON.stringify(idi74) === JSON.stringify({ A1: 'pt', A2: 'pt', B1: 'en', B2: 'en', C1: 'en', C2: 'en' }),
+  'v7.4 (congelado, no ar) ainda declara a politica antiga: ' + JSON.stringify(idi74));
 ok(classificaDiretiva('A1', 'Escreva a explicação INTEIRAMENTE em inglês simples, SEM português. Perguntas em inglês.') === 'en',
   'se o fluxo passar a mandar A1 em ingles, a derivacao vira "en" (nada cravado no validador)');
 ok(classificaDiretiva('C2', 'Escreva a explicação em português, com exemplos em inglês. Perguntas em inglês.') === 'pt',
@@ -90,6 +92,34 @@ ok(classificaDiretiva('C2', 'Escreva a explicação em português, com exemplos 
 let derivouAsCegas = false;
 try { classificaDiretiva('B1', 'Seja didatico e conciso.'); derivouAsCegas = true; } catch (e) { /* esperado */ }
 ok(!derivouAsCegas, 'diretiva sem idioma explicito e ERRO ruidoso, nao um palpite');
+
+// 2b. A rede que faltava: na verificacao do T005 dava para cravar `idiomaPorNivel` num mapa fixo
+// e o gate seguia VERDE, porque nada media o VEREDITO DE UM ARQUIVO contra um fluxo diferente.
+// Aqui o fluxo e mutado em disco (B1 volta a "inteiramente em ingles") e o mesmo .md tem de
+// trocar de lado. Com um mapa cravado, os dois vereditos ficam iguais e este bloco reprova.
+const fluxoMutado = path.join(os.tmpdir(), 'iachat-lang-mutado-' + process.pid + '.json');
+{
+  const bruto = JSON.parse(fs.readFileSync(path.join(RAIZ, 'fluxos', 'IAChat_Telegram_v8.json'), 'utf8'));
+  const engine = bruto.nodes.find((n) => n.name === 'Professor Engine');
+  const antes = engine.parameters.jsCode;
+  engine.parameters.jsCode = antes.replace(
+    /B1:'[^']*'/,
+    "B1:'Escreva a explicação INTEIRAMENTE em inglês claro e simples, SEM português. Perguntas em inglês com resposta curta.'");
+  ok(engine.parameters.jsCode !== antes, 'consegui mutar a diretiva de B1 no fluxo de teste');
+  fs.writeFileSync(fluxoMutado, JSON.stringify(bruto, null, 2), 'utf8');
+}
+const ctxMutado = contexto(fluxoMutado);
+ok(ctxMutado.idioma.B1 === 'en' && ctx.idioma.B1 === 'pt',
+  'o fluxo mutado diz B1=' + ctxMutado.idioma.B1 + ' e o fluxo real diz B1=' + ctx.idioma.B1);
+
+const MD_PT = path.join(DIR_FIX, 'ok-b1-portugues', 'B1', '01-past-continuous.md');
+const MD_EN = path.join(DIR_FIX, 'idioma-b1-em-ingles', 'B1', '01-past-continuous.md');
+const cods = (md, c) => validaArquivo(md, c).problemas.map((p) => p.codigo);
+ok(cods(MD_PT, ctx).length === 0 && cods(MD_PT, ctxMutado).indexOf('IDIOMA') >= 0,
+  'o MESMO .md de B1 em portugues passa no fluxo real e reprova por IDIOMA no fluxo mutado');
+ok(cods(MD_EN, ctx).indexOf('IDIOMA') >= 0 && cods(MD_EN, ctxMutado).length === 0,
+  'o MESMO .md de B1 em ingles reprova no fluxo real e passa no fluxo mutado');
+fs.rmSync(fluxoMutado, { force: true });
 
 // ---------------------------------------------------------------- 3. gabarito
 console.log('\n== 3. Vazamento de gabarito (o criterio nao pode ser grosseiro) ==');

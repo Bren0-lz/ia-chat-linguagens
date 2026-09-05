@@ -7,33 +7,41 @@ modelo: gemini-2.5-pro
 data: 2026-09-05
 ---
 
-<b>WHAT IT IS AND WHEN TO USE IT</b>
-The past continuous shows an action that was in progress at a moment in the past. Use it to set the scene, or to show a long action that a shorter action interrupts.
+<b>O QUE É E QUANDO USAR</b>
+O past continuous mostra uma ação que estava em andamento em um momento do passado. Ele serve para montar o cenário de uma história, e principalmente para mostrar uma ação longa que é interrompida por outra ação mais curta.
 
-<b>THE FORMS</b>
-- I was working. He was working. She was working. It was working.
+<b>AS FORMAS</b>
+A estrutura é sempre a mesma: was ou were, mais o verbo com a terminação -ing.
+- I was working. He was working. She was working.
 - You were working. We were working. They were working.
-- Negative: I wasn't working. She wasn't working. They weren't working.
-- Question: Were you working? Was she reading?
-- Short answers: Yes, I was. No, I wasn't. Yes, they were. No, they weren't.
-- The main verb always takes the -ing ending: cook becomes cooking, read becomes reading, study becomes studying.
+- Negativa: I wasn't working. They weren't working.
+- Pergunta: Were you working? Was she reading?
+O verbo principal nunca muda de forma: cook vira cooking, read vira reading, study vira studying.
 
-<b>EXAMPLES</b>
+<b>COMO LIGAR AS DUAS AÇÕES</b>
+A ação longa fica no past continuous e a ação curta fica no past simple. As duas se ligam por WHEN ou por WHILE. Em geral, WHEN vem antes da ação curta, e WHILE vem antes da ação longa que estava acontecendo.
+
+Lembre que essa forma sempre pede o verbo com -ing, e que você pode usar sempre que quiser mostrar duas ações que aconteceram juntas, uma mais longa e outra mais curta.
+
+<b>EXEMPLOS</b>
 - I was cooking at 8 pm.
-  (a long action in progress at that hour)
+  (Eu estava cozinhando às 8 da noite: a ação estava em andamento naquela hora.)
 - I was reading when the phone rang.
-  (WHEN plus past simple marks the short action)
+  (A leitura era longa, e o telefone tocando é a ação curta que corta a leitura.)
 - While she was studying, he arrived.
-  (WHILE plus the long action, past simple for the short one)
+  (Aqui o WHILE marca a ação longa, e a chegada dele é a ação curta.)
 - They weren't working on Monday morning.
+  (A negativa também mantém o verbo com -ing.)
 - She was cooking when the doorbell rang.
+  (mesma estrutura: a ação longa na cozinha e a campainha como ação curta.)
 - We were watching a film at ten o'clock last night.
+  (aqui não há interrupção nenhuma: temos só a ação longa em andamento naquele horário da noite, montando o cenário da história.)
 
-<b>COMMON MISTAKES</b>
-Do not use the past continuous for a short, finished action. That is the job of the past simple.
-wrong: "I was breaking my phone yesterday"
-the correct form is: "I broke my phone yesterday"
-The past continuous is the background; the past simple is the event that cuts it.
+<b>ERROS COMUNS</b>
+Não use o past continuous para uma ação curta e terminada. Esse é o trabalho do past simple.
+errado: "I was breaking my phone yesterday"
+o certo é: "I broke my phone yesterday"
+O past continuous é o pano de fundo, e o past simple é o evento que corta esse pano de fundo.
 
-<b>SUMMARY</b>
-was or were plus verb-ing is the long action in progress, and the past simple is the short action that interrupts it.
+<b>RESUMO</b>
+was ou were mais verbo com -ing é a ação longa em andamento, e o past simple é a ação curta que interrompe.

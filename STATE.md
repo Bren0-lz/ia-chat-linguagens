@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T005b
-- **Última concluída:** T005
+- **Tarefa atual:** T005c
+- **Última concluída:** T005b
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum
 
@@ -49,3 +49,6 @@
 - 2026-09-05 10 pares (cefr_level, track_topic) contradizem o nivel que o TRACK da ao topico. O T007 vai esbarrar nisso ao modelar a tabela.
 - 2026-09-05 3 questoes practice (B1/2, B1/8, B2/1) sao redundantes com a descricao do TRACK: o material e obrigado a ensinar o que elas cobram. Viram AVISO, nao reprovacao. Decisao de produto pendente.
 - 2026-09-05 `conteudo/questoes.json` e retrato versionado do banco; `node conteudo/extrai_questoes.js --conferir` prova que batem (precisa do Postgres, fica fora do gate).
+- 2026-09-05 T005b DONE. O `qSys` injeta o LANG INTEIRO: a clausula de explicacao em PT contaminou a geracao da questao e o B1 saiu com enunciado em portugues. So passou com "INTEIRAMENTE em ingles, enunciado e resposta". QUEM MEXER NO LANG RECONFERE A PERGUNTA AO VIVO, nao so a explicacao.
+- 2026-09-05 DIVIDA CONFIRMADA: `bateria_completa_b.js:403` (T3) assere "nivel B2: portugues na explicacao == false" — agora contradiz o produto e vai dar falso vermelho na proxima bateria B. Reescrever para "explicacao PT / pergunta EN". Conferir junto a linha 257 e o cabecalho do `revalida_niveis.js`.
+- 2026-09-05 VARIANCIA: em n=3 no C2 ao vivo, 2 explicacoes vieram em PT e 1 em ingles. Afeta a geracao ao vivo (fallback), nao os 60 pre-gerados, que saem pelo gerador. Medir com n maior se o C2 der problema.

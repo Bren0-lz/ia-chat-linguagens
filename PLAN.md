@@ -109,7 +109,7 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
   mostre as duas saídas) + a mutação do idioma cravado passa a **reprovar** o gate +
   `publica_v8.js` + verificação ao vivo da rota do Professor num nível B1+
 - **Depende de:** T005
-- **Status:** TODO
+- **Status:** DONE — 12/12 enunciados em EN e explicação em PT, medido ao vivo em 6 execuções
 
 ### T005c — calibrar o detector de vazamento antes de gerar os 60
 - **Escopo:** a verificação do T005 simulou explicações que ensinam a matéria do próprio tópico e
@@ -121,6 +121,10 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
   simulação não se sustentar, diga isso e feche a tarefa sem alterar o limiar.
   Registrar também o limite conhecido do outro lado: 35 das 136 questões não têm detector nenhum
   (resposta de uma palavra, enunciado sem lacuna).
+  **Segundo item, vindo do T005b:** a `DIRETIVA_IDIOMA.pt` do `gerar_explicacoes.js` é a de A1
+  ("sempre com o termo em inglês seguido da tradução"). Agora que B1..C2 também geram em português,
+  ela achata o registro dos quatro níveis altos — um C2 não precisa de tradução a cada termo.
+  Derivar o registro do `LANG` do nível, como o idioma já é derivado.
 - **Gate:** a simulação que hoje reprova 22/60 passa a reprovar só o que é vazamento de verdade, com
   as fixtures das duas direções ainda verdes; `npm run gate` verde
 - **Depende de:** T005b
