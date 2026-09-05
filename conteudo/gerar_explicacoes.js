@@ -42,7 +42,7 @@ const ENDPOINT = 'https://aiplatform.googleapis.com/v1/projects/' + PROJETO +
 // Orcamento folgado de propriedade: o "pensamento" do 2.5-pro consome a maior parte.
 const MAX_OUTPUT_TOKENS = 12000;
 const MIN_CARACTERES = 500;   // abaixo disso nao e explicacao, e um toco
-const MAX_CARACTERES = 3000;  // o envio ao Telegram trunca; ~2500 e o alvo
+const MAX_CARACTERES = 3800;  // T006: o Telegram aceita 4096; o teto de 3000 barrou C2/07 em 4 de 4
 
 // Contrato de idioma E DE REGISTRO por nivel — VEM do `const LANG` do no "Professor Engine",
 // ao pe da letra (`ctx.diretiva[nivel]`), nao de um molde escrito aqui.
@@ -120,12 +120,16 @@ function montaPrompt(t, total, diretiva) {
     '',
     'FORMATO (o texto vai para o Telegram com parse_mode=HTML):',
     '- Use as marcacoes <b>negrito</b> e <i>italico</i> e mais NENHUMA outra tag.',
-    '- NUNCA use markdown: nada de *, **, _, #, `, ``` ou tabelas com |.',
+    '- NUNCA use markdown: nada de *, **, _, #, crase ou tabelas com |. Para destacar um termo use',
+    '  <b>termo</b>: a crase nao formata nada no parse_mode HTML, chega literal na tela do aluno.',
     '- NUNCA use os caracteres < ou > soltos, nem o caractere & (quebram o HTML do Telegram).',
     '  Nada de setinhas "->": para corrigir, escreva no formato',
     '  errado: "I has a dog" ... o certo e: "I have a dog".',
     '  Onde precisaria de "e comercial", escreva a palavra "e".',
     '- Marcadores de lista com o hifen "-" no comeco da linha.',
+    '- MARQUE EM <i>...</i> todo termo, forma e frase que estiver EM INGLES — inclusive dentro',
+    '  dos itens de lista e da conjugacao. A explicacao e em portugues e o ingles e o objeto de',
+    '  estudo: e a marcacao que os separa na tela do aluno.',
     '- No maximo 1 ou 2 emojis no texto inteiro, e so se ajudarem.',
     '- Nao escreva titulo, frontmatter, saudacao inicial nem despedida: comece direto pela parte 1.',
     '- Nao numere as partes com "1)"; use um rotulo curto em negrito para cada parte.',
@@ -235,7 +239,7 @@ function confereCorpo(texto) {
   if (texto.length < MIN_CARACTERES) problemas.push('curto demais (' + texto.length + ' chars)');
   if (texto.length > MAX_CARACTERES) problemas.push('longo demais (' + texto.length + ' chars)');
   if (/&/.test(texto)) problemas.push('contem & (quebra o parse HTML do Telegram)');
-  if (/^\s*```|\*\*|^\s*#{1,6}\s/m.test(texto)) problemas.push('contem markdown (``` ** ou #)');
+  if (/`|\*\*|^\s*#{1,6}\s/m.test(texto)) problemas.push('contem markdown (crase, ** ou #)');
   const tags = texto.match(/<\/?([a-zA-Z0-9]*)[^>]*>/g) || [];
   for (const tag of tags) {
     const nome = (tag.match(/^<\/?([a-zA-Z0-9]+)/) || [])[1];

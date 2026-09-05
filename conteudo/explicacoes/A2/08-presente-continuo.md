@@ -8,72 +8,61 @@ data: 2026-09-05
 ---
 
 <b>O QUE É E QUANDO USAR</b>
-O Presente Contínuo (<i>Present Continuous</i>) é usado para falar de ações que estão acontecendo <b>agora</b>, no exato momento em que falamos. ⏰ Pense nele como o nosso "-ando", "-endo", "-indo" do português, como em "eu estou <i>trabalhando</i>".
+O Presente Contínuo descreve uma ação que está acontecendo <i>agora</i>, neste exato momento. Pense em algo que você está fazendo <i>neste instante</i>, como ler esta explicação. É para isso que ele serve.
 
 <b>AS FORMAS</b>
-A estrutura é sempre a mesma: uma forma do verbo <b>to be</b> (<i>am, is, are</i>) seguida por um verbo principal com a terminação <b>-ing</b>.
+A fórmula é sempre: sujeito + verbo <i>to be</i> (<i>am, is, are</i>) + verbo principal com <i>-ing</i>.
 
-<b>Afirmativa:</b>
-- I <b>am</b> work<b>ing</b>.
-- You <b>are</b> work<b>ing</b>.
-- He <b>is</b> work<b>ing</b>.
-- She <b>is</b> work<b>ing</b>.
-- It <b>is</b> work<b>ing</b>.
-- We <b>are</b> work<b>ing</b>.
-- They <b>are</b> work<b>ing</b>.
+- <b>Afirmativa:</b>
+<i>I am working.</i>
+<i>You are working.</i>
+<i>He is working.</i>
+<i>She is working.</i>
+<i>It is working.</i>
+<i>We are working.</i>
+<i>They are working.</i>
 
-<b>Negativa:</b>
-- I <b>am not</b> working.
-- You <b>are not</b> (aren't) working.
-- He <b>is not</b> (isn't) working.
-- She <b>is not</b> (isn't) working.
-- It <b>is not</b> (isn't) working.
-- We <b>are not</b> (aren't) working.
-- They <b>are not</b> (aren't) working.
+- <b>Negativa</b> (adicionamos <i>not</i> depois do <i>to be</i>):
+<i>I'm not working.</i>
+<i>You are not working. (You aren't working.)</i>
+<i>He is not working. (He isn't working.)</i>
+<i>She is not working. (She isn't working.)</i>
+<i>It is not working. (It isn't working.)</i>
+<i>We are not working. (We aren't working.)</i>
+<i>They are not working. (They aren't working.)</i>
 
-<b>Pergunta:</b>
-- <b>Am</b> I working?
-- <b>Are</b> you working?
-- <b>Is</b> he working?
-- <b>Is</b> she working?
-- <b>Is</b> it working?
-- <b>Are</b> we working?
-- <b>Are</b> they working?
+- <b>Pergunta</b> (o verbo <i>to be</i> vem antes do sujeito):
+<i>Am I working?</i>
+<i>Are you working?</i>
+<i>Is he working?</i>
+<i>Is she working?</i>
+<i>Is it working?</i>
+<i>Are we working?</i>
+<i>Are they working?</i>
 
-<b>Regras para o -ING:</b>
-- Verbos que terminam em <b>-e</b>: o <b>-e</b> desaparece.
-Exemplo: <i>make</i> vira <i>mak<b>ing</b></i>; <i>dance</i> vira <i>danc<b>ing</b></i>.
-- Verbos curtos com a sequência <b>C</b>onsoante-<b>V</b>ogal-<b>C</b>onsoante: a última consoante dobra.
-Exemplo: <i>run</i> vira <i>ru<b>nning</b></i>; <i>sit</i> vira <i>si<b>tting</b></i>.
+- <b>Regras para o -ING:</b>
+1. Verbos terminados em <b>-e</b> perdem o <b>-e</b>. Exemplo: <i>make</i> vira <i>making</i>; <i>have</i> vira <i>having</i>.
+2. Verbos curtos com a sequência <b>CVC</b> (Consoante-Vogal-Consoante) dobram a última consoante. Exemplos: <i>run</i> vira <i>running</i>; <i>sit</i> vira <i>sitting</i>; <i>get</i> vira <i>getting</i>.
 
-<b>Palavras comuns (marcadores de tempo):</b>
-- now (agora)
-- right now (agora mesmo)
-- at the moment (neste momento)
+- <b>Marcadores de tempo comuns:</b>
+<i>now</i> (agora)
+<i>right now</i> (agora mesmo)
+<i>at the moment</i> (no momento)
 
 <b>EXEMPLOS</b>
-- I am studying English <b>now</b>.
-<i>(Eu estou estudando inglês agora.)</i>
-
-- She <b>is not</b> cooking at the moment.
-<i>(Ela não está cozinhando neste momento.)</i>
-
-- <b>Are</b> they playing soccer?
-<i>(Eles estão jogando futebol?)</i>
-
-- He is runn<b>ing</b> because he is late.
-<i>(Ele está correndo porque está atrasado.)</i>
+- <i>I am studying English now.</i> (Eu estou estudando inglês agora.)
+- <i>She is talking on the phone right now.</i> (Ela está falando no telefone agora mesmo.)
+- <i>They are not watching TV at the moment.</i> (Eles não estão assistindo TV no momento.)
+- <i>Are you listening to me?</i> (Você está me ouvindo?)
 
 <b>ERROS COMUNS</b>
-O erro mais comum é esquecer o verbo <b>to be</b> (<i>am, is, are</i>). A frase fica incompleta e gramaticalmente errada sem ele.
+O erro mais comum é esquecer o verbo <i>to be</i> (<i>am, is, are</i>). Lembre-se que o <i>-ing</i> sozinho não forma o tempo verbal. Ele precisa do seu auxiliar.
 
-- forma errada: <i>I working now.</i>
-- forma certa: <i>I <b>am</b> working now.</i>
+- Errado: <i>I working now.</i>
+- Certo: <i>I <b>am</b> working now.</i>
 
-- forma errada: <i>He reading a book.</i>
-- forma certa: <i>He <b>is</b> reading a book.</i>
-
-Lembre-se: a estrutura é sempre <b>verbo to be + verbo com -ing</b>. Uma parte não funciona sem a outra.
+- Errado: <i>He reading a book.</i>
+- Certo: <i>He <b>is</b> reading a book.</i>
 
 <b>RESUMO</b>
-Para descrever o que está acontecendo <b>agora</b>, use: <b>sujeito + am/is/are + verbo com -ing</b>.
+💡 Para falar do que está acontecendo <b>agora</b>, use: verbo <i>to be</i> (<i>am, is, are</i>) + verbo com <i>-ing</i>.

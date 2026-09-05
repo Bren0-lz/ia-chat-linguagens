@@ -1,9 +1,9 @@
 # Estado do loop
 
-- **Tarefa atual:** T006
-- **Última concluída:** T005c
+- **Tarefa atual:** T007
+- **Última concluída:** T006
 - **Tentativas na atual:** 0/3
-- **Bloqueios:** nenhum
+- **Bloqueios:** nenhum — T006 destravado em 05/09
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
 
@@ -58,3 +58,18 @@
 - 2026-09-05 4 eixos que o detector NAO ve, declarados no codigo e impressos pelo gate: questao sem detector (36/136 practice, 29/60 exam), distancia >240 chars, remendo (palavra no meio), e lacuna copiada + resposta ao lado (81/82). A rede real do T006 e a revisao humana.
 - 2026-09-05 A diretiva de registro do gerador vem do LANG do nivel (nao ha mais DIRETIVA_IDIOMA). Mexer no LANG obriga a REGERAR os 60, nao so revalidar.
 - 2026-09-05 So 18 das 100 questoes com detector sao do tipo "par" (transformacao com frase entre aspas); as outras 82 sao de lacuna e vivem so da regra (a).
+- 2026-09-05 T006 BLOCKED. 59 .md gerados em 16 passadas (retomada funcionou, nenhuma parada por token, nenhum .tmp orfao). 50 validam. 1 aviso, o conhecido (B1/02, mandado pelo TRACK).
+- 2026-09-05 DEFEITO DE INSTRUMENTO: `medeIdioma` conta marcadores EN dentro das FRASES DE EXEMPLO em ingles, que o proprio prompt exige. Quanto mais alto o nivel, mais o bloco de exemplos domina — a metrica pune o que o produto pede. 6 arquivos a 42-52% com o texto comprovadamente em portugues.
+- 2026-09-05 DEFEITO DE INSTRUMENTO 2: COBERTURA e ERRO_COMUM casam termos LITERAIS da descricao do TRACK, inclusive palavras que ali sao so cenario de exemplo (road, car, beautiful). Forca o gerador a copiar o exemplo do TRACK.
+- 2026-09-05 C2/07 nao existe: 4 de 4 tentativas estouraram o MAX_CARACTERES de 3000 (3069-3463).
+- 2026-09-05 DEFEITO REAL, nao de instrumento: 7 arquivos usam crase-backtick em vez de <b>. O prompt proibe markdown mas nem `confereCorpo` nem o validador pegam backtick isolado; no Telegram HTML aparece literal.
+- 2026-09-05 DECIDIDO pelo Breno: MAX_CARACTERES sobe de 3000 para 3800 (o Telegram aceita 4096; a mediana hoje e ~2500). Destrava o C2/07.
+- 2026-09-05 Confirmei o defeito do medeIdioma por medicao propria: em C1/03 so 23% das linhas sao prosa PT densa, o resto sao formulas em ingles que o prompt EXIGE. Consertar o que e medido, nao baixar o limiar de 55% (isso seria mover a trave).
+- 2026-09-05 T006 tentativa 2 REPROVADA: das 4 checagens afrouxadas, 2 viraram carimbo. `medeIdioma` descarta LINHAS DE LISTA inteiras, entao uma aula toda em ingles com as frases em bullets e 3 linhas de portugues decorativo mede 100% PT e passa (o HEAD reprovava com 26%). `termosExigiveis` caiu de 958 para 660 termos: B2/4 ficou com ZERO (checagem inexistente ali) e A1/6 perdeu as contracoes, que sao a materia.
+- 2026-09-05 A 5a mudanca (folga de palavra de funcao no GABARITO), feita fora de escopo, foi AUDITADA e e legitima: rebaixa exatamente 1 questao no banco inteiro, a que a motivou. Escopo triplamente travado. Manter.
+- 2026-09-05 REGRA: commitar o conteudo gerado ANTES de qualquer conserto in loco. Sem baseline no git, conserto em arquivo gerado e inauditavel.
+- 2026-09-05 T006 DONE (3 tentativas, 1 bloqueio). 60 explicacoes validas em conteudo/explicacoes/. REVISAO HUMANA DO BRENO PENDENTE — e ela a rede real, nao o gate.
+- 2026-09-05 TETO DO INSTRUMENTO, medido: um .md gramaticalmente correto, sem repeticao, cobrindo os termos e com as 5 secoes, que NUNCA enuncia a regra, PASSA. Esta declarado no codigo. Julgar "ensina ou nao ensina" exige leitura humana.
+- 2026-09-05 Escape conhecido do idioma: aula em ingles escrita inteira em sentencas de <=8 palavras mede 88% PT e passa. Alcancado pelo verifier, mas exige texto adversarial; nenhum LLM escreve assim espontaneamente.
+- 2026-09-05 COBERTURA quase cega em C2/4 (1 termo) e C2/7 (2 termos): a descricao do TRACK desses topicos quase nao tem termo ensinavel fora dos exemplos. Culpa do TRACK, nao do validador.
+- 2026-09-05 DIVIDA pre-existente: o validador quebra em arquivo CRLF ("data: 2026-09-05"). Vai morder quem clonar no Windows com autocrlf=true.

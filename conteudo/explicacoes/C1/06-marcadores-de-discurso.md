@@ -8,42 +8,31 @@ data: 2026-09-05
 ---
 
 <b>O QUE É E QUANDO USAR</b>
-<i>Discourse markers</i>, ou marcadores de discurso, são palavras e expressões de registro formal que conectam frases ou orações. Eles agem como "sinalizadores" lógicos, explicitando a relação entre as ideias: adição, contraste, consequência, ênfase, etc. Seu uso eleva a sofisticação e a clareza da escrita e da fala.
+Marcadores de discurso são conectores que unem ideias, dando coesão e fluidez ao texto. Os que veremos aqui são de registro formal, ideais para a escrita acadêmica e profissional, onde substituem conjunções mais simples e elevam o nível do seu argumento. Eles sinalizam a relação lógica entre duas frases ou ideias.
 
 <b>AS FORMAS</b>
-Estes marcadores são <i>conjunctive adverbs</i> e exigem pontuação específica. A exceção é <i>whereas</i>, que é uma <i>subordinating conjunction</i>.
-
-- <i>nevertheless / nonetheless</i> (mesmo assim, apesar disso)
-- <i>moreover / furthermore</i> (além disso, ademais)
-- <i>in fact / indeed</i> (de fato, na verdade)
-- <i>on the other hand</i> (por outro lado)
-- <i>therefore / thus</i> (portanto, sendo assim)
-- <i>whereas</i> (enquanto que)
+Esses marcadores geralmente iniciam uma nova frase (seguidos de vírgula) ou são precedidos por ponto e vírgula (<i>;</i>).
+- <i>Nevertheless / Nonetheless</i>: indicam uma concessão ou contraste inesperado (mesmo assim).
+- <i>Moreover / Furthermore</i>: adicionam uma informação que reforça o ponto anterior (além disso).
+- <i>In fact / Indeed</i>: introduzem uma informação que enfatiza, confirma ou até corrige a anterior (de fato, na verdade).
+- <i>On the other hand</i>: apresentam um ponto de vista ou aspecto contrastante (por outro lado).
+- <i>Therefore / Thus</i>: indicam uma consequência ou resultado lógico (portanto, assim).
+- <i>Whereas</i>: estabelece um contraste direto entre duas ideias, geralmente dentro da mesma frase (enquanto que).
 
 <b>EXEMPLOS</b>
-- The strategy was risky and expensive; <i>nevertheless</i>, it proved to be highly successful.
-(A estratégia era arriscada e cara; <i>mesmo assim</i>, provou-se altamente bem-sucedida.)
-
-- The candidate has extensive experience in the field. <i>Furthermore</i>, she possesses excellent leadership skills.
-(A candidata tem vasta experiência na área. <i>Além disso</i>, ela possui excelentes habilidades de liderança.)
-
-- He said he would be on time. <i>In fact</i>, he arrived twenty minutes early.
-(Ele disse que chegaria na hora. <i>De fato</i>, ele chegou vinte minutos adiantado.)
-
-- The coastal region is expecting heavy rain, <i>whereas</i> the inland areas will remain dry.
-(A região costeira espera chuva forte, <i>enquanto que</i> as áreas do interior permanecerão secas.)
+- <i>The company has been losing money for months; therefore, a new strategy is urgently needed.</i> (A empresa tem perdido dinheiro por meses; portanto, uma nova estratégia é urgentemente necessária.)
+- <i>The report is well-researched and comprehensive. Moreover, its conclusions are groundbreaking.</i> (O relatório é bem pesquisado e abrangente. Além disso, suas conclusões são inovadoras.)
+- <i>He claimed to be a pacifist. In fact, he had served in the army for ten years.</i> (Ele afirmava ser um pacifista. Na verdade, ele havia servido no exército por dez anos.)
+- <i>My brother loves spicy food, whereas I prefer milder dishes.</i> (Meu irmão ama comida apimentada, enquanto que eu prefiro pratos mais suaves.)
 
 <b>ERROS COMUNS</b>
-O erro mais frequente é o <i>comma splice</i>: usar uma vírgula para conectar duas frases completas com um destes marcadores. Eles são advérbios, não conjunções como <i>and</i> ou <i>but</i>, e por isso exigem uma pausa mais forte.
+O erro mais frequente é o <i>comma splice</i>: usar estes marcadores para unir duas frases independentes com apenas uma vírgula, como se fossem conjunções simples (<i>and, but</i>). Isso está gramaticalmente incorreto.
 
-errado: The project was challenging, <i>however</i>, the team completed it on schedule.
-o certo é: The project was challenging. <i>However</i>, the team completed it on schedule.
-o certo é: The project was challenging; <i>however</i>, the team completed it on schedule.
+errado: <i>The plan was brilliant, however, it was never implemented.</i>
+o certo é: <i>The plan was brilliant; however, it was never implemented.</i>
+ou: <i>The plan was brilliant. However, it was never implemented.</i>
 
-A mesma lógica se aplica aos outros marcadores da lista (com exceção de <i>whereas</i>, que por ser uma conjunção, geralmente une duas orações com uma vírgula, como no exemplo acima).
-
-errado: The evidence was clear, <i>therefore</i>, the jury reached a verdict quickly.
-o certo é: The evidence was clear; <i>therefore</i>, the jury reached a verdict quickly.
+A lógica se aplica a todos os outros, como <i>therefore</i> e <i>moreover</i>. A exceção é <i>whereas</i>, que funciona como uma conjunção subordinada e une duas orações com uma vírgula.
 
 <b>RESUMO</b>
-Use estes marcadores formais para conectar ideias entre frases, separando-as com ponto final ou ponto e vírgula.
+Use marcadores formais para conectar ideias, separando-os da frase anterior com ponto ou ponto e vírgula, nunca apenas com uma vírgula.

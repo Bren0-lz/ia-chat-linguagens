@@ -8,63 +8,49 @@ data: 2026-09-05
 ---
 
 <b>O QUE É E QUANDO USAR</b>
-O verbo <i>can</i> é usado para falar sobre duas coisas principais: uma <b>habilidade</b> (algo que você sabe fazer) ou uma <b>permissão</b> (algo que você pode fazer). Ele é como o nosso "consigo", "sei" ou "posso" em português.
+Usamos a palavra <i>can</i> para falar sobre duas coisas principais: <b>habilidades</b> (o que sabemos ou conseguimos fazer) e <b>permissão</b> (o que podemos ou não fazer). Em português, <i>can</i> é como se fosse o nosso "consigo", "sei" (fazer algo) ou "posso".
 
 <b>AS FORMAS</b>
-A regra é simples: <b>sujeito + can + verbo principal</b>. O verbo <i>can</i> nunca muda, e o verbo principal vem logo depois, sem <i>to</i>.
+A estrutura é sempre a mesma: <b>sujeito + <i>can</i> + verbo na forma base</b> (sem <i>to</i> e sem <i>-s</i>). O <i>can</i> nunca muda, não importa o sujeito.
 
-- <b>Afirmativa:</b>
-I can speak
-You can speak
-He can speak
-She can speak
-It can speak
-We can speak
-They can speak
+<b>Afirmativa:</b>
+- <i>I can work.</i>
+- <i>You can work.</i>
+- <i>He can work.</i>
+- <i>She can work.</i>
+- <i>It can work.</i>
+- <i>We can work.</i>
+- <i>They can work.</i>
 
-- <b>Negativa:</b>
-A forma negativa é <i>cannot</i> (tudo junto) ou a contração <i>can't</i>.
-I can't cook
-You can't cook
-He can't cook
-She can't cook
-It can't cook
-We can't cook
-They can't cook
+<b>Negativa:</b>
+- A forma completa é <i>cannot</i> (tudo junto).
+- A forma curta e mais comum é <i>can't</i>.
+- <i>I cannot cook. / I can't cook.</i>
+- <i>She cannot cook. / She can't cook.</i>
 
-- <b>Pergunta e Resposta Curta:</b>
-Para perguntar, o <i>can</i> vem antes do sujeito.
-<i>Can you swim?</i> (Você sabe nadar?)
-- Yes, I can. (Sim, eu sei.)
-- No, I can't. (Não, eu não sei.)
+<b>Pergunta:</b>
+- A estrutura é: <i>Can</i> + sujeito + verbo?
+- <i>Can you help me?</i>
+- <i>Can they come?</i>
 
-<i>Can she go?</i> (Ela pode ir?)
-- Yes, she can. (Sim, ela pode.)
-- No, she can't. (Não, ela não pode.)
+<b>Respostas curtas:</b>
+- <i>Yes, I can.</i>
+- <i>No, she can't.</i>
 
 <b>EXEMPLOS</b>
-- I <b>can</b> play the piano.
-<i>Eu sei tocar piano.</i> (habilidade)
-
-- They <b>can't</b> come to the party.
-<i>Eles não podem vir para a festa.</i> (impossibilidade/falta de permissão)
-
-- <b>Can</b> I open the window?
-<i>Eu posso abrir a janela?</i> (permissão)
-
-- He <b>can</b> speak three languages.
-<i>Ele sabe falar três línguas.</i> (habilidade)
+- <i>She can play the guitar very well.</i> (Ela sabe tocar violão muito bem.) - Habilidade
+- <i>I can't hear you.</i> (Eu não consigo te ouvir.) - Habilidade (ou falta dela)
+- <i>Can I use your pen, please?</i> (Eu posso usar sua caneta, por favor?) - Permissão
+- <i>You can't park here.</i> (Você não pode estacionar aqui.) - Permissão (ou falta dela)
 
 <b>ERROS COMUNS</b>
-O erro mais comum é usar <i>to</i> ou colocar <i>-s</i> depois de <i>can</i>. Lembre-se que <i>can</i> é um verbo especial e não segue as mesmas regras dos outros.
+O erro mais comum é tratar o <i>can</i> como um verbo normal, adicionando <i>-s</i> para <i>he/she/it</i> ou usando <i>to</i> depois dele. Lembre-se que <i>can</i> é especial.
 
-- Errado: He can <b>to go</b>.
-- O certo é: He can <b>go</b>.
-<i>Explicação: O verbo que vem depois de "can" fica sempre na sua forma base, sem "to".</i>
+- Erro com "-s": <i>He cans speak Japanese.</i>
+- O certo é: <i><b>He can speak Japanese.</b></i> (<i>Can</i> nunca muda!)
 
-- Errado: She <b>cans</b> cook.
-- O certo é: She <b>can</b> cook.
-<i>Explicação: "Can" nunca muda. É sempre "can" para I, you, he, she, it, we, they.</i>
+- Erro com "to": <i>They can to travel tomorrow.</i>
+- O certo é: <i><b>They can travel tomorrow.</b></i> (Depois de <i>can</i>, o verbo vem sem <i>to</i>.)
 
-<b>RESUMO</b>
-Para dizer que alguém sabe ou pode fazer algo, a fórmula é sempre: <b>sujeito + can + verbo (sem 'to')</b>. 🧠
+<b>RESUMO</b> 💡
+Para habilidade ou permissão, use <i>can</i> ou <i>can't</i> + verbo base para TODOS os sujeitos.

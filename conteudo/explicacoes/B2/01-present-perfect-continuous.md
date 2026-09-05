@@ -8,48 +8,48 @@ data: 2026-09-05
 ---
 
 <b>O QUE É E QUANDO USAR</b>
-O <i>present perfect continuous</i> descreve uma ação que começou no passado e continua até o presente. O foco principal é na <b>duração</b> da atividade, ou seja, <i>há quanto tempo</i> ela vem acontecendo.
+Usamos o <i>Present Perfect Continuous</i> para falar de uma ação que começou no passado e continua até o presente. O foco principal é na <b>duração</b> da ação, no tempo que ela vem acontecendo, e não se ela já terminou ou não.
 
 <b>AS FORMAS</b>
-A estrutura é sempre <i>have/has + been + verbo com -ING</i>.
+A estrutura é sempre <i>sujeito + have/has + been + verbo-ING</i>.
 
-<i>Afirmativa:</i>
-- I/You/We/They <b>have been</b> studying.
-- He/She/It <b>has been</b> studying.
+- <b>Afirmativa:</b>
+<i>I/You/We/They have been working</i>
+<i>He/She/It has been working</i>
 
-<i>Negativa (com contração):</i>
-- I/You/We/They <b>haven't been</b> studying.
-- He/She/It <b>hasn't been</b> studying.
+- <b>Negativa:</b>
+<i>I/You/We/They have not (haven't) been working</i>
+<i>He/She/It has not (hasn't) been working</i>
 
-<i>Interrogativa:</i>
-- <b>Have</b> you been studying?
-- <b>Has</b> she been studying?
+- <b>Interrogativa:</b>
+<i>Have you been working?</i>
+<i>Has she been working?</i>
 
-<i>Para indicar a duração:</i>
-- <b>for</b>: um período de tempo (<i>for three hours, for ten years</i>).
-- <b>since</b>: um ponto de início no tempo (<i>since 8 AM, since 2022</i>).
+- <b>Palavras-chave (duração):</b>
+<i>for</i> + período de tempo: <i>for two hours, for ten years, for a long time.</i>
+<i>since</i> + ponto de início no tempo: <i>since 2020, since last week, since I arrived.</i>
 
 <b>EXEMPLOS</b>
-- I <b>have been waiting</b> for you for thirty minutes.
-(Eu estou te esperando há trinta minutos.)
+- <i>I have been studying English for three years.</i>
+(Eu estudo inglês há três anos.)
 
-- She <b>has been working</b> at this company since January.
+- <i>She has been working at this company since January.</i>
 (Ela está trabalhando nesta empresa desde janeiro.)
 
-- They <b>have been playing</b> video games all day.
-(Eles estão jogando videogame o dia todo.)
+- <i>They are tired because they have been playing soccer all afternoon.</i>
+(Eles estão cansados porque estiveram jogando futebol a tarde toda.)
 
-- How long <b>have you been learning</b> English?
-(Há quanto tempo você está aprendendo inglês?)
+- <i>How long have you been waiting for me?</i>
+(Há quanto tempo você está me esperando?)
 
 <b>ERROS COMUNS</b>
-O erro mais frequente é esquecer a palavra <i>been</i>. Lembre-se que ela é obrigatória na estrutura.
-errado: "She has working here for a long time."
-o certo é: "She has <b>been</b> working here for a long time."
+O erro mais comum é esquecer a palavra <i>been</i>. A estrutura precisa de todos os seus componentes.
+errado: <i>I have studying for hours.</i>
+o certo é: <i>I have <b>been</b> studying for hours.</i>
 
-Outro ponto de atenção é a diferença para o <i>present perfect simple</i>. Compare:
-- <i>Present Perfect Continuous</i> foca na <b>duração</b> da ação: <i>I have been cleaning my room.</i> (A ênfase está na atividade de limpar, que pode não ter acabado).
-- <i>Present Perfect Simple</i> foca no <b>resultado</b> da ação: <i>I have cleaned my room.</i> (A ênfase está no resultado: o quarto agora está limpo, a tarefa foi concluída).
+Outro ponto é a diferença para o <i>Present Perfect Simple</i>. O foco muda:
+- <i>Present Perfect Continuous</i> (foco na <b>duração</b>): <i>I have been reading this book.</i> (Estou focado na ação de ler, talvez eu ainda não tenha terminado).
+- <i>Present Perfect Simple</i> (foco no <b>resultado</b>): <i>I have read this book.</i> (A ação acabou, o livro foi lido).
 
 <b>RESUMO</b>
-Use para uma ação que começou no passado e continua, com foco na <b>duração</b> (usando <i>for</i> ou <i>since</i>).
+Use <i>have/has been + verbo-ING</i> para focar na <b>duração</b> de uma ação que começou no passado e continua.

@@ -34,7 +34,7 @@ const RAIZ = path.join(__dirname, '..');
 const DIR_CONTEUDO = path.join(__dirname, 'explicacoes');
 
 const MIN_CORPO = 500;    // abaixo disso nao e explicacao, e um toco
-const MAX_CORPO = 3000;   // o envio ao Telegram trunca; ~2500 e o alvo
+const MAX_CORPO = 3800;   // T006, decisao do Breno: o Telegram aceita 4096 e a mediana e ~2500
 const TAGS_OK = ['b', 'i'];
 const CAMPOS_FM = ['nivel', 'ordem', 'slug', 'titulo', 'modelo', 'data'];
 
@@ -144,9 +144,82 @@ const PT_META = new Set(('acao acoes academico adjetivo adjetivos adoentado adve
 const ROTULOS = new Set(['formas', 'forma', 'uso', 'usos', 'exemplo', 'exemplos', 'obs', 'nota',
   'atencao', 'regra', 'estrutura', 'nivel', 'topico', 'materia']);
 
+// MATERIA x MOBILIA DO EXEMPLO (calibragem do T006).
+//
+// A `descricao` do TRACK mistura duas coisas: a MATERIA (as formas, as estruturas, os termos a
+// ensinar, o erro comum) e a MOBILIA das frases que a ilustram. Em C2/4 a materia e "fronting"
+// e "inversao"; `road`, `car`, `beautiful` e `view` so existem porque alguem precisou escrever
+// "Down the road came a car". Exigir a mobilia obriga o gerador a COPIAR o exemplo do TRACK em
+// vez de ensinar o ponto — o espelho do falso positivo que o T005c tirou do detector de
+// gabarito. No T006, C2/4 reprovou por 46% de cobertura com sete termos faltando, e os sete
+// eram mobilia; A2/1 reprovou o ERRO COMUM por nao dizer `work`/`works`, que sao o verbo
+// escolhido para demonstrar a regra, e nao a regra.
+//
+// Duas fontes de mobilia, as duas reconheciveis pela FORMA, sem lista escrita a mao:
+//   (a) o par com seta DENTRO do ERRO COMUM: "(he work -> he works)", "(is speak -> is spoken)".
+//       Ali a seta demonstra o erro, e o verbo escolhido para demonstra-lo e mobilia. FORA do
+//       ERRO COMUM a seta e inventario de formas — "(quick->quickly, careful->carefully)" em
+//       B1/9 e o par adjetivo->adverbio, "(stop->stopped)" em A2/9 e a ortografia do -ed: e
+//       MATERIA, e continua exigida. Esta restricao veio da verificacao do T006, que pegou a
+//       regra engolindo os dois casos.
+//   (b) a frase de exemplo em ingles: um segmento comecado por MAIUSCULA, com >=3 palavras e
+//       NENHUMA palavra de meta-linguagem portuguesa. "Down the road came a car" e exemplo;
+//       "a blessing in disguise" e "the elephant in the room" (minusculas, itens de uma lista
+//       de idioms) NAO sao — ali o inventario e a propria materia, e continua exigido.
+//       EXCECAO, tambem da verificacao: segmento precedido de ROTULO DE MATERIA em maiusculas
+//       ("CONJUGACAO COMPLETA:", "CONTRACOES:", "PRESENTE:", "REGULARES:") e INVENTARIO DE
+//       FORMAS, nao exemplo. Sem isso a regra comia `i'm you're he's she's` do A1/6 — a
+//       conjugacao inteira, que e o coracao daquele topico. So o rotulo que anuncia EXEMPLO
+//       ("EX.:", "EXEMPLO:") deixa o segmento seguinte desprotegido.
+// Um termo que aparece TAMBEM fora do exemplo continua exigido: so cai o que so existe la.
+const MARCA_SETA = /(->|→|=>)/;
+const ROTULO_DE_EXEMPLO = /^(exs?|exemplos?)$/;
+
+// Rotulo estrutural da descricao: curto e em maiusculas ("ESTRUTURA", "ERRO COMUM", "EX.").
+function ehRotulo(segmento) {
+  const brutos = (segmento.match(/[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'-]*/g) || []);
+  if (!brutos.length || brutos.length > 3) return false;
+  return brutos.every((b) => b === b.toUpperCase());
+}
+
+function ehExemploIngles(segmento) {
+  const brutos = (segmento.match(/[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'-]*/g) || []);
+  if (brutos.length < 3) return false;
+  if (!/^[A-ZÀ-Ý]/.test(brutos[0])) return false;               // exemplo comeca por maiuscula
+  for (const b of brutos) {
+    const t = semAcento(b).toLowerCase();
+    if (PT_META.has(t) || ROTULOS.has(t)) return false;         // tem meta-linguagem: nao e exemplo
+  }
+  return true;
+}
+
+// A descricao sem a mobilia. Segmenta por ';', ':' e '.', que e como as descricoes do TRACK
+// separam rotulo, regra e exemplo — nao por virgula, que corta o exemplo ao meio.
+function semMobilia(texto) {
+  const bruto = String(texto);
+  const corteErro = bruto.search(/ERROS?\s+COMU(M|NS)/i);
+  const cabeca = corteErro >= 0 ? bruto.slice(0, corteErro) : bruto;
+  const erro = corteErro >= 0 ? bruto.slice(corteErro) : '';
+  // (a) so no ERRO COMUM: o par com seta e demonstracao do erro.
+  const semPar = cabeca + erro.replace(/\(([^)]*)\)/g, (todo, dentro) => MARCA_SETA.test(dentro) ? ' ' : todo);
+
+  const segmentos = semPar.split(/[;:.]/);
+  const fica = [];
+  for (let i = 0; i < segmentos.length; i++) {
+    const anterior = i > 0 ? segmentos[i - 1] : '';
+    const rotulo = ehRotulo(anterior);
+    const anunciaExemplo = rotulo &&
+      (anterior.match(/[A-Za-zÀ-ÿ]+/g) || []).some((p) => ROTULO_DE_EXEMPLO.test(semAcento(p).toLowerCase()));
+    const protegido = rotulo && !anunciaExemplo;   // inventario de formas anunciado por rotulo
+    if (!protegido && ehExemploIngles(segmentos[i])) continue;
+    fica.push(segmentos[i]);
+  }
+  return fica.join(' . ');
+}
+
 function termosExigiveis(texto) {
   const vistos = new Set();
-  for (const t of tokens(texto)) {
+  for (const t of tokens(semMobilia(texto))) {
     if (t.length < 3) continue;
     if (PT_META.has(t) || ROTULOS.has(t)) continue;
     vistos.add(t);
@@ -154,9 +227,19 @@ function termosExigiveis(texto) {
   return [...vistos];
 }
 
+// Tolerancia de plural (T006): o TRACK do C2/2 nomeia o erro como "mixed metaphors" e a
+// explicacao escreveu "a mixed metaphor" — o conteudo esta la, no singular. Cobrar a letra do
+// plural nao mede ensino, mede sorte de flexao. So o -s final, nada de radical: "metaphor"
+// conta por "metaphors", mas "metafora" (portugues) continua NAO contando por "metaphors".
+function presenteNoCorpo(presentes, t) {
+  if (presentes.has(t)) return true;
+  if (t.length > 3 && t.endsWith('s') && presentes.has(t.slice(0, -1))) return true;
+  return presentes.has(t + 's');
+}
+
 function cobertura(termos, corpo) {
   const presentes = new Set(tokens(corpo));
-  const faltando = termos.filter((t) => !presentes.has(t));
+  const faltando = termos.filter((t) => !presenteNoCorpo(presentes, t));
   const frac = termos.length ? (termos.length - faltando.length) / termos.length : 1;
   return { frac: frac, faltando: faltando, total: termos.length };
 }
@@ -174,9 +257,59 @@ const MARC_EN = new Set(('the you are and with when this that for not use used u
   'then there their about into than what which something someone always never after before here does don ' +
   'doesn means meaning').split(' '));
 
+// O QUE E MEDIDO — e por que nao e o texto todo (calibragem do T006).
+//
+// Ate aqui a fracao era calculada sobre o corpo INTEIRO. Mas o corpo inteiro nao esta em uma
+// lingua so, e nem deveria: o proprio prompt EXIGE a conjugacao completa, as linhas de formula
+// (`It is/was + [person] + who/that + ...`) e >=4 frases de exemplo — tudo em ingles, sempre.
+// Quanto mais alto o nivel, maior esse bloco, e a metrica media a proporcao de INGLES EXIGIDO,
+// nao o idioma da aula. No T006 isso reprovou 6 explicacoes escritas em portugues correto:
+// `C1/03` marcava 43% com a abertura "<i>Cleft sentences</i> sao estruturas que 'dividem' uma
+// frase para dar enfase" — prosa portuguesa impecavel, afogada pelas formulas.
+//
+// O conserto NAO foi baixar os 55%: baixar a trave faria passar tambem a aula escrita em
+// ingles, que e o que a checagem existe para pegar. O conserto foi tirar da conta os TRECHOS
+// que sao forma/exemplo — e SO os trechos:
+//   - <i>...</i>, que e como estas explicacoes citam termo, forma e frase em ingles;
+//   - o que esta entre aspas, entre crases e entre parenteses (a glosa, a traducao).
+//
+// POR SENTENCA, NUNCA POR LINHA. A primeira versao deste conserto descartava a LINHA de lista
+// inteira, e a verificacao do T006 a derrubou com um contra-exemplo certeiro: uma aula
+// INTEIRAMENTE em ingles, com cada frase de ensino numa linha comecada por "-" e tres linhas
+// curtas de portugues decorativo, media fracPt=1 e PASSAVA (o validador anterior a reprovava
+// com 26%). A prosa de um item de lista e prosa: "- Para I, you, we, they, usamos have" ensina
+// tanto quanto um paragrafo. A fixture `idioma-bullets-em-ingles` guarda esse ataque.
+//
+// Depois dos trechos citados, sobra o ingles que o autor NAO marcou — a conjugacao escrita
+// crua ("- I was working. He was working."). Descartar tudo devolveria o buraco; contar tudo
+// reprova a fixture `ok-b1-portugues`, que e portugues legitimo com a conjugacao crua. O eixo
+// que separa os dois e o TAMANHO DA SENTENCA: forma e exemplo sao curtos ("She was cooking
+// when the doorbell rang" tem 7 palavras); prosa que ENSINA e longa (as sentencas do ataque
+// tem 15 a 18). Entao: sentenca sem nenhum marcador portugues E com ate 8 palavras e forma ou
+// exemplo, e sai da conta. Todo o resto conta, com bullet ou sem.
+// LIMITE CONHECIDO, declarado: uma aula em ingles escrita inteira em sentencas de ate 8
+// palavras escapa. Nao e o que um modelo produz, e o preco de nao ter semantica aqui.
+const PALAVRAS_FORMA = 8;
+
+function trechosCitados(corpo) {
+  return String(corpo)
+    .replace(/<i>[\s\S]*?<\/i>/g, ' ')   // termo/forma/exemplo em ingles, marcado pelo autor
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/"[^"]*"/g, ' ')
+    .replace(/\([^)]*\)/g, ' ');
+}
+
+function prosaExplicativa(corpo) {
+  return trechosCitados(corpo).split(/[.!?\n]+/).filter((s) => {
+    const t = tokens(s);
+    if (t.length > PALAVRAS_FORMA) return true;          // sentenca longa: e prosa, conta
+    return t.some((w) => MARC_PT.has(w));                // curta: so conta se tiver portugues
+  }).join('\n');
+}
+
 function medeIdioma(corpo) {
   let pt = 0, en = 0;
-  for (const t of tokens(corpo)) {
+  for (const t of tokens(prosaExplicativa(corpo))) {
     if (MARC_PT.has(t)) pt++;
     if (MARC_EN.has(t)) en++;
   }
@@ -360,6 +493,28 @@ function questoesDoTopico(banco, topico) {
   return q;
 }
 
+// A EXCECAO DO TRACK, sem depender de uma palavra de funcao (T006).
+//
+// A excecao ja existia desde o T005c: se a `descricao` do TRACK manda ensinar aquilo, o
+// conflito e entre a questao e o TRACK, e o CLI AVISA em vez de reprovar. No T006 ela errou
+// por um "to": a practice #50 e "Complete the collocation: to ___ a decision." (resposta
+// "make"), o trecho resolvido fica "to make a decision", e o TRACK do B2/10 manda ensinar
+// "COLLOCATIONS com make/do/take: make a decision" e o erro '"do a decision" -> make a
+// decision'. A descricao tem "make a decision", nao "to make a decision" — e a excecao
+// passava ao largo. Medido, nao previsto: 12 geracoes seguidas do B2/10 reprovaram pelo mesmo
+// trecho, porque escrever "to make a decision" e a unica forma natural de ensinar o que o
+// TRACK mandou.
+// A folga vale SO para a excecao. A DETECCAO contra o corpo continua exigindo o trecho
+// inteiro: nada deixa de ser pego, o que muda e quando o achado vira AVISO em vez de falha.
+const FUNCAO_INICIAL = /^(to|the|a|an) /;
+
+function mandadoPeloTrack(trecho, descricao) {
+  if (trecho.casa(descricao)) return true;
+  const cru = String(trecho.trecho || '');
+  if (trecho.tipo !== 'enunciado resolvido' || !FUNCAO_INICIAL.test(cru)) return false;
+  return descricao.includes(cru.replace(FUNCAO_INICIAL, ''));
+}
+
 function achaVazamentos(corpo, topico, banco) {
   const alvo = normalizaTrecho(corpo);
   const daDescricao = normalizaTrecho(topico.descricao);
@@ -369,7 +524,7 @@ function achaVazamentos(corpo, topico, banco) {
       if (!t.casa(alvo)) continue;
       achados.push({
         origem: q.origem, tipo: t.tipo, trecho: t.trecho,
-        mandadoPeloTrack: t.casa(daDescricao)
+        mandadoPeloTrack: mandadoPeloTrack(t, daDescricao)
       });
     }
   }
@@ -413,9 +568,11 @@ function separaFrontmatter(bruto) {
 function problemasHtml(corpo) {
   const p = [];
   const add = (codigo, msg) => p.push({ codigo: codigo, msg: msg });
-  if (/(^|\n)\s*#{1,6}\s/.test(corpo) || /\*\*/.test(corpo) || /```/.test(corpo) ||
+  // A crase entrou na lista no T006: 7 dos 60 .md marcaram termo com `crase` em vez de <b>.
+  // O envio usa parse_mode=HTML, entao a crase nao formata nada — chega literal na tela do aluno.
+  if (/(^|\n)\s*#{1,6}\s/.test(corpo) || /\*\*/.test(corpo) || /`/.test(corpo) ||
       /(^|\n)\s*\|.*\|/.test(corpo) || /(^|\s)\*\s/.test(corpo)) {
-    add('HTML_MARKDOWN', 'contem markdown (##, **, ```, tabela com | ou bullet com *) — o envio usa parse_mode HTML');
+    add('HTML_MARKDOWN', 'contem markdown (##, **, crase, tabela com | ou bullet com *) — o envio usa parse_mode HTML');
   }
   if (/&/.test(corpo)) add('HTML_AMP', 'contem & cru (o Telegram exige &amp;)');
 
@@ -434,6 +591,35 @@ function problemasHtml(corpo) {
   const soltos = corpo.replace(/<\/?(b|i)>/g, '');
   if (/[<>]/.test(soltos)) add('HTML_ANGULO', 'contem < ou > solto fora de <b>/<i>');
   return p;
+}
+
+// ------------------------------------------------------------------ repeticao
+
+// LIXO SEMANTICO — o buraco que o validador nao via (achado duas vezes, em duas tarefas).
+// Nenhuma checagem aqui le o texto: elas contam termos, marcadores e tags. Um corpo montado
+// com a LISTA DE TERMOS do TRACK mais UMA FRASE REPETIDA doze vezes bate todos os contadores e
+// passa limpo — foi o que a verificacao do T005 mostrou e a do T006 repetiu, e e o pior falso
+// PASSOU possivel, porque o arquivo chega ao aluno com cara de aula.
+// Julgar "ensina ou nao ensina" exige leitura humana, e por isso o T006 tem revisao no diff.
+// Mas a forma degenerada mais obvia da para pegar sem semantica nenhuma: uma frase inteira
+// (>=5 palavras) repetida 3 vezes ou mais nao acontece em explicacao escrita de verdade —
+// medido nos 60 .md gerados, onde a repeticao maxima e 2.
+const REPETICAO_MAX = 2;
+const MIN_PALAVRAS_SENTENCA = 5;
+
+// Corta ANTES de normalizar: `normalizaTrecho` troca pontuacao por espaco, entao normalizar
+// primeiro devolveria o corpo inteiro como uma sentenca so (erro cometido e corrigido aqui).
+function sentencas(corpo) {
+  return String(corpo).split(/[.!?\n]+/)
+    .map((s) => normalizaTrecho(s))
+    .filter((s) => s.split(' ').filter(Boolean).length >= MIN_PALAVRAS_SENTENCA);
+}
+
+function repeticoes(corpo) {
+  const conta = new Map();
+  for (const s of sentencas(corpo)) conta.set(s, (conta.get(s) || 0) + 1);
+  return [...conta.entries()].filter(([, n]) => n > REPETICAO_MAX)
+    .sort((a, b) => b[1] - a[1]);
 }
 
 // ------------------------------------------------------------------ validacao de um arquivo
@@ -489,8 +675,17 @@ function validaArquivo(caminho, ctx) {
   for (const p of problemasHtml(corpo)) problemas.push(p);
 
   // --- cobertura da materia
-  const cobGeral = cobertura(termosExigiveis(topico.descricao), corpo);
-  if (cobGeral.frac < COBERTURA_MIN) {
+  const exigiveis = termosExigiveis(topico.descricao);
+  // Cobertura vazia e checagem inexistente. Se a `descricao` do TRACK nao tem NENHUM termo
+  // exigivel, o defeito e do TRACK, e tem de gritar — nao virar "eixo aberto" silencioso.
+  // (Veio da verificacao do T006: B2/4 ficou com zero termos e o validador seguia aprovando.)
+  if (!exigiveis.length) {
+    add('COBERTURA', 'a descricao do TRACK de ' + topico.nivel + '/' + topico.ordem +
+      ' nao tem nenhum termo exigivel — cobertura vazia e checagem inexistente. Corrija a ' +
+      'descricao no "Professor Engine" e rode `node conteudo/extrai_track.js`');
+  }
+  const cobGeral = cobertura(exigiveis, corpo);
+  if (exigiveis.length && cobGeral.frac < COBERTURA_MIN) {
     add('COBERTURA', 'cobre ' + Math.round(cobGeral.frac * 100) + '% dos ' + cobGeral.total +
       ' termos da descricao do TRACK (minimo ' + Math.round(COBERTURA_MIN * 100) + '%). Faltam: ' +
       cobGeral.faltando.slice(0, 12).join(', ') + (cobGeral.faltando.length > 12 ? ' ...' : ''));
@@ -506,13 +701,22 @@ function validaArquivo(caminho, ctx) {
         mErro[2].trim().slice(0, 90) + '")');
     } else {
       const secao = corpo.slice(marca);
-      const cobErro = cobertura(termosExigiveis(mErro[2]), secao);
+      // Passa o trecho COM o rotulo "ERRO COMUM:" — e ele que diz a `semMobilia` que os pares
+      // com seta ali dentro sao demonstracao do erro, e nao inventario de formas.
+      const cobErro = cobertura(termosExigiveis(mErro[0]), secao);
       if (cobErro.frac < ERRO_COMUM_MIN) {
         add('ERRO_COMUM', 'a secao de erros cobre ' + Math.round(cobErro.frac * 100) + '% dos ' +
           cobErro.total + ' termos do ERRO COMUM do TRACK (minimo ' + Math.round(ERRO_COMUM_MIN * 100) +
           '%). Faltam: ' + cobErro.faltando.slice(0, 12).join(', '));
       }
     }
+  }
+
+  // --- repeticao: a forma degenerada do lixo semantico
+  for (const [frase, n] of repeticoes(corpo)) {
+    add('REPETICAO', 'a mesma frase aparece ' + n + ' vezes (maximo ' + REPETICAO_MAX +
+      '): "' + frase.slice(0, 70) + '"');
+    break;   // uma basta para reprovar; listar todas so polui
   }
 
   // --- idioma, derivado do LANG do fluxo

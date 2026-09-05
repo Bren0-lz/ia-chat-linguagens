@@ -135,7 +135,7 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
   `.md` em git, o Breno lê no diff.
 - **Gate:** `node conteudo/valida_explicacoes.js` verde nos 60
 - **Depende de:** T005c
-- **Status:** TODO
+- **Status:** DONE — 60 válidos; revisão humana do Breno pendente, e é ela a rede real
 
 ### T007 — migration e seed
 - **Escopo:** `db/migrations/013_explicacoes_topico.sql` (nível, ordem, slug, título, corpo,
