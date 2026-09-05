@@ -3821,9 +3821,9 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent",
+        "url": "https://aiplatform.googleapis.com/v1/projects/agent-hackton/locations/global/publishers/google/models/gemini-2.5-flash-lite:generateContent",
         "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "googlePalmApi",
+        "nodeCredentialType": "googleApi",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Texto: \"' + $json.nameCheck.candidate + '\"' }] }], systemInstruction: { parts: [{ text: \"Voce valida se um texto que um usuario digitou e um NOME PROPRIO DE PESSOA. Responda SOMENTE com JSON, sem explicacao: {\\\"valido\\\":true|false,\\\"nome\\\":\\\"<nome limpo>\\\",\\\"motivo\\\":\\\"ok|saudacao|ofensivo|nao_e_nome\\\"}. INVALIDO: saudacoes (oi, hi, bom dia); respostas genericas (sim, nao, ok, teste, nada, sei la, qualquer um); palavras comuns, verbos ou substantivos que nao sao nomes; palavroes, xingamentos, termos sexuais, partes intimas do corpo ou suas girias e variacoes disfarcadas; nomes de figuras odiosas; sequencias aleatorias de letras. VALIDO: nomes proprios reais de qualquer cultura, inclusive incomuns, com ou sem sobrenome, e apelidos afetuosos comuns. Na duvida entre um nome raro e uma palavra comum, prefira valido. Se valido, devolva em \\\"nome\\\" apenas o nome, com a primeira letra maiuscula.\" }] }, generationConfig: { temperature: 0, maxOutputTokens: 256, responseMimeType: 'application/json' }, safetySettings: [{\"category\":\"HARM_CATEGORY_HARASSMENT\",\"threshold\":\"BLOCK_ONLY_HIGH\"},{\"category\":\"HARM_CATEGORY_HATE_SPEECH\",\"threshold\":\"BLOCK_ONLY_HIGH\"},{\"category\":\"HARM_CATEGORY_SEXUALLY_EXPLICIT\",\"threshold\":\"BLOCK_ONLY_HIGH\"},{\"category\":\"HARM_CATEGORY_DANGEROUS_CONTENT\",\"threshold\":\"BLOCK_ONLY_HIGH\"}] }) }}",
@@ -3842,7 +3842,13 @@
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 1000,
-      "onError": "continueRegularOutput"
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "googleApi": {
+          "id": "mKfC2ANkOKHfbKal",
+          "name": "Google Service Account account"
+        }
+      }
     },
     {
       "parameters": {
