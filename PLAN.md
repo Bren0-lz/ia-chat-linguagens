@@ -43,7 +43,7 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
   **Não tocar** no workflow `9MA0o1XJjD33BnKc`; conferir `active` dos dois no fim.
 - **Gate:** `npm run gate && node fluxos/_teststand/gate_vivo_v8.js`
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE — workflow `PbwEf7L9xEXhJaCg`, ativo em paralelo ao v7.4
 
 ### T002 — Professor: abre-alas determinístico
 - **Escopo:** nó novo que envia `📚 Tópico N/10: <título>` **antes** de chamar o `Agente Professor`,

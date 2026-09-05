@@ -23,7 +23,8 @@
           "id": "IOXDZsXhaGzp9pFD",
           "name": "Telegram account"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -3496,7 +3497,7 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "iachat-test",
+        "path": "iachat-test-v8",
         "authentication": "headerAuth",
         "options": {}
       },

@@ -3,7 +3,11 @@
 // Configure via env: N8N_API_KEY (obrigatório), N8N_URL (opcional, default localhost:5678).
 const BASE = process.env.N8N_URL || 'http://localhost:5678';
 const API = BASE + '/api/v1';
-const WEBHOOK = BASE + '/webhook/iachat-test';
+// O path do TEST Ingress varia por versao do fluxo: o v7.4 (no ar) atende em
+// `iachat-test`; o v8, publicado como workflow separado, em `iachat-test-v8`.
+// Default = v7.4, para nao quebrar os ~20 scripts que ja usam este harness.
+const TEST_PATH = process.env.IACHAT_TEST_PATH || 'iachat-test';
+const WEBHOOK = BASE + '/webhook/' + TEST_PATH;
 
 // Le uma chave do .env da raiz do repo (mesmo lugar do IACHAT_TEST_SECRET).
 function fromDotEnv(name) {
@@ -158,7 +162,7 @@ async function cb(userId, data) {
   return postUpdate({ update_id: u, callback_query: { id: String(u), from: { id: userId, is_bot: false, first_name: 'Teen' }, message: { message_id: u, chat: { id: userId, type: 'private' }, date: Math.floor(Date.now()/1000), text: '(x)' }, data } }, userId);
 }
 
-module.exports = { msg, cb, digest, nodeOut, jget, API, sleep, nextUpd };
+module.exports = { msg, cb, digest, nodeOut, jget, API, sleep, nextUpd, WEBHOOK, TEST_PATH };
 
 // ---- smoke test when run directly ----
 if (require.main === module) {
