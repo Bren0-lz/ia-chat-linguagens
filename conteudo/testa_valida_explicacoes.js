@@ -2,7 +2,7 @@
 //
 // Uso:  node conteudo/testa_valida_explicacoes.js
 //
-// Tres blocos:
+// Cinco blocos:
 //   1. FIXTURES  — `conteudo/_fixtures_explicacoes/<caso>/<NIVEL>/<arquivo>.md`, um caso por
 //      classe de defeito. Cada caso declara o CODIGO que espera: fixture que reprova pelo
 //      motivo errado nao vale como prova (o instrumento pode estar julgando a string errada,
@@ -14,18 +14,26 @@
 //      reprova quem voltar a cravar o mapa de idiomas dentro do validador.
 //   3. GABARITO — vazar e entregar o ITEM ESPECIFICO da questao, nao usar o vocabulario do
 //      topico. Os dois lados sao testados: a explicacao que reproduz o enunciado resolvido
-//      reprova; a que fala da mesma materia com as mesmas palavras passa.
+//      reprova; a que fala da mesma materia com as mesmas palavras passa. Em 3b e 3c, a
+//      calibragem do T005c: citar a forma canonica ("Never have I seen such chaos") NAO
+//      reprova, reproduzir o par enunciado->resposta reprova, e a simulacao dos 60 topicos
+//      (`simula_vazamento.js`) tem de dar 0 falso positivo em VARIAS redacoes de aula
+//      legitima, e pegar o item reproduzido nas duas ordens. Os eixos que o detector nao
+//      cobre (distancia e remendo) sao IMPRESSOS, nao afirmados — teste que so mede a
+//      redacao escolhida por ele mesmo nao e evidencia.
 //   4. BOMBA DO T006 — .md truncado no disco: o gerador NAO pode pula-lo, e a gravacao tem
 //      de ser atomica (se o rename falhar, o destino nao existe).
+//   5. REGISTRO DO PROMPT — a diretiva que o gerador manda ao modelo sai do LANG daquele
+//      nivel: B1 e C2 recebem linhas diferentes, e elas mudam quando o LANG do fluxo muda.
 
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const {
   validaArquivo, contexto, listaMd, idiomaPorNivel, classificaDiretiva, achaVazamentos,
-  DIR_CONTEUDO
+  diretivaExplicacaoPorNivel, DIR_CONTEUDO
 } = require('./valida_explicacoes.js');
-const { gravaAtomico, precisaGerar } = require('./gerar_explicacoes.js');
+const { gravaAtomico, precisaGerar, montaPrompt } = require('./gerar_explicacoes.js');
 
 const RAIZ = path.join(__dirname, '..');
 const DIR_FIX = path.join(__dirname, '_fixtures_explicacoes');
@@ -147,6 +155,83 @@ ok(vazReal.length > 0 && vazReal.some((v) => !v.mandadoPeloTrack),
 ok(achaVazamentos('Example: She was cooking when the doorbell rang.', b11, ctx.questoes).length === 0,
   'a mesma estrutura com outro sujeito e outro final NAO e vazamento');
 
+// --- 3b. calibragem do T005c: forma canonica x item reproduzido
+// A regra antiga ("a resposta sozinha, se for frase, e vazamento") reprovava a frase que
+// qualquer material usa para ensinar o topico. Cada assercao abaixo REPROVA aquela versao.
+const c12 = ctx.topicos.find((t) => t.nivel === 'C1' && t.ordem === 2);
+ok(achaVazamentos(
+  'Na inversao o auxiliar vem antes do sujeito: Never have I seen such chaos. Repare na ordem.',
+  c12, ctx.questoes).length === 0,
+  'C1/2: citar a forma canonica da inversao ("Never have I seen such chaos") NAO e vazamento');
+
+const b21 = ctx.topicos.find((t) => t.nivel === 'B2' && t.ordem === 1);
+ok(achaVazamentos('A forma e have/has been + -ing: I have been learning English.', b21, ctx.questoes).length === 0,
+  'B2/1: citar "have been learning" numa frase propria NAO e vazamento');
+
+const b22 = ctx.topicos.find((t) => t.nivel === 'B2' && t.ordem === 2);
+ok(achaVazamentos('O past perfect marca o anterior: he had never seen anything like it.', b22, ctx.questoes).length === 0,
+  'B2/2: citar "had never seen" numa frase propria NAO e vazamento');
+
+// O outro lado: reproduzir o ITEM — enunciado e resposta juntos, na mesma ordem — continua
+// sendo vazamento, e pelo motivo certo (tipo "item reproduzido", nao "resposta").
+const parVaza = achaVazamentos(
+  'Exercicio resolvido: de "I have never seen such chaos" fica "Never have I seen such chaos".',
+  c12, ctx.questoes);
+ok(parVaza.length === 1 && parVaza[0].tipo === 'item reproduzido' && !parVaza[0].mandadoPeloTrack,
+  'C1/2: reproduzir o par enunciado->resposta E vazamento (' +
+  (parVaza[0] ? parVaza[0].origem + ' ' + parVaza[0].tipo : 'nao pegou') + ')');
+
+// A ORDEM NAO importa (simetria fechada na verificacao do T005c): a prosa didatica escreve
+// primeiro a forma certa e so depois a frase que ela corrige, e exigir "fonte antes da
+// resposta" deixava escapar 100% dos itens escritos assim.
+const invertido = achaVazamentos(
+  'A forma correta e Never have I seen such chaos. Ela corrige a frase "I have never seen such chaos".',
+  c12, ctx.questoes);
+ok(invertido.length === 1 && invertido[0].tipo === 'item reproduzido',
+  'reproduzir o item na ordem INVERTIDA tambem e vazamento (' +
+  (invertido[0] ? invertido[0].origem : 'ESCAPOU') + ')');
+
+// A PROXIMIDADE, sim, importa — e o preco dela e um eixo cego, declarado no comentario do
+// validador e medido pelo gate: as duas frases longe uma da outra escapam.
+const longe = 'I have never seen such chaos.' + ' bla bla bla filler.'.repeat(30) + ' Never have I seen such chaos.';
+ok(achaVazamentos(longe, c12, ctx.questoes).length === 0,
+  'EIXO ABERTO, nao virtude: as duas frases a 600 chars de distancia escapam (a janela e o que ' +
+  'impede o falso positivo; sem ela, aula que cite as duas em paragrafos distintos reprovaria)');
+
+// --- 3c. a simulacao dos 60 topicos e das 100 questoes (conteudo/simula_vazamento.js).
+// O teste NAO pode se apoiar numa unica redacao: a primeira versao deste bloco media um texto
+// que nunca emitia o enunciado contra uma regra que exige o enunciado, e o "0/60" era
+// tautologico. Aqui cada lado tem varias redacoes, e as que ficam abertas sao IMPRESSAS, nao
+// afirmadas — para que o numero do gate descreva a capacidade real.
+const sim = require('./simula_vazamento.js');
+// Numeros da regra anterior (medidos na verificacao do T005c, com estas mesmas redacoes).
+const ANTES = { 'forma-canonica': '22/60 topicos e 26/101 questoes', 'forma-fonte-longe': '17/60 topicos e 17/18 questoes' };
+for (const r of sim.SAO_FORMA) {
+  const maus = sim.porTopico(ctx, r).filter((c) => c.reprova.length);
+  const m = sim.porQuestao(ctx, r);
+  ok(maus.length === 0 && m.pegas === 0,
+    'FORMA "' + r + '": material de ensino legitimo nao reprova — ' + maus.length + '/60 topicos, ' +
+    m.pegas + '/' + m.aplicaveis + ' questoes (regra anterior: ' + ANTES[r] + ')');
+}
+for (const r of sim.SAO_ITEM) {
+  const m = sim.porQuestao(ctx, r);
+  const taxa = m.aplicaveis ? Math.round((m.pegas / m.aplicaveis) * 100) : 100;
+  if (sim.ABERTOS.indexOf(r) >= 0) {
+    console.log('  ~ EIXO ABERTO "' + r + '": pega ' + m.pegas + '/' + m.aplicaveis +
+      ' (' + taxa + '%) — declarado no validador, nao exigido aqui');
+    continue;
+  }
+  ok(m.pegas / m.aplicaveis >= 0.9,
+    'ITEM "' + r + '": reproduzir o item continua sendo pego — ' + m.pegas + '/' + m.aplicaveis + ' (' + taxa + '%)');
+}
+
+// Divida registrada, nao consertada: questoes que nenhum detector alcanca. O teste segura o
+// numero para que ele nao cresca em silencio; abaixar e bem-vindo, subir precisa de decisao.
+const cob = sim.cobertura(ctx);
+ok(cob.cegas.length <= 65,
+  'ponto cego estrutural: ' + cob.cegasPractice + '/' + cob.practice + ' practice e ' +
+  cob.cegasExam + '/' + cob.exam + ' exam sem detector nenhum (teto declarado: 65 no total)');
+
 // ---------------------------------------------------------------- 4. a bomba do T006
 console.log('\n== 4. Retomada e gravacao atomica (bomba do T006) ==');
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'iachat-t005-'));
@@ -183,6 +268,49 @@ gravaAtomico(novo, 'ok\n');
 ok(fs.readFileSync(novo, 'utf8') === 'ok\n', 'gravaAtomico grava o conteudo inteiro no caminho feliz');
 
 fs.rmSync(tmpDir, { recursive: true, force: true });
+
+// ---------------------------------------------------------------- 5. registro do prompt (T005c)
+// A diretiva que o gerador manda ao modelo sai do LANG daquele nivel, com o REGISTRO que o
+// fluxo escreveu. Ate o T005c era um molde unico por idioma, copiado do A1 — B1..C2 recebiam
+// "sempre com o termo em ingles seguido da traducao" e a progressao do LANG virava pó.
+console.log('\n== 5. Registro do prompt vem do LANG, por nivel ==');
+const b1t = ctx.topicos.find((t) => t.nivel === 'B1' && t.ordem === 1);
+const c2t = ctx.topicos.find((t) => t.nivel === 'C2' && t.ordem === 1);
+const linhaIdioma = (p) => (p.split('\n').find((l) => l.indexOf('IDIOMA E REGISTRO') === 0) || '');
+const pB1 = linhaIdioma(montaPrompt(b1t, 10, ctx.diretiva.B1));
+const pC2 = linhaIdioma(montaPrompt(c2t, 10, ctx.diretiva.C2));
+ok(pB1 !== pC2, 'a diretiva de B1 e a de C2 sao DIFERENTES (antes eram a mesma linha)');
+ok(pB1.indexOf(ctx.diretiva.B1) > 0 && pC2.indexOf(ctx.diretiva.C2) > 0,
+  'cada uma e, ao pe da letra, o trecho de EXPLICACAO do LANG daquele nivel');
+ok(pB1.indexOf('PERGUNTAS') < 0 && pC2.indexOf('PERGUNTAS') < 0,
+  'a parte do LANG que fala das PERGUNTAS nao entra no prompt da explicacao');
+console.log('      B1: ' + pB1.slice(0, 150));
+console.log('      C2: ' + pC2.slice(0, 150));
+
+// E ela acompanha o fluxo: muda o LANG, muda o prompt. Sem isso, um mapa cravado no gerador
+// passaria neste teste.
+const fluxoC2 = path.join(os.tmpdir(), 'iachat-registro-mutado-' + process.pid + '.json');
+{
+  const bruto = JSON.parse(fs.readFileSync(path.join(RAIZ, 'fluxos', 'IAChat_Telegram_v8.json'), 'utf8'));
+  const engine = bruto.nodes.find((n) => n.name === 'Professor Engine');
+  const antes = engine.parameters.jsCode;
+  engine.parameters.jsCode = antes.replace(
+    /C2:'[^']*'/,
+    "C2:'Escreva a EXPLICAÇÃO em português telegráfico, só bullet points. As PERGUNTAS são em inglês; resposta curta.'");
+  ok(engine.parameters.jsCode !== antes, 'consegui mutar a diretiva de C2 no fluxo de teste');
+  fs.writeFileSync(fluxoC2, JSON.stringify(bruto, null, 2), 'utf8');
+}
+const dirMutada = diretivaExplicacaoPorNivel(fluxoC2);
+const pC2m = linhaIdioma(montaPrompt(c2t, 10, dirMutada.C2));
+ok(pC2m !== pC2 && pC2m.indexOf('telegrafico') < 0 && pC2m.indexOf('telegráfico') > 0,
+  'trocando o LANG de C2 no fluxo, a diretiva do prompt muda junto: ' + pC2m.slice(38, 110));
+ok(diretivaExplicacaoPorNivel(fluxoC2).B1 === ctx.diretiva.B1,
+  'e so o nivel mutado muda — B1 segue igual');
+fs.rmSync(fluxoC2, { force: true });
+
+let semDiretiva = false;
+try { montaPrompt(c2t, 10, ''); semDiretiva = true; } catch (e) { /* esperado */ }
+ok(!semDiretiva, 'sem diretiva no fluxo o gerador estoura, em vez de cair num molde escondido');
 
 console.log('\n' + (fails ? 'REPROVOU: ' + fails + ' falha(s)' : 'PASSOU: validador reprova cada classe de defeito e a retomada nao pula lixo'));
 process.exit(fails ? 1 : 0);

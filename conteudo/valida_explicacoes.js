@@ -68,6 +68,28 @@ function idiomaPorNivel(caminhoFluxo) {
   return mapa;
 }
 
+// A diretiva de EXPLICACAO daquele nivel, ao pe da letra, como o fluxo a escreveu — e nao so
+// o rotulo 'pt'/'en'. E o que o gerador manda ao modelo: o LANG ja diz, por nivel, o REGISTRO
+// esperado ("claro e simples, uma ideia por frase" em B1, "denso e economico, de leitor
+// experiente" em C2). Ate o T005c o gerador tinha um molde unico por idioma, escrito a mao e
+// copiado do A1 ("sempre com o termo em ingles seguido da traducao"), que achatava B1..C2 no
+// registro do A1 — uma terceira verdade, que envelhece sozinha. Corta em "As PERGUNTAS", que
+// e outro artefato (o enunciado das questoes, gerado pelo fluxo ao vivo).
+function diretivaExplicacao(nivel, texto) {
+  const bruto = String(texto || '');
+  const corte = bruto.search(/\bas\s+perguntas\b/i);
+  const trecho = (corte > 0 ? bruto.slice(0, corte) : bruto).trim().replace(/[\s;.]+$/, '');
+  if (!trecho) throw new Error('LANG do nivel ' + nivel + ' nao tem diretiva de explicacao');
+  return trecho;
+}
+
+function diretivaExplicacaoPorNivel(caminhoFluxo) {
+  const LANG = capturaConst('LANG', caminhoFluxo);
+  const mapa = {};
+  for (const nivel of Object.keys(LANG)) mapa[nivel] = diretivaExplicacao(nivel, LANG[nivel]);
+  return mapa;
+}
+
 // ------------------------------------------------------------------ texto
 
 function semAcento(s) {
@@ -164,6 +186,23 @@ function medeIdioma(corpo) {
 
 // ------------------------------------------------------------------ gabarito das questoes
 
+// CALIBRACAO DO T005c — por que a regra da "resposta sozinha" saiu.
+//
+// Ate aqui havia uma segunda regra: a RESPOSTA sozinha, quando ja era frase (>=3 palavras e
+// >=12 chars), contava como vazamento. A simulacao do T005c (`simula_vazamento.js`) montou, para
+// os 60 topicos, a aula que ENSINA a materia do proprio topico — o corpo cita a forma canonica,
+// sem tocar no enunciado — e essa regra reprovava 22 dos 60. Entre os 22:
+// "never have i seen such chaos" (C1/2), que e O exemplo de inversao; "had never seen" (B2/2);
+// "have been learning" (B2/1); "i am not tired" (A1/7). Nenhum deles entrega item nenhum: a
+// questao do C1/2 e "Invert: 'I have never seen such chaos.'" — quem le so a forma invertida
+// ainda precisa saber que ela e a resposta daquele pedido.
+//
+// Subir o numero de palavras nao resolveria: a frase canonica da inversao tem 6 palavras e 28
+// caracteres, mais que qualquer limiar que ainda deixasse passar vazamento de verdade. O eixo
+// que separa os dois casos nao e tamanho, e sim se o corpo reproduz o ITEM — o pedido do
+// enunciado E a resposta dele, juntos. A ordem NAO importa: "a resposta e X, ela corrige Y"
+// entrega o item tanto quanto "de Y fica X", e e a ordem natural da prosa didatica.
+//
 // O QUE CONTA COMO VAZAMENTO — e o que NAO conta.
 //
 // Nao conta: usar o vocabulario e as formas do topico. A explicacao de "Past continuous" tem
@@ -171,23 +210,54 @@ function medeIdioma(corpo) {
 // literalmente, a resposta de uma das questoes. Reprovar isso reprovaria os 60 no T006 e
 // mataria a explicacao como material de ensino.
 //
-// Conta: entregar de bandeja o ITEM ESPECIFICO. Duas formas, as duas exigindo que o trecho
-// seja distintivo o bastante para nao acontecer por acaso:
-//   (a) a FRASE RESOLVIDA — o enunciado com a lacuna ja preenchida pela resposta — aparece
-//       no corpo (>= 4 palavras e >= 18 caracteres);
-//   (b) a RESPOSTA sozinha, quando ela ja e uma frase (>= 3 palavras e >= 12 caracteres),
-//       aparece no corpo.
+// Conta: entregar de bandeja o ITEM ESPECIFICO, nas duas formas que o banco tem:
+//   (a) FRASE RESOLVIDA — enunciado com lacuna, com a lacuna ja preenchida pela resposta
+//       (>= 4 palavras e >= 18 chars), aparece no corpo;
+//   (b) PAR ENUNCIADO->RESPOSTA — enunciado de transformacao ("Corrija: '...'", "Invert: '...'",
+//       "Rewrite: '...'"), onde a frase-fonte (>= 3 palavras e >= 12 chars) aparece no corpo e a
+//       resposta (>= 2 palavras e >= 8 chars) aparece a menos de JANELA_PAR chars dela, em
+//       QUALQUER ORDEM. So a proximidade distingue "ensinou a transformacao daquele item" de
+//       "as duas frases calharam de existir no mesmo texto" — exigir a ordem fonte->resposta
+//       deixava escapar toda aula escrita como "o correto e X; a frase Y esta errada".
 //
 // Excecao, e ela vem dos dados, nao de uma lista escrita a mao: se o trecho JA ESTA na
 // `descricao` do TRACK daquele topico, o gerador foi MANDADO ensinar aquilo (o TRACK do B1/2
-// manda ensinar "I have seen him yesterday ... I saw him yesterday", que e exatamente uma das
+// manda ensinar "I have seen him yesterday -> I saw him yesterday", que e exatamente uma das
 // questoes). Nesse caso o conflito e entre a questao e o TRACK, nao um defeito da explicacao;
-// o CLI avisa, e nao reprova.
+// o CLI avisa, e nao reprova. O mesmo teste roda contra a descricao e contra o corpo.
+//
+// O QUE ESTE DETECTOR NAO VE. Quatro eixos, medidos por `simula_vazamento.js` e relatados no
+// gate a cada rodada — nenhum deles vai ser consertado no T005c, e todos ficam abertos para
+// quem revisar os 60 .md do T006 a olho:
+//
+//   1. QUESTAO SEM DETECTOR (estrutural): 36 das 136 de practice e 29 das 60 de exam. Resposta
+//      de uma palavra ("went", "have", "ever"), ou enunciado sem lacuna e sem frase-fonte entre
+//      aspas ("Qual e a pergunta correta?" -> "Are you ready?"). Nao ha o que casar.
+//   2. DISTANCIA: frase-fonte e resposta a mais de JANELA_PAR chars uma da outra escapam
+//      (0/18 das questoes de par). A janela e o que impede o falso positivo; sem ela, qualquer
+//      aula que cite as duas frases em paragrafos distintos reprovaria.
+//   3. REMENDO: uma palavra a mais no meio da frase ("she don't REALMENTE like coffee") escapa
+//      (0/100). O casamento e literal, por substring; parear texto parecido exigiria medida de
+//      similaridade, que traz falso positivo junto.
+//   4. LACUNA COPIADA + RESPOSTA AO LADO: nas 82 questoes de lacuna a `fraseFonte` e nula (o
+//      enunciado tem "___"), entao so vale a regra (a). Um corpo que copie o enunciado COM a
+//      lacuna e ponha a resposta ao lado ("She ___ (live) here since 2010 -> has lived") escapa
+//      em 81 das 82. Achado na verificacao do T005c. Risco baixo na pratica: o gerador nunca ve
+//      os enunciados, entao nao tem de onde copiar a lacuna — mas o eixo existe.
+//
+// A regra anterior ("a resposta sozinha, se for frase, e vazamento") cobria parte dos eixos 2
+// e 3 — 17/18 e 18/94 — ao preco de 26 falsos positivos em 101 questoes e 22 dos 60 topicos.
+// A troca foi deliberada: falso negativo custa uma questao decorada; falso positivo reprovaria
+// as 60 explicacoes do T006 e mataria a explicacao como material de ensino. O que NAO vale e
+// relatar isso como aumento de deteccao: o gate imprime os seis numeros, sempre.
 
 const MIN_PALAVRAS_FRASE = 4;
 const MIN_CHARS_FRASE = 18;
-const MIN_PALAVRAS_RESPOSTA = 3;
-const MIN_CHARS_RESPOSTA = 12;
+const MIN_PALAVRAS_FONTE = 3;
+const MIN_CHARS_FONTE = 12;
+const MIN_PALAVRAS_RESPOSTA = 2;
+const MIN_CHARS_RESPOSTA = 8;
+const JANELA_PAR = 240;   // chars entre o fim da frase-fonte e o inicio da resposta
 
 function normalizaTrecho(s) {
   return semAcento(String(s).replace(/<[^>]*>/g, ' '))
@@ -198,25 +268,82 @@ function distintiva(s, minPal, minChars) {
   return !!s && s.length >= minChars && s.split(' ').filter(Boolean).length >= minPal;
 }
 
-// Enunciado com a lacuna preenchida. Descarta o comando em portugues ("Complete: ...") e as
-// dicas entre parenteses, que nao fazem parte da frase.
-function fraseResolvida(prompt, answer) {
-  let p = String(prompt || '');
+// Enunciado sem o comando em portugues ("Complete: ...") e sem as dicas entre parenteses.
+// Prefere o que esta entre aspas (a frase-fonte das questoes de transformacao); se o que esta
+// entre aspas nao tem a lacuna mas o enunciado inteiro tem, volta para o enunciado inteiro.
+function corpoDoEnunciado(prompt, exigeLacuna) {
+  const p = String(prompt || '');
+  const semComando = (() => { const i = p.indexOf(':'); return (i >= 0 && i < 60) ? p.slice(i + 1) : p; })();
   const aspas = p.match(/"([^"]+)"/g);
-  if (aspas && aspas.length) p = aspas.map((x) => x.slice(1, -1)).join(' ');
-  else { const i = p.indexOf(':'); if (i >= 0 && i < 60) p = p.slice(i + 1); }
-  p = p.replace(/\([^)]*\)/g, ' ');
+  let escolhido = aspas && aspas.length ? aspas.map((x) => x.slice(1, -1)).join(' ') : semComando;
+  if (exigeLacuna && !/_/.test(escolhido) && /_/.test(semComando)) escolhido = semComando;
+  return escolhido.replace(/\([^)]*\)/g, ' ');
+}
+
+function fraseResolvida(prompt, answer) {
+  const p = corpoDoEnunciado(prompt, true);
   if (!/_/.test(p)) return null;
   return normalizaTrecho(p.replace(/(_+\s*)+/g, ' ' + String(answer || '') + ' '));
 }
 
-// Trechos que, se aparecerem no corpo, sao vazamento daquela questao.
+// Frase-fonte das questoes de transformacao: o que o aluno recebe para transformar. So existe
+// quando o enunciado NAO tem lacuna (com lacuna, quem cobre e a regra (a)) e quando ela nao ja
+// contem a resposta.
+function fraseFonte(prompt, answer) {
+  // So conta o que esta entre aspas: e ali que mora a frase que o aluno recebe para
+  // transformar. Sem aspas sobraria o comando ('Qual e a pergunta correta?'), que e
+  // meta-linguagem em portugues e nunca apareceria no corpo — detector que nunca dispara.
+  if (!/"[^"]+"/.test(String(prompt || ''))) return null;
+  // Com lacuna, quem cobre e a regra (a): a frase resolvida ja e o item inteiro. Se o par
+  // tambem valesse aqui, o pedaco citado ANTES da lacuna viraria fonte e a resposta sozinha
+  // no meio da aula bastaria — a regra que o T005c acabou de tirar, de volta pela janela.
+  if (/_/.test(String(prompt || ''))) return null;
+  const p = corpoDoEnunciado(prompt, false);
+  const fonte = normalizaTrecho(p);
+  const resp = normalizaTrecho(answer);
+  if (!distintiva(fonte, MIN_PALAVRAS_FONTE, MIN_CHARS_FONTE)) return null;
+  if (!distintiva(resp, MIN_PALAVRAS_RESPOSTA, MIN_CHARS_RESPOSTA)) return null;
+  if (fonte.includes(resp) || resp.includes(fonte)) return null;
+  return { fonte: fonte, resposta: resp };
+}
+
+function posicoes(alvo, agulha) {
+  const out = [];
+  let i = alvo.indexOf(agulha);
+  while (i >= 0) { out.push(i); i = alvo.indexOf(agulha, i + 1); }
+  return out;
+}
+
+// Frase-fonte e resposta a menos de JANELA_PAR chars uma da outra, EM QUALQUER ORDEM.
+// A ordem foi simetrica desde a verificacao do T005c: exigir "fonte antes da resposta" deixava
+// escapar 100% dos itens escritos na ordem natural da prosa didatica — "A forma correta e X.
+// Ela corrige a frase Y." So a PROXIMIDADE distingue "resolveu aquele item" de "as duas frases
+// existem no mesmo texto"; a ordem nao distingue nada, e cobra-la e um convite ao vazamento.
+function achaPar(alvo, fonte, resposta) {
+  for (const f of posicoes(alvo, fonte)) {
+    for (const r of posicoes(alvo, resposta)) {
+      const vao = r >= f ? r - (f + fonte.length) : f - (r + resposta.length);
+      if (vao <= JANELA_PAR) return true;
+    }
+  }
+  return false;
+}
+
+// Trechos que, se aparecerem no texto, sao vazamento daquela questao. Cada um sabe se casa com
+// um texto — assim a mesma prova roda contra o corpo e contra a `descricao` do TRACK.
 function trechosDaQuestao(q) {
   const out = [];
   const frase = fraseResolvida(q.prompt, q.answer);
-  if (distintiva(frase, MIN_PALAVRAS_FRASE, MIN_CHARS_FRASE)) out.push({ tipo: 'enunciado resolvido', trecho: frase });
-  const resp = normalizaTrecho(q.answer);
-  if (distintiva(resp, MIN_PALAVRAS_RESPOSTA, MIN_CHARS_RESPOSTA)) out.push({ tipo: 'resposta', trecho: resp });
+  if (distintiva(frase, MIN_PALAVRAS_FRASE, MIN_CHARS_FRASE)) {
+    out.push({ tipo: 'enunciado resolvido', trecho: frase, casa: (alvo) => alvo.includes(frase) });
+  }
+  const par = fraseFonte(q.prompt, q.answer);
+  if (par) {
+    out.push({
+      tipo: 'item reproduzido', trecho: par.fonte + ' -> ' + par.resposta,
+      casa: (alvo) => achaPar(alvo, par.fonte, par.resposta)
+    });
+  }
   return out;
 }
 
@@ -239,10 +366,10 @@ function achaVazamentos(corpo, topico, banco) {
   const achados = [];
   for (const q of questoesDoTopico(banco, topico)) {
     for (const t of trechosDaQuestao(q)) {
-      if (!alvo.includes(t.trecho)) continue;
+      if (!t.casa(alvo)) continue;
       achados.push({
         origem: q.origem, tipo: t.tipo, trecho: t.trecho,
-        mandadoPeloTrack: daDescricao.includes(t.trecho)
+        mandadoPeloTrack: t.casa(daDescricao)
       });
     }
   }
@@ -427,7 +554,10 @@ function contexto(caminhoFluxo) {
   if (!Array.isArray(topicos) || !topicos.length) {
     throw new Error('track.json sem topicos — rode `node conteudo/extrai_track.js`');
   }
-  return { topicos: topicos, idioma: idiomaPorNivel(fluxo), questoes: carregaQuestoes(), fluxo: fluxo };
+  return {
+    topicos: topicos, idioma: idiomaPorNivel(fluxo), diretiva: diretivaExplicacaoPorNivel(fluxo),
+    questoes: carregaQuestoes(), fluxo: fluxo
+  };
 }
 
 function listaMd(dir) {
@@ -453,8 +583,9 @@ function arquivoValido(caminho, ctx) {
 
 module.exports = {
   validaArquivo, arquivoValido, contexto, listaMd, idiomaPorNivel, classificaDiretiva,
+  diretivaExplicacao, diretivaExplicacaoPorNivel,
   termosExigiveis, medeIdioma, separaFrontmatter, problemasHtml,
-  achaVazamentos, fraseResolvida, carregaQuestoes,
+  achaVazamentos, fraseResolvida, fraseFonte, trechosDaQuestao, carregaQuestoes,
   DIR_CONTEUDO, MIN_CORPO, MAX_CORPO
 };
 

@@ -128,7 +128,7 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
 - **Gate:** a simulação que hoje reprova 22/60 passa a reprovar só o que é vazamento de verdade, com
   as fixtures das duas direções ainda verdes; `npm run gate` verde
 - **Depende de:** T005b
-- **Status:** TODO
+- **Status:** DONE — falso positivo 22/60 → 0/60, regra simétrica na ordem, 4 eixos declarados
 
 ### T006 — gerar os 60 e revisar
 - **Escopo:** rodar o gerador nos 60 tópicos, um commit por nível. Ponto de revisão humana: são

@@ -44,14 +44,15 @@ const MAX_OUTPUT_TOKENS = 12000;
 const MIN_CARACTERES = 500;   // abaixo disso nao e explicacao, e um toco
 const MAX_CARACTERES = 3000;  // o envio ao Telegram trunca; ~2500 e o alvo
 
-// Contrato de idioma por nivel — DERIVADO do `const LANG` do no "Professor Engine", nao
-// copiado. `idiomaPorNivel()` le o fluxo e devolve 'pt' ou 'en' por nivel; a diretiva do
-// prompt sai de um dos dois moldes abaixo. Assim o gerador e o validador seguem juntos a
-// politica que o Breno mudar no fluxo, sem uma terceira verdade para envelhecer.
-const DIRETIVA_IDIOMA = {
-  pt: 'Escreva a explicacao em PORTUGUES simples (aluno brasileiro), sempre com o termo em ingles seguido da traducao.',
-  en: 'Write the whole explanation in clear ENGLISH, at the level of the student. No Portuguese at all.'
-};
+// Contrato de idioma E DE REGISTRO por nivel — VEM do `const LANG` do no "Professor Engine",
+// ao pe da letra (`ctx.diretiva[nivel]`), nao de um molde escrito aqui.
+//
+// Ate o T005c havia dois moldes fixos, um por idioma, e o de portugues era o do A1 ("sempre
+// com o termo em ingles seguido da traducao"). Depois do T005b, que passou B1..C2 a explicar
+// em portugues, esse molde unico caia sobre os seis niveis e achatava a progressao que o LANG
+// guarda: o LANG pede B1 "claro e simples, uma ideia por frase" e C2 "denso e economico, de
+// leitor experiente" — um aluno de C2 nao precisa de traducao a cada termo. Mandar a diretiva
+// do fluxo resolve sem inventar uma terceira verdade: mudou o LANG, muda o prompt.
 
 // Tags que o Telegram entende em parse_mode=HTML e que autorizamos no corpo.
 const TAGS_OK = ['b', 'i'];
@@ -84,9 +85,10 @@ function rotuloDe(t) {
 
 // O prompt e o coracao da tarefa. A regua vem do handoff sec.1: "a explicacao de um topico
 // tem de bastar para o aluno acertar as questoes dele sozinho, sem buscar fora".
-function montaPrompt(t, total, idioma) {
-  const diretiva = DIRETIVA_IDIOMA[idioma];
-  if (!diretiva) throw new Error('idioma "' + idioma + '" nao tem molde de diretiva (nivel ' + t.nivel + ')');
+function montaPrompt(t, total, diretiva) {
+  if (!diretiva || !String(diretiva).trim()) {
+    throw new Error('sem diretiva de explicacao para o nivel ' + t.nivel + ' — o LANG do fluxo nao a tem');
+  }
   return [
     'Voce e o IAChat, um professor de ingles paciente e muito didatico, escrevendo a EXPLICACAO',
     'oficial de um topico da trilha do MODO PROFESSOR. Este texto sera guardado e servido a TODOS',
@@ -97,7 +99,7 @@ function montaPrompt(t, total, idioma) {
     'MATERIA A ENSINAR (cobrir TUDO isto, sem pular nada):',
     t.descricao,
     '',
-    'IDIOMA: ' + diretiva,
+    'IDIOMA E REGISTRO (vem do LANG do no "Professor Engine", e nao daqui): ' + diretiva,
     'NIVEL: fique dentro do que se aprende em ' + t.nivel + '. Nao use nem pressuponha estrutura,',
     'tempo verbal ou vocabulario de niveis acima — se precisar de um termo mais avancado, explique-o.',
     '',
@@ -355,7 +357,7 @@ async function main() {
     if (fs.existsSync(destino)) console.log('REGERA ' + rotuloDe(t) + '  ' + decisao.motivo);
     process.stdout.write('GERA   ' + rotuloDe(t) + '  ' + t.titulo + ' ... ');
     try {
-      const corpo = await chamaModelo(montaPrompt(t, porNivel[t.nivel], ctx.idioma[t.nivel]));
+      const corpo = await chamaModelo(montaPrompt(t, porNivel[t.nivel], ctx.diretiva[t.nivel]));
       const problemas = confereCorpo(corpo);
       if (problemas.length) throw new Error(problemas.join('; '));
       gravaAtomico(destino, montaMd(t, corpo, new Date().toISOString().slice(0, 10)));
@@ -381,7 +383,7 @@ async function main() {
 
 module.exports = {
   caminhoDe, montaPrompt, confereCorpo, montaMd, gravaAtomico, precisaGerar,
-  DIRETIVA_IDIOMA, MODELO, DIR_SAIDA
+  MODELO, DIR_SAIDA
 };
 
 if (require.main === module) {

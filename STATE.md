@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T005c
-- **Última concluída:** T005b
+- **Tarefa atual:** T006
+- **Última concluída:** T005c
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum
 
@@ -52,3 +52,9 @@
 - 2026-09-05 T005b DONE. O `qSys` injeta o LANG INTEIRO: a clausula de explicacao em PT contaminou a geracao da questao e o B1 saiu com enunciado em portugues. So passou com "INTEIRAMENTE em ingles, enunciado e resposta". QUEM MEXER NO LANG RECONFERE A PERGUNTA AO VIVO, nao so a explicacao.
 - 2026-09-05 DIVIDA CONFIRMADA: `bateria_completa_b.js:403` (T3) assere "nivel B2: portugues na explicacao == false" — agora contradiz o produto e vai dar falso vermelho na proxima bateria B. Reescrever para "explicacao PT / pergunta EN". Conferir junto a linha 257 e o cabecalho do `revalida_niveis.js`.
 - 2026-09-05 VARIANCIA: em n=3 no C2 ao vivo, 2 explicacoes vieram em PT e 1 em ingles. Afeta a geracao ao vivo (fallback), nao os 60 pre-gerados, que saem pelo gerador. Medir com n maior se o C2 der problema.
+- 2026-09-05 T005c tentativa 1 REPROVADA: o 0/60 era tautologico (a simulacao FORMA nunca escreve o enunciado, e a regra nova exige o enunciado) e o criterio e burlavel em 100/100 invertendo a ordem resposta-antes-da-fonte, que e a ordem natural da prosa didatica. Detectacao caiu 28 num eixo inteiro, nao subiu.
+- 2026-09-05 T005c DONE (2 tentativas). Detector de vazamento: regra do par SIMETRICA na ordem, janela de 240 chars. Falso positivo na aula que ensina: 22/60 -> 0/60. Item resolvido: pego em 98/100 (direto) e 17/18 (invertido).
+- 2026-09-05 LICAO: a tentativa 1 media a si mesma — a simulacao FORMA nunca escrevia o enunciado e a regra nova exigia o enunciado, entao o 0/60 era inalcancavel por construcao. Quem escreve a regra NAO deve escrever sozinho o texto que a mede.
+- 2026-09-05 4 eixos que o detector NAO ve, declarados no codigo e impressos pelo gate: questao sem detector (36/136 practice, 29/60 exam), distancia >240 chars, remendo (palavra no meio), e lacuna copiada + resposta ao lado (81/82). A rede real do T006 e a revisao humana.
+- 2026-09-05 A diretiva de registro do gerador vem do LANG do nivel (nao ha mais DIRETIVA_IDIOMA). Mexer no LANG obriga a REGERAR os 60, nao so revalidar.
+- 2026-09-05 So 18 das 100 questoes com detector sao do tipo "par" (transformacao com frase entre aspas); as outras 82 sao de lacuna e vivem so da regra (a).
