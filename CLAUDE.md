@@ -54,6 +54,14 @@ erro fatal — reprovação de teste sai 0.
 - Ambiguidade não se resolve por chute: marque `BLOCKED` e pare.
 - Tarefa marcada **Precisa de ambiente** só roda com o pré-requisito de pé; não tente subir
   Docker, n8n ou ngrok sozinho.
+- **`PLAN.md` e `STATE.md` são do orquestrador.** O implementer não muda status de tarefa nem
+  escreve no diário — quem verifica é outro agente, e marcar-se DONE contamina o ponto de
+  controle.
+- **Mudança no fluxo só vale ao vivo depois de republicar:** `node fluxos/_teststand/publica_v8.js`.
+  É o único script autorizado a publicar, e só atinge o v8 (alvo cravado, aborta se o arquivo
+  local puder roubar o bot). Sem ele, o gate ao vivo testa a versão antiga e dá falso PASSOU.
+- **`gate_vivo_v8.js` só percorre o onboarding.** Se a sua tarefa mexe em outra rota, ele passa
+  sem tocar no que você mudou — escreva a verificação ao vivo da rota que você alterou.
 
 ### Nunca fazer sem pedido explícito do Breno
 

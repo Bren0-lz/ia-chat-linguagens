@@ -51,7 +51,7 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
 - **Gate:** teste offline novo que extrai o nó e confere o texto para um estado dado e **reprova o
   v7.4** (onde o nó não existe) + `npm run gate` + `gate_vivo_v8.js`
 - **Depende de:** T001
-- **Status:** TODO
+- **Status:** DONE — cabeçalho 1,16 s antes do modelo, medido ao vivo (exec 3483) — nós `Cabeçalho Tópico` + `Enviar Cabeçalho Tópico` no v8, publicados por `fluxos/_teststand/publica_v8.js`
 
 ### T003 — TRACK como fonte única e consultável
 - **Escopo:** script que extrai os 6×10 tópicos do `jsCode` do `Professor Engine` para
