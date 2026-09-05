@@ -1,7 +1,7 @@
 // Roda o jsCode da "Triagem de Nome" fora do n8n contra uma bateria de entradas.
 const fs = require('fs');
 const path = require('path');
-const FLOW = 'C:/Users/breno/OneDrive/Documents/GitHub/ia-chat-linguagens/fluxos/IAChat_Telegram_v7.4.json';
+const FLOW = process.argv[2] || path.join(__dirname, '..', 'IAChat_Telegram_v7.4.json');
 const flow = JSON.parse(fs.readFileSync(FLOW, 'utf8'));
 const node = flow.nodes.find(n => n.name === 'Triagem de Nome');
 if (!node) { throw new Error('no Triagem de Nome nao encontrado'); }

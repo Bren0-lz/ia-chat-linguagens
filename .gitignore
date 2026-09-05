@@ -1,4 +1,7 @@
-.claude
+.claude/*
+# a estrutura do loop autodev e versionada; o settings.local.json continua fora
+!.claude/agents/
+!.claude/commands/
 .superpowers/
 node_modules/
 web/.env
@@ -14,3 +17,14 @@ pgtest/node_modules/
 # saida de medicao que cai na raiz quando se roda do diretorio errado;
 # a versao boa mora em fluxos/_teststand/
 /lat_por_rota.json
+
+# --- autodev (05/09) ---
+
+# PDFs dos livros WAYS: 130 MB, ficam fora do git por decisao do handoff.
+# Os .md derivados entram versionados quando existirem.
+documentos/livros/*.pdf
+
+# assets ainda nao decididos — impede que o `git add -A` do loop os varra sem querer.
+# Se quiser versiona-los, apague as duas linhas.
+/logo/
+/Claude outputs/
