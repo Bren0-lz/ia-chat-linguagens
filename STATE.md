@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T004
-- **Última concluída:** T003
+- **Tarefa atual:** T005
+- **Última concluída:** T004
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum
 
@@ -38,3 +38,6 @@
 - 2026-09-05 Slugs prontos para arquivo: ASCII, unicos ate globalmente. `conteudo/explicacoes/A1/01-cumprimentos.md` ... `C2/10-precisao-e-parafrase.md`.
 - 2026-09-05 QUEM EDITAR O TRACK no `Professor Engine` tem de rodar `node conteudo/extrai_track.js`, senao o `npm run gate` reprova (de proposito).
 - 2026-09-05 `extrai_track.js` captura o valor do TRACK em runtime, nao o literal. Hoje da no mesmo (as outras ocorrencias sao leitura), e toda quebra de refactor testada aborta barulhento.
+- 2026-09-05 T004 DONE. Auth do Vertex fora do n8n: ADC via `gcloud auth print-access-token`, projeto `agent-hackton` (o store de credenciais do n8n nao e legivel pela API, 405). No Windows, Node >=20 recusa spawn direto de .cmd — chamar via `cmd.exe /c`.
+- 2026-09-05 DECISAO DE PRODUTO PENDENTE: o `LANG` do `Professor Engine` manda A1/A2 em portugues e B1/B2/C1/C2 **em ingles**. Confirmado nos dois fluxos. 40 das 60 explicacoes sairao em ingles. Levado ao Breno; ate decidir, o gerador espelha o fluxo.
+- 2026-09-05 BOMBA-RELOGIO do T006: `gerar_explicacoes.js` grava com writeFileSync direto (nao atomico) e a retomada e so `existsSync`. Um .md truncado por Ctrl-C e pulado para sempre. Fechar no T005.

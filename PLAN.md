@@ -68,11 +68,17 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
 - **Gate:** dry-run sem rede lista os 60 caminhos corretos; geração real do piloto A1/01 passa no
   validador do T005
 - **Depende de:** T003
-- **Status:** TODO
+- **Status:** DONE — piloto A1/01 gerado; auth por ADC, não pela Service Account
 
 ### T005 — validador de conteúdo
 - **Escopo:** `conteudo/valida_explicacoes.js` — frontmatter completo, tamanho na faixa, cobre os
   pontos do TRACK daquele tópico, não vaza gabarito das questões do banco, idioma correto.
+  **Idioma vem do fluxo, não de constante no validador:** o `LANG` do `Professor Engine` manda
+  A1/A2 em português e B1/B2/C1/C2 em inglês. Derive a expectativa do fluxo, como o T003 faz com
+  o TRACK — assim a decisão de produto muda num lugar só.
+  Fechar também a bomba-relógio do T006 achada na verificação do T004: a gravação do gerador não
+  é atômica e o guard de retomada é só `existsSync`, então um `.md` truncado por interrupção é
+  pulado para sempre. Gravar por temporário + `rename`, e pular só o que passa no validador.
 - **Gate:** aprova o piloto e **reprova** um `.md` sabotado (fixture no repositório)
 - **Depende de:** T004
 - **Status:** TODO
