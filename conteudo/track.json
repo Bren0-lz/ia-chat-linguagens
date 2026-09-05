@@ -1,0 +1,435 @@
+{
+  "_fonte": "fluxos/IAChat_Telegram_v8.json :: no \"Professor Engine\" :: const TRACK",
+  "_aviso": "NAO editar a mao. Gerado por conteudo/extrai_track.js; conferido por conteudo/valida_track.js.",
+  "niveis": [
+    "A1",
+    "A2",
+    "B1",
+    "B2",
+    "C1",
+    "C2"
+  ],
+  "total": 60,
+  "topicos": [
+    {
+      "nivel": "A1",
+      "ordem": 1,
+      "slug": "cumprimentos",
+      "titulo": "Cumprimentos",
+      "descricao": "Cumprimentos e despedidas do zero. FORMAS: hello/hi = oi; good morning = bom dia; good afternoon = boa tarde; good evening = boa noite (ao chegar); good night = boa noite (ao se despedir/dormir); goodbye/bye = tchau; see you / see you later / see you tomorrow = ate mais/depois/amanha. PERGUNTAR ESTADO: How are you? = Como voce esta? RESPONDER: I'm fine / I'm good / Not bad, thank you. CORTESIA: please = por favor; thank you/thanks = obrigado; you're welcome = de nada. ERRO COMUM: usar good night para cumprimentar ao chegar (o certo e good evening)."
+    },
+    {
+      "nivel": "A1",
+      "ordem": 2,
+      "slug": "alfabeto",
+      "titulo": "Alfabeto",
+      "descricao": "O alfabeto A-Z e como soletrar. Ensinar o NOME de cada letra (aprox.): a=ei, b=bi, c=si, d=di, e=i, f=ef, g=dji, h=eitch, i=ai, j=djei, k=kei, l=el, m=em, n=en, o=ou, p=pi, q=kiu, r=ar, s=es, t=ti, u=iu, v=vi, w=dabliu, x=eks, y=uai, z=zi. VOGAIS: a, e, i, o, u. SOLETRAR: How do you spell it? -> dizer letra por letra, ex.: DOG = D-O-G. ERRO COMUM: confundir o NOME da letra com o SOM que ela faz na palavra."
+    },
+    {
+      "nivel": "A1",
+      "ordem": 3,
+      "slug": "numeros",
+      "titulo": "Números",
+      "descricao": "Numeros de 0 a 100. 0 zero,1 one,2 two,3 three,4 four,5 five,6 six,7 seven,8 eight,9 nine,10 ten,11 eleven,12 twelve,13 thirteen,14 fourteen,15 fifteen,16 sixteen,17 seventeen,18 eighteen,19 nineteen,20 twenty. DEZENAS: 30 thirty,40 forty,50 fifty,60 sixty,70 seventy,80 eighty,90 ninety,100 one hundred. COMPOSTOS com hifen: 21 twenty-one, 45 forty-five. ERRO COMUM: forty escreve-se SEM u (nao \"fourty\"); nao confundir thirteen (13) com thirty (30)."
+    },
+    {
+      "nivel": "A1",
+      "ordem": 4,
+      "slug": "cores-e-animais",
+      "titulo": "Cores e animais",
+      "descricao": "Vocabulario basico. CORES: red vermelho, blue azul, green verde, yellow amarelo, black preto, white branco, orange laranja, pink rosa, brown marrom, purple roxo, grey cinza. ANIMAIS: dog cachorro, cat gato, bird passaro, fish peixe, horse cavalo, cow vaca, pig porco, rabbit coelho. ORDEM: a cor vem ANTES do substantivo: a black cat (um gato preto), NAO \"a cat black\". ERRO COMUM: inverter a ordem cor+substantivo."
+    },
+    {
+      "nivel": "A1",
+      "ordem": 5,
+      "slug": "pronomes-pessoais",
+      "titulo": "Pronomes pessoais",
+      "descricao": "Pronomes sujeito (quem faz a acao): I eu, you voce, he ele, she ela, it ele/ela (coisa ou animal), we nos, you voces, they eles/elas. I e SEMPRE maiusculo. he=homem, she=mulher, it=coisa/animal, they=plural. EX.: She is a teacher; It is a dog; They are friends. ERRO COMUM: usar he/she para objetos (o certo e it); esquecer o I maiusculo."
+    },
+    {
+      "nivel": "A1",
+      "ordem": 6,
+      "slug": "verbo-to-be",
+      "titulo": "Verbo to be",
+      "descricao": "O verbo to be (ser/estar) no presente, afirmativo. CONJUGACAO COMPLETA: I am, you are, he is, she is, it is, we are, you are, they are. CONTRACOES: I'm, you're, he's, she's, it's, we're, they're. USO: nome, origem, profissao, estado, idade. EX.: I am Bruno; She is happy; We are Brazilian. ERRO COMUM: usar are com he/she/it — \"he are\" ERRADO, \"he is\" CERTO."
+    },
+    {
+      "nivel": "A1",
+      "ordem": 7,
+      "slug": "negativa",
+      "titulo": "Negativa",
+      "descricao": "Negativa do to be = NOT depois do verbo. FORMAS: I am not, you are not, he is not, she is not, it is not, we are not, they are not. CONTRACOES: isn't (is not), aren't (are not); am not nao contrai (fica I'm not). EX.: I'm not tired; He isn't at home; They aren't ready. ERRO COMUM: usar don't/doesn't com to be (isso e para outros verbos)."
+    },
+    {
+      "nivel": "A1",
+      "ordem": 8,
+      "slug": "interrogativa",
+      "titulo": "Interrogativa",
+      "descricao": "Perguntas sim/nao com to be = INVERTER verbo e sujeito. FORMA: Am I...? Are you...? Is he/she/it...? Are we/they...? RESPOSTAS CURTAS: Yes, I am / No, I'm not; Yes, he is / No, he isn't; Yes, they are / No, they aren't. EX.: Are you a student? Yes, I am. Is she happy? No, she isn't. ERRO COMUM: nao inverter (\"You are happy?\" em vez de \"Are you happy?\")."
+    },
+    {
+      "nivel": "A1",
+      "ordem": 9,
+      "slug": "nacionalidade-e-clima",
+      "titulo": "Nacionalidade e clima",
+      "descricao": "Nacionalidades e clima com to be. NACIONALIDADES (sempre maiusculas): Brazilian, American, English, Spanish, French, Italian, German, Japanese. USO: I am Brazilian; She is American. CLIMA (com it is): sunny ensolarado, rainy chuvoso, cloudy nublado, windy ventando, cold frio, hot quente, warm morno. EX.: It is sunny today; It is cold. ERRO COMUM: escrever nacionalidade com minuscula; esquecer o \"it is\" ao falar do clima."
+    },
+    {
+      "nivel": "A1",
+      "ordem": 10,
+      "slug": "perguntas-com-wh",
+      "titulo": "Perguntas com WH",
+      "descricao": "Perguntas com palavras WH + to be. PALAVRAS: what o que, who quem, where onde, when quando, why por que, how como, which qual, how old que idade. ESTRUTURA: WH + to be + sujeito? EX.: What is your name? Where are you from? Who is she? How old are you? Why are you sad? A resposta e uma informacao (nao yes/no). ERRO COMUM: ordem errada (\"What your name is?\")."
+    },
+    {
+      "nivel": "A2",
+      "ordem": 1,
+      "slug": "presente-simples",
+      "titulo": "Presente simples",
+      "descricao": "Presente simples para rotinas, fatos e habitos. REGRA: I/you/we/they + verbo base (I work); he/she/it + verbo com -S (he works). ORTOGRAFIA do -s: verbos em -o/-ss/-sh/-ch/-x ganham -ES (go->goes, watch->watches); consoante+y vira -ies (study->studies), vogal+y so +s (play->plays). EX.: I live in Brazil; She works every day. ERRO COMUM: esquecer o -s na 3a pessoa (he work -> he works)."
+    },
+    {
+      "nivel": "A2",
+      "ordem": 2,
+      "slug": "presente-simples-negativa-e-perguntas",
+      "titulo": "Presente simples: negativa e perguntas",
+      "descricao": "Auxiliar DO/DOES. NEGATIVA: I/you/we/they + don't + base; he/she/it + doesn't + base (com does o verbo PERDE o -s). EX.: I don't like coffee; She doesn't work here. PERGUNTAS: Do you/we/they + base? Does he/she/it + base? Resp.: Yes, I do / No, she doesn't. EX.: Do you speak English? Does he live here? ERRO COMUM: manter o -s com does (he doesn't works -> he doesn't work)."
+    },
+    {
+      "nivel": "A2",
+      "ordem": 3,
+      "slug": "there-is-there-are",
+      "titulo": "There is / There are",
+      "descricao": "Dizer que algo EXISTE. There is (singular/incontavel): There is a book. There are (plural): There are three chairs. NEG.: There isn't / There aren't. PERG.: Is there...? Are there...? SOME em afirmativas (There are some apples), ANY em negativas/perguntas (There aren't any apples; Are there any apples?). ERRO COMUM: There is two cats -> There are two cats."
+    },
+    {
+      "nivel": "A2",
+      "ordem": 4,
+      "slug": "plural-dos-substantivos",
+      "titulo": "Plural dos substantivos",
+      "descricao": "Formar o plural. GERAL: +s (car->cars). -s/-ss/-sh/-ch/-x/-o: +es (bus->buses, box->boxes, potato->potatoes). consoante+y: -ies (city->cities); vogal+y: +s (boy->boys). -f/-fe: -ves (knife->knives, leaf->leaves). IRREGULARES: man->men, woman->women, child->children, foot->feet, tooth->teeth, person->people, mouse->mice, fish->fish. ERRO COMUM: por -s em irregulares (childs -> children)."
+    },
+    {
+      "nivel": "A2",
+      "ordem": 5,
+      "slug": "preposicoes-de-lugar-e-tempo",
+      "titulo": "Preposições de lugar e tempo",
+      "descricao": "IN/ON/AT. LUGAR: in (dentro: in the box, in Brazil), on (superficie: on the table), at (ponto: at home, at school). Outras: under, next to, between, behind, in front of. TEMPO: in (meses/anos/partes do dia: in July, in 2020, in the morning), on (dias/datas: on Monday, on July 5th), at (horas: at 7 o'clock, at night). ERRO COMUM: \"at the morning\" -> in the morning; \"in Monday\" -> on Monday."
+    },
+    {
+      "nivel": "A2",
+      "ordem": 6,
+      "slug": "possessivos",
+      "titulo": "Possessivos",
+      "descricao": "Indicar posse. ADJETIVOS POSSESSIVOS (antes do substantivo): my, your, his (dele), her (dela), its, our, their. EX.: my car, her book. GENITIVO com 's (de pessoas): the boy's dog = o cachorro do menino; Anna's house. Plural em s leva so o apostrofo: the students' books. ERRO COMUM: confundir his (de homem) com her (de mulher)."
+    },
+    {
+      "nivel": "A2",
+      "ordem": 7,
+      "slug": "can-cant",
+      "titulo": "Can / cant",
+      "descricao": "CAN para habilidade e permissao. FORMA: sujeito + can + verbo base (igual p/ todos, sem -s, sem to). AFIRM.: I can swim. NEG.: cannot / can't (She can't cook). PERG.: Can you...? -> Yes, I can / No, I can't. EX.: Can you speak English? ERRO COMUM: por -s ou to depois de can (he can to go / he cans -> he can go)."
+    },
+    {
+      "nivel": "A2",
+      "ordem": 8,
+      "slug": "presente-continuo",
+      "titulo": "Presente contínuo",
+      "descricao": "Acao acontecendo AGORA. FORMA: to be (am/is/are) + verbo-ING. EX.: I am working now; She is reading. ORTOGRAFIA -ing: verbo em -e perde o e (make->making); CVC curto dobra a consoante (run->running, sit->sitting). NEG.: I'm not working. PERG.: Are you working? MARCADORES: now, right now, at the moment. ERRO COMUM: esquecer o to be (I working -> I am working)."
+    },
+    {
+      "nivel": "A2",
+      "ordem": 9,
+      "slug": "passado-simples-to-be-e-regulares",
+      "titulo": "Passado simples (to be e regulares)",
+      "descricao": "Passado. TO BE: was (I/he/she/it) e were (you/we/they). EX.: I was tired; They were at home. NEG.: wasn't/weren't. REGULARES: verbo + -ED (work->worked). ORTOGRAFIA: -e so +d (like->liked); CVC dobra (stop->stopped); consoante+y -> -ied (study->studied). EX.: I visited my aunt; She watched TV. ERRO COMUM: was/were junto com verbo -ed (I was worked -> I worked)."
+    },
+    {
+      "nivel": "A2",
+      "ordem": 10,
+      "slug": "passado-simples-irregulares-e-tempo",
+      "titulo": "Passado simples (irregulares) e tempo",
+      "descricao": "Irregulares e negativa/pergunta no passado. IRREGULARES: go->went, have->had, do->did, say->said, see->saw, get->got, make->made, come->came, take->took, eat->ate, buy->bought, think->thought. NEG./PERG. (todos os verbos): DID + verbo BASE: I didn't go; Did you go? -> Yes, I did / No, I didn't (com did o verbo volta a base). MARCADORES: yesterday, last week, two days ago, in 2019. ERRO COMUM: usar did e ainda por o verbo no passado (didn't went -> didn't go)."
+    },
+    {
+      "nivel": "B1",
+      "ordem": 1,
+      "slug": "past-continuous",
+      "titulo": "Past continuous",
+      "descricao": "was/were + verbo-ING = acao em andamento no passado. EX.: I was cooking at 8 pm. USO principal: acao longa interrompida por outra curta (past simple), ligadas por WHEN/WHILE: I was reading when the phone rang; While she was studying, he arrived. NEG.: wasn't/weren't + -ing. PERG.: Were you working? ERRO COMUM: usar past continuous para acao pontual (usar past simple)."
+    },
+    {
+      "nivel": "B1",
+      "ordem": 2,
+      "slug": "present-perfect",
+      "titulo": "Present perfect",
+      "descricao": "have/has + PARTICIPIO PASSADO. FORMA: I/you/we/they have + pp; he/she/it has + pp. Participios irregulares: go->gone, see->seen, do->done, be->been, have->had, eat->eaten, write->written. USO: experiencia de vida e acao com efeito no presente. MARCADORES: ever, never, just, already, yet (yet em neg./perg.: I haven't finished yet). NEG.: haven't/hasn't. ERRO COMUM: usar com tempo passado definido (I have seen him yesterday -> I saw him yesterday)."
+    },
+    {
+      "nivel": "B1",
+      "ordem": 3,
+      "slug": "present-perfect-vs-past-simple",
+      "titulo": "Present perfect vs past simple",
+      "descricao": "Quando usar cada um. PAST SIMPLE: passado TERMINADO e definido, com quando (yesterday, in 2010, last week): I saw that movie last night. PRESENT PERFECT: tempo NAO especificado ou ligado ao presente: I have seen that movie. Com just/already/yet/ever/never -> present perfect. Com ago/yesterday/last -> past simple. ERRO COMUM: usar present perfect com marcador de tempo definido."
+    },
+    {
+      "nivel": "B1",
+      "ordem": 4,
+      "slug": "comparativos-e-superlativos",
+      "titulo": "Comparativos e superlativos",
+      "descricao": "Comparar. CURTOS (1 silaba): +er / the +est (tall->taller->the tallest); dobra consoante (big->bigger). -y: -ier/-iest (happy->happier->the happiest). LONGOS (2+ silabas): more / the most (expensive->more expensive->the most expensive). IRREGULARES: good->better->the best; bad->worse->the worst. THAN em comparacao: taller than me. AS...AS (igualdade): as tall as. ERRO COMUM: \"more taller\"; esquecer o the no superlativo."
+    },
+    {
+      "nivel": "B1",
+      "ordem": 5,
+      "slug": "futuro-will-vs-going-to",
+      "titulo": "Futuro: will vs going to",
+      "descricao": "WILL: decisao no momento, previsao, promessa, oferta: I'll help you; It will rain. FORMA: will + base (sem -s, sem to); neg. won't. GOING TO: plano/intencao ja decidida e previsao com evidencia: I'm going to travel next month; Look at those clouds, it's going to rain. FORMA: am/is/are going to + base. ERRO COMUM: por -s ou to depois de will (he will to go -> he will go)."
+    },
+    {
+      "nivel": "B1",
+      "ordem": 6,
+      "slug": "contaveis-incontaveis-e-quantificadores",
+      "titulo": "Contáveis/incontáveis e quantificadores",
+      "descricao": "CONTAVEIS (tem plural: apple/apples) x INCONTAVEIS (sem plural: water, money, information, advice). MANY (contaveis) / MUCH (incontaveis), em geral em neg./perg. A LOT OF / LOTS OF (ambos, afirmativo). A FEW (poucos, contaveis) / A LITTLE (pouco, incontavel). SOME (afirm.) / ANY (neg./perg.). ERRO COMUM: \"how much people\" -> how many people."
+    },
+    {
+      "nivel": "B1",
+      "ordem": 7,
+      "slug": "verbos-modais",
+      "titulo": "Verbos modais",
+      "descricao": "SHOULD: conselho (You should rest). MUST: obrigacao forte/regra (You must wear a helmet); proibicao mustn't (You mustn't smoke). HAVE TO: obrigacao externa (I have to work); 3a pessoa has to; don't have to = nao e necessario. FORMA modal: modal + base, sem -s, sem to (excecao: have to). ERRO COMUM: \"should to / must to\" -> should go, must go; confundir mustn't (proibido) com don't have to (opcional)."
+    },
+    {
+      "nivel": "B1",
+      "ordem": 8,
+      "slug": "primeira-condicional",
+      "titulo": "Primeira condicional",
+      "descricao": "Situacao real/provavel no futuro. ESTRUTURA: If + presente simples, will + base. EX.: If it rains, I will stay home; If you study, you will pass. A ordem pode inverter (sem virgula): I will stay home if it rains. Na parte do IF nunca usar will (If it will rain -> If it rains). ERRO COMUM: por will nas duas partes."
+    },
+    {
+      "nivel": "B1",
+      "ordem": 9,
+      "slug": "adverbios-de-frequencia-e-modo",
+      "titulo": "Advérbios de frequência e modo",
+      "descricao": "FREQUENCIA: always, usually, often, sometimes, rarely, never. POSICAO: antes do verbo principal, mas DEPOIS do to be: I always wake up early; She is always late. MODO (como): adjetivo + -ly (quick->quickly, careful->carefully); irregular good->well, fast->fast. Vem depois do verbo/objeto: He drives carefully. ERRO COMUM: \"I wake up always\"; usar good como adverbio (He plays good -> well)."
+    },
+    {
+      "nivel": "B1",
+      "ordem": 10,
+      "slug": "conectores-e-phrasal-verbs-comuns",
+      "titulo": "Conectores e phrasal verbs comuns",
+      "descricao": "CONECTORES: because (causa), so (consequencia), but, although/though (contraste), however, and, or. EX.: I stayed home because it was raining; It was hard, however I finished. PHRASAL VERBS: get up (levantar), look for (procurar), turn on/off (ligar/desligar), give up (desistir), find out (descobrir), look after (cuidar). ERRO COMUM: confundir because com so; traduzir phrasal verbs ao pe da letra."
+    },
+    {
+      "nivel": "B2",
+      "ordem": 1,
+      "slug": "present-perfect-continuous",
+      "titulo": "Present perfect continuous",
+      "descricao": "have/has been + verbo-ING. USO: acao que comecou no passado e continua, com enfase na DURACAO: I have been studying for two hours; She has been working here since 2019. FOR (periodo: for three years) x SINCE (ponto de inicio: since Monday). Contraste com present perfect simples (duracao x resultado). ERRO COMUM: esquecer been (I have studying -> I have been studying)."
+    },
+    {
+      "nivel": "B2",
+      "ordem": 2,
+      "slug": "past-perfect",
+      "titulo": "Past perfect",
+      "descricao": "had + participio passado. USO: o passado do passado, acao ANTES de outra acao passada. EX.: When I arrived, the movie had already started; She had left before he called. Marcadores: already, just, before, after, by the time. ERRO COMUM: usar past perfect quando ha so um evento passado (basta past simple)."
+    },
+    {
+      "nivel": "B2",
+      "ordem": 3,
+      "slug": "segunda-condicional",
+      "titulo": "Segunda condicional",
+      "descricao": "Situacao HIPOTETICA/irreal no presente ou futuro. ESTRUTURA: If + past simple, would + base. EX.: If I had more money, I would travel; If I were you, I would study more (were para todos os sujeitos no hipotetico). Nao usar would na parte do if. ERRO COMUM: \"If I would have\" -> If I had."
+    },
+    {
+      "nivel": "B2",
+      "ordem": 4,
+      "slug": "voz-passiva",
+      "titulo": "Voz passiva",
+      "descricao": "Foco no objeto/acao, nao em quem faz. ESTRUTURA: to be (no tempo certo) + participio passado. PRESENTE: English is spoken here. PASSADO: The house was built in 1990. Agente com BY (opcional): The book was written by her. So verbos transitivos. ERRO COMUM: esquecer o participio (is speak -> is spoken)."
+    },
+    {
+      "nivel": "B2",
+      "ordem": 5,
+      "slug": "discurso-indireto",
+      "titulo": "Discurso indireto",
+      "descricao": "Reported speech. BACKSHIFT: present->past (is->was), past->past perfect, will->would, can->could, must->had to. Pronomes e tempo mudam (now->then, today->that day). SAY x TELL: tell precisa de objeto (she told me), say nao (she said that...). EX.: He said he was tired; She told me she would come. ERRO COMUM: esquecer o backshift; \"say me\" -> tell me."
+    },
+    {
+      "nivel": "B2",
+      "ordem": 6,
+      "slug": "oracoes-relativas",
+      "titulo": "Orações relativas",
+      "descricao": "Pronomes relativos: who (pessoas), which (coisas), that (pessoas/coisas em defining), whose (posse), where (lugar), when (tempo). DEFINING (essencial, sem virgula): The man who called is my boss. NON-DEFINING (extra, entre virgulas, nao usa that): My brother, who lives in Rio, is a doctor. ERRO COMUM: usar that em non-defining; usar which para pessoas."
+    },
+    {
+      "nivel": "B2",
+      "ordem": 7,
+      "slug": "gerundio-vs-infinitivo",
+      "titulo": "Gerúndio vs infinitivo",
+      "descricao": "Padroes verbais. VERBO + -ING: enjoy, avoid, finish, mind, suggest, keep, practise (I enjoy reading). VERBO + TO + base: want, need, decide, hope, promise, would like, plan (I want to go). Depois de PREPOSICAO sempre -ing (good at cooking). ERRO COMUM: \"I enjoy to read\" -> I enjoy reading; \"I want going\" -> I want to go."
+    },
+    {
+      "nivel": "B2",
+      "ordem": 8,
+      "slug": "modais-de-deducao",
+      "titulo": "Modais de dedução",
+      "descricao": "Deduzir probabilidade no presente. MUST (certeza positiva): She must be tired. CAN'T (certeza negativa): He can't be at home. MIGHT/MAY/COULD (possibilidade): It might rain. FORMA: modal + be/verbo base. ERRO COMUM: usar mustn't (proibicao) para deducao negativa (o certo e can't)."
+    },
+    {
+      "nivel": "B2",
+      "ordem": 9,
+      "slug": "used-to-would",
+      "titulo": "Used to / would",
+      "descricao": "Habitos e estados do passado que nao ocorrem mais. USED TO + base: habito OU estado passado (I used to smoke; There used to be a shop here). Neg./perg.: didn't use to / Did you use to...? WOULD + base: so acoes/habitos repetidos do passado, NAO estados: We would play outside every day. ERRO COMUM: \"use to\" no afirmativo (o certo e used to); usar would com verbos de estado."
+    },
+    {
+      "nivel": "B2",
+      "ordem": 10,
+      "slug": "phrasal-verbs-e-collocations-avancadas",
+      "titulo": "Phrasal verbs e collocations avançadas",
+      "descricao": "SEPARAVEIS: objeto pode ir no meio; se for PRONOME, tem que ir no meio: turn it on (nao \"turn on it\"); pick up the kids / pick the kids up / pick them up. INSEPARAVEIS: objeto sempre depois: look after the baby (nao \"look the baby after\"). COLLOCATIONS com make/do/take: make a decision, do homework, take a break. ERRO COMUM: \"turn on it\"; \"do a decision\" -> make a decision."
+    },
+    {
+      "nivel": "C1",
+      "ordem": 1,
+      "slug": "terceira-e-mistas-condicionais",
+      "titulo": "Terceira e mistas condicionais",
+      "descricao": "Hipoteses sobre o passado. TERCEIRA: If + past perfect, would have + participio: If I had studied, I would have passed. MISTA: condicao passada -> resultado presente: If I had saved money, I would be rich now. ERRO COMUM: \"If I would have known\" -> If I had known."
+    },
+    {
+      "nivel": "C1",
+      "ordem": 2,
+      "slug": "inversao",
+      "titulo": "Inversão",
+      "descricao": "Inversao com adverbios negativos no inicio (registro formal/enfatico): auxiliar antes do sujeito. Never have I seen such a thing; Hardly had I arrived when it started; Not only did he lie, but he also...; Seldom do we see this. ERRO COMUM: manter a ordem normal apos o adverbio negativo (\"Never I have seen\")."
+    },
+    {
+      "nivel": "C1",
+      "ordem": 3,
+      "slug": "cleft-sentences",
+      "titulo": "Cleft sentences",
+      "descricao": "Estruturas de enfase. IT-CLEFT: It is/was + elemento + that/who...: It was John who broke it. WH-CLEFT: What I need is a break; What she did was call the police. Servem para focar uma parte da frase. ERRO COMUM: concordancia verbal errada apos o cleft."
+    },
+    {
+      "nivel": "C1",
+      "ordem": 4,
+      "slug": "voz-passiva-avancada",
+      "titulo": "Voz passiva avançada",
+      "descricao": "PASSIVE REPORTING: It is said that he is rich / He is said to be rich. CAUSATIVE have/get something done (mandar fazer): I had my car repaired; She got her hair cut. ERRO COMUM: confundir causative (I had my car repaired = alguem consertou pra mim) com o passado simples de have."
+    },
+    {
+      "nivel": "C1",
+      "ordem": 5,
+      "slug": "modais-e-probabilidade-nuance",
+      "titulo": "Modais e probabilidade (nuance)",
+      "descricao": "may well (bem provavel), might/could (possivel), ought to (= should), should have + pp (deveria ter feito, mas nao fez), must have + pp (deducao sobre o passado), needn't have + pp (nao precisava ter feito). EX.: You should have called; They must have left. ERRO COMUM: \"should of\" -> should have."
+    },
+    {
+      "nivel": "C1",
+      "ordem": 6,
+      "slug": "marcadores-de-discurso",
+      "titulo": "Marcadores de discurso",
+      "descricao": "Linkers formais e sentido: nevertheless/nonetheless (mesmo assim), moreover/furthermore (alem disso), in fact/indeed (de fato), on the other hand (por outro lado), therefore/thus (portanto), whereas (enquanto que). Pontuacao correta (ponto e virgula ou inicio de frase). ERRO COMUM: usar however como conjuncao com virgula (comma splice)."
+    },
+    {
+      "nivel": "C1",
+      "ordem": 7,
+      "slug": "collocations-e-preposicoes-dependentes",
+      "titulo": "Collocations e preposições dependentes",
+      "descricao": "Palavras com preposicao fixa: depend ON, interested IN, good AT, afraid OF, responsible FOR, keen ON, capable OF, accuse someone OF, congratulate someone ON, insist ON. COLLOCATIONS: heavy rain, strong coffee, make progress, reach a decision. ERRO COMUM: traduzir a preposicao do portugues (\"depend of\" -> depend on)."
+    },
+    {
+      "nivel": "C1",
+      "ordem": 8,
+      "slug": "linguagem-idiomatica-e-figurada",
+      "titulo": "Linguagem idiomática e figurada",
+      "descricao": "Idioms comuns e sentido nao-literal: once in a blue moon (raramente), hit the books (estudar muito), under the weather (adoentado), break the ice (quebrar o gelo), a piece of cake (muito facil), cost an arm and a leg (caro). Usar no registro certo (informal). ERRO COMUM: traduzir ao pe da letra."
+    },
+    {
+      "nivel": "C1",
+      "ordem": 9,
+      "slug": "hedging-e-registro",
+      "titulo": "Hedging e registro",
+      "descricao": "Suavizar afirmacoes (registro academico/polido): it seems that, it tends to, it may be argued that, to some extent, arguably, apparently, this suggests that. Modais para suavizar (would, might, could). ERRO COMUM: afirmacoes absolutas demais em texto formal."
+    },
+    {
+      "nivel": "C1",
+      "ordem": 10,
+      "slug": "nominalizacao-e-estilo-academico",
+      "titulo": "Nominalização e estilo acadêmico",
+      "descricao": "Transformar verbos/adjetivos em substantivos para estilo formal: decide->decision, analyse->analysis, able->ability, grow->growth. EX.: The government decided -> The government's decision... Coesao com referencing (this, such, the former). ERRO COMUM: nominalizacao em excesso deixa o texto pesado."
+    },
+    {
+      "nivel": "C2",
+      "ordem": 1,
+      "slug": "registro-e-conotacao-sutis",
+      "titulo": "Registro e conotação sutis",
+      "descricao": "Escolher a palavra pela conotacao e formalidade: slim (positivo) x skinny (negativo) x thin (neutro); assertive x aggressive; childlike x childish. Registro formal/neutro/informal e a mensagem que a escolha transmite. ERRO COMUM: usar termo de conotacao negativa sem querer."
+    },
+    {
+      "nivel": "C2",
+      "ordem": 2,
+      "slug": "idioms-avancados-e-metafora",
+      "titulo": "Idioms avançados e metáfora",
+      "descricao": "Idioms menos frequentes e metafora: a blessing in disguise, the elephant in the room, bite the bullet, the ball is in your court, throw in the towel; metaforas conceituais (time is money). Uso apropriado ao contexto. ERRO COMUM: misturar metaforas (mixed metaphors)."
+    },
+    {
+      "nivel": "C2",
+      "ordem": 3,
+      "slug": "elipse-e-substituicao",
+      "titulo": "Elipse e substituição",
+      "descricao": "Omitir (ellipsis) ou substituir para coesao: She can sing and (she can) dance; I haven't read it but I will (do); Are you coming? I think so (so = that). ONE/ONES como substituto (the red one). ERRO COMUM: elipse que gera ambiguidade."
+    },
+    {
+      "nivel": "C2",
+      "ordem": 4,
+      "slug": "fronting-e-enfase",
+      "titulo": "Fronting e ênfase",
+      "descricao": "Mover elementos para o inicio para enfase (fronting): This I cannot accept; Down the road came a car; So beautiful was the view that... Frequentemente com inversao. ERRO COMUM: fronting sem a inversao necessaria."
+    },
+    {
+      "nivel": "C2",
+      "ordem": 5,
+      "slug": "coesao-e-discurso-avancado",
+      "titulo": "Coesão e discurso avançado",
+      "descricao": "Referenciacao e sinalizacao: anaphora (this, that, such, the former/the latter), signposting (having said that, in other words, to sum up), coesao lexical. ERRO COMUM: referencia ambigua (this sem antecedente claro)."
+    },
+    {
+      "nivel": "C2",
+      "ordem": 6,
+      "slug": "ironia-humor-e-understatement",
+      "titulo": "Ironia, humor e understatement",
+      "descricao": "Understatement (dizer menos para efeito: not bad = otimo; a bit of a problem = um problemao), irony e sarcasm sinalizados por tom/contexto. Muito usado no ingles britanico. ERRO COMUM: interpretar understatement literalmente."
+    },
+    {
+      "nivel": "C2",
+      "ordem": 7,
+      "slug": "estilo-academico-e-formal",
+      "titulo": "Estilo acadêmico e formal",
+      "descricao": "Convencoes: evitar contracoes, voz passiva quando apropriado, hedging, nominalizacao, linkers formais, terceira pessoa, precisao. ERRO COMUM: coloquialismos e contracoes em texto formal."
+    },
+    {
+      "nivel": "C2",
+      "ordem": 8,
+      "slug": "phrasal-e-prepositional-verbs-raros",
+      "titulo": "Phrasal e prepositional verbs raros",
+      "descricao": "Phrasal verbs de baixa frequencia e sentido idiomatico: pore over (examinar), wear off (o efeito passar), egg on (incitar), rope in (arrastar para algo), gloss over (passar por cima). Inferir sentido pelo contexto. ERRO COMUM: confundir com o sentido literal do verbo base."
+    },
+    {
+      "nivel": "C2",
+      "ordem": 9,
+      "slug": "pragmatica-e-implicatura",
+      "titulo": "Pragmática e implicatura",
+      "descricao": "Sentido implicito (implicature) e polidez: dizer \"It is cold in here\" para pedir para fechar a janela; indirect requests (I was wondering if...); face-saving. Interpretar o que NAO foi dito literalmente. ERRO COMUM: responder so ao sentido literal."
+    },
+    {
+      "nivel": "C2",
+      "ordem": 10,
+      "slug": "precisao-e-parafrase",
+      "titulo": "Precisão e paráfrase",
+      "descricao": "Escolher o quase-sinonimo exato e parafrasear com concisao: big/large/vast/immense; parafrasear mantendo o sentido; evitar redundancia (each and every). ERRO COMUM: quase-sinonimo com colocacao errada (\"quick food\" -> fast food)."
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+// Extrai o TRACK (6 niveis x 10 topicos) de dentro do jsCode do no `Professor Engine`
+// e grava `conteudo/track.json`. Fonte da verdade continua sendo o FLUXO: este arquivo
+// e apenas uma projecao dele, conferida por `conteudo/valida_track.js`.
+//
+// Uso:  node conteudo/extrai_track.js [caminho/do/fluxo.json]
+//
+// Como a extracao funciona (e por que nao e regex): as descricoes contem aspas, ';',
+// '->', parenteses e travessoes, entao casar o literal com regex e frageil. Em vez disso
+// executamos o jsCode num contexto controlado, como o `regressao_v7.4.js` faz
+// (`new Function('$','$input','$json', code)` com refs falsas), tendo antes reescrito
+// `const TRACK=` para tambem publicar o valor num slot de captura. O resto do engine pode
+// falhar a vontade: o que interessa ja foi capturado, e o erro e engolido.
+const fs = require('fs');
+const path = require('path');
+
+const RAIZ = path.join(__dirname, '..');
+const FLUXO_PADRAO = path.join(RAIZ, 'fluxos', 'IAChat_Telegram_v8.json');
+const DESTINO = path.join(__dirname, 'track.json');
+const NO = 'Professor Engine';
+const MARCA = 'const TRACK=';
+const SLOT = '__TRACK_CAPTURADO__';
+
+// Slug estavel para nome de arquivo: sem acento, minusculo, so [a-z0-9-].
+// "Cores e animais" -> "cores-e-animais"; "Números" -> "numeros".
+function slugify(titulo) {
+  return String(titulo)
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function lerJsCode(caminhoFluxo) {
+  const fluxo = JSON.parse(fs.readFileSync(caminhoFluxo, 'utf8'));
+  const no = (fluxo.nodes || []).find(n => n.name === NO);
+  if (!no || !no.parameters || !no.parameters.jsCode) {
+    throw new Error('no "' + NO + '" nao encontrado (ou sem jsCode) em ' + caminhoFluxo);
+  }
+  return no.parameters.jsCode;
+}
+
+// Devolve o objeto TRACK cru, exatamente como esta no fluxo: { NIVEL: [[titulo, descricao], ...] }
+function extraiTrackCru(caminhoFluxo) {
+  const code = lerJsCode(caminhoFluxo || FLUXO_PADRAO);
+  const ocorrencias = code.split(MARCA).length - 1;
+  if (ocorrencias !== 1) {
+    throw new Error('esperava exatamente 1 "' + MARCA + '" no ' + NO + ', achei ' + ocorrencias);
+  }
+  const instrumentado = code.replace(MARCA, 'const TRACK=globalThis.' + SLOT + '=');
+
+  // refs falsas, no mesmo espirito do regressao_v7.4.js
+  const refs = { 'Roteador Mestre': { userId: 1, subroute: 'start', profile: { level: 'A1' }, text: '', callbackData: '' } };
+  const $ = (nome) => ({ first: () => ({ json: refs[nome] || {} }), all: () => (refs[nome] ? [{ json: refs[nome] }] : []) });
+  const $input = { item: { json: {} }, all: () => [] };
+
+  delete globalThis[SLOT];
+  try {
+    new Function('$', '$input', '$json', instrumentado + '\n')($, $input, {});
+  } catch (e) {
+    // esperado: o resto do engine depende de banco/estado que nao temos aqui.
+  }
+  const track = globalThis[SLOT];
+  delete globalThis[SLOT];
+  if (!track || typeof track !== 'object') {
+    throw new Error('a execucao do ' + NO + ' nao chegou a atribuir o TRACK');
+  }
+  return track;
+}
+
+// Forma consumivel: lista plana ordenada por nivel e ordem 1..10.
+// T004 gera um .md por topico (nivel/ordem/slug); T007 semeia com chave nivel+ordem.
+function normaliza(trackCru) {
+  const niveis = Object.keys(trackCru);
+  const topicos = [];
+  for (const nivel of niveis) {
+    const lista = trackCru[nivel];
+    if (!Array.isArray(lista)) throw new Error('nivel ' + nivel + ' nao e lista');
+    lista.forEach((par, i) => {
+      topicos.push({
+        nivel: nivel,
+        ordem: i + 1,
+        slug: slugify(par[0]),
+        titulo: String(par[0]),
+        descricao: String(par[1])
+      });
+    });
+  }
+  return {
+    _fonte: 'fluxos/IAChat_Telegram_v8.json :: no "' + NO + '" :: const TRACK',
+    _aviso: 'NAO editar a mao. Gerado por conteudo/extrai_track.js; conferido por conteudo/valida_track.js.',
+    niveis: niveis,
+    total: topicos.length,
+    topicos: topicos
+  };
+}
+
+function extrai(caminhoFluxo) {
+  return normaliza(extraiTrackCru(caminhoFluxo));
+}
+
+module.exports = { extrai, extraiTrackCru, normaliza, slugify, FLUXO_PADRAO, DESTINO, NO };
+
+if (require.main === module) {
+  const caminho = process.argv[2] || FLUXO_PADRAO;
+  const dados = extrai(caminho);
+  fs.writeFileSync(DESTINO, JSON.stringify(dados, null, 2) + '\n', 'utf8');
+  console.log('fluxo: ' + path.basename(caminho));
+  console.log('niveis: ' + dados.niveis.join(', '));
+  console.log('topicos: ' + dados.total);
+  console.log('gravado: ' + path.relative(RAIZ, DESTINO));
+}

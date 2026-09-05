@@ -59,7 +59,7 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
   idêntico ao TRACK embutido no fluxo.
 - **Gate:** `node conteudo/valida_track.js` + `npm run gate`
 - **Depende de:** T001
-- **Status:** TODO
+- **Status:** DONE — 60 tópicos, fidelidade conferida por extração independente
 
 ### T004 — gerador de explicações (Gemini 2.5 Pro no Vertex)
 - **Escopo:** `conteudo/gerar_explicacoes.js` — Service Account `mKfC2ANkOKHfbKal`, um `.md` por
