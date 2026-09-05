@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T005
-- **Última concluída:** T004
+- **Tarefa atual:** T005b
+- **Última concluída:** T005
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum
 
@@ -41,3 +41,11 @@
 - 2026-09-05 T004 DONE. Auth do Vertex fora do n8n: ADC via `gcloud auth print-access-token`, projeto `agent-hackton` (o store de credenciais do n8n nao e legivel pela API, 405). No Windows, Node >=20 recusa spawn direto de .cmd — chamar via `cmd.exe /c`.
 - 2026-09-05 DECISAO DE PRODUTO PENDENTE: o `LANG` do `Professor Engine` manda A1/A2 em portugues e B1/B2/C1/C2 **em ingles**. Confirmado nos dois fluxos. 40 das 60 explicacoes sairao em ingles. Levado ao Breno; ate decidir, o gerador espelha o fluxo.
 - 2026-09-05 BOMBA-RELOGIO do T006: `gerar_explicacoes.js` grava com writeFileSync direto (nao atomico) e a retomada e so `existsSync`. Um .md truncado por Ctrl-C e pulado para sempre. Fechar no T005.
+- 2026-09-05 DECIDIDO pelo Breno: B1..C2 passam a explicar em PORTUGUES. Muda so a clausula de explicacao do LANG; as PERGUNTAS seguem em ingles com resposta curta, como em A1/A2. Virou T005b, aplicar depois do T005 e antes do T006.
+- 2026-09-05 T005 tentativa 1 devolvida: pulou o item "nao vaza gabarito" alegando banco fora, mas o iachat-pg esta up ha 10h e a 5433 aberta. Conferir o ambiente antes de declarar bloqueio.
+- 2026-09-05 DECIDIDO: enunciado das perguntas em portugues em A1 e A2 (o A2 era ambiguo, fica explicito); B1..C2 mantem enunciado em ingles. Resposta curta em ingles nos seis niveis. Entra no T005b.
+- 2026-09-05 T005 DONE (2 tentativas). `practice_questions.track_topic` = titulo do topico do TRACK; 136/136 preenchidas, 60/60 topicos cobertos. E a chave que T007/T008 devem usar para casar explicacao e questao.
+- 2026-09-05 LIMITE ACEITO: o validador confere forma e cobertura lexical, NAO se o texto ensina. Lixo semantico que bate os contadores passa. A revisao humana do T006 e obrigatoria, nao opcional.
+- 2026-09-05 10 pares (cefr_level, track_topic) contradizem o nivel que o TRACK da ao topico. O T007 vai esbarrar nisso ao modelar a tabela.
+- 2026-09-05 3 questoes practice (B1/2, B1/8, B2/1) sao redundantes com a descricao do TRACK: o material e obrigado a ensinar o que elas cobram. Viram AVISO, nao reprovacao. Decisao de produto pendente.
+- 2026-09-05 `conteudo/questoes.json` e retrato versionado do banco; `node conteudo/extrai_questoes.js --conferir` prova que batem (precisa do Postgres, fica fora do gate).

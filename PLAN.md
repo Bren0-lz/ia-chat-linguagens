@@ -81,13 +81,56 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
   pulado para sempre. Gravar por temporário + `rename`, e pular só o que passa no validador.
 - **Gate:** aprova o piloto e **reprova** um `.md` sabotado (fixture no repositório)
 - **Depende de:** T004
+- **Status:** DONE — validador + gravação atômica + detector de vazamento por `track_topic`
+
+### T005b — LANG: B1..C2 explicam em português
+- **Escopo:** decisões do Breno em 05/09. No `LANG` do `Professor Engine` (v8), duas mudanças:
+  1. **Explicação** de B1, B2, C1 e C2: de "INTEIRAMENTE em inglês, SEM português" para português,
+     preservando o registro de cada nível (simples em B1, natural em B2, sofisticado em C1, nativo
+     em C2).
+  2. **Enunciado das perguntas** em português na faixa básica. A1 já está assim; o A2 hoje diz só
+     "enunciado simples", sem idioma — tornar explícito. De B1 em diante o enunciado **segue em
+     inglês**. A resposta curta continua em inglês em todos os seis níveis.
+
+  Estado alvo:
+
+  | | explicação | enunciado | resposta |
+  |---|---|---|---|
+  | A1, A2 | PT | **PT** | EN |
+  | B1, B2, C1, C2 | **PT** | EN | EN |
+
+  Republicar o v8.
+  **Fechar junto a rede de proteção que falta:** a verificação do T005 mutou `idiomaPorNivel` para
+  um mapa cravado e o `npm run gate` continuou **verde** — a implementação deriva do fluxo, mas o
+  teste não pegaria uma regressão que voltasse a cravar. Acrescente o caso que reprova essa mutação.
+  A asserção fixa em `testa_valida_explicacoes.js:82` vai quebrar com a troca; é por desenho.
+- **Gate:** `npm run gate` + `node conteudo/valida_explicacoes.js` (que deriva o idioma do fluxo:
+  depois da troca, um `.md` de B1 em inglês passa a reprovar e um em português passa a aprovar —
+  mostre as duas saídas) + a mutação do idioma cravado passa a **reprovar** o gate +
+  `publica_v8.js` + verificação ao vivo da rota do Professor num nível B1+
+- **Depende de:** T005
+- **Status:** TODO
+
+### T005c — calibrar o detector de vazamento antes de gerar os 60
+- **Escopo:** a verificação do T005 simulou explicações que ensinam a matéria do próprio tópico e
+  **22 de 60 reprovariam** por GABARITO — entre elas frases que qualquer aula boa escreveria
+  (`had never seen`, `have been learning`, `never have I seen such chaos`, que é o exemplo canônico
+  de inversão). O gatilho de resposta (≥3 palavras / ≥12 chars) é curto demais para separar
+  "entregou o item" de "ensinou a matéria". Calibrar antes de gastar 60 gerações.
+  É uma **previsão por simulação**, não medição de conteúdo real — confirme antes de mexer, e se a
+  simulação não se sustentar, diga isso e feche a tarefa sem alterar o limiar.
+  Registrar também o limite conhecido do outro lado: 35 das 136 questões não têm detector nenhum
+  (resposta de uma palavra, enunciado sem lacuna).
+- **Gate:** a simulação que hoje reprova 22/60 passa a reprovar só o que é vazamento de verdade, com
+  as fixtures das duas direções ainda verdes; `npm run gate` verde
+- **Depende de:** T005b
 - **Status:** TODO
 
 ### T006 — gerar os 60 e revisar
 - **Escopo:** rodar o gerador nos 60 tópicos, um commit por nível. Ponto de revisão humana: são
   `.md` em git, o Breno lê no diff.
 - **Gate:** `node conteudo/valida_explicacoes.js` verde nos 60
-- **Depende de:** T005
+- **Depende de:** T005c
 - **Status:** TODO
 
 ### T007 — migration e seed

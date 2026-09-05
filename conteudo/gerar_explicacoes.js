@@ -7,7 +7,11 @@
 //   node conteudo/gerar_explicacoes.js --apenas A1/01     # gera so um topico (piloto)
 //   node conteudo/gerar_explicacoes.js                    # gera os que faltam (T006)
 //
-// RETOMAVEL: nao regera .md que ja existe. Para refazer, apague o arquivo.
+// RETOMAVEL: nao regera .md que ja existe E PASSA no validador (conteudo/valida_explicacoes.js).
+// "Existe" nao basta: um Ctrl-C no meio da escrita deixava um .md truncado que o gerador
+// pulava para sempre, reportando sucesso (reproduzido na verificacao do T004 — 25 bytes
+// cortados no frontmatter). Por isso, alem do guard pelo validador, a gravacao e ATOMICA
+// (temporario + rename), de modo que nunca exista um arquivo pela metade no destino.
 //
 // Autenticacao: ADC via `gcloud auth print-access-token` (projeto agent-hackton).
 // A credencial `Google Service Account` do n8n vive no store de credenciais e a API
@@ -24,6 +28,7 @@ const path = require('path');
 const https = require('https');
 const { execFileSync } = require('child_process');
 const { extrai, DESTINO } = require('./extrai_track.js');
+const { contexto, arquivoValido } = require('./valida_explicacoes.js');
 
 const RAIZ = path.join(__dirname, '..');
 const DIR_SAIDA = path.join(__dirname, 'explicacoes');
@@ -39,16 +44,13 @@ const MAX_OUTPUT_TOKENS = 12000;
 const MIN_CARACTERES = 500;   // abaixo disso nao e explicacao, e um toco
 const MAX_CARACTERES = 3000;  // o envio ao Telegram trunca; ~2500 e o alvo
 
-// Contrato de idioma por nivel — ESPELHA `const LANG` do no "Professor Engine"
-// (fluxos/IAChat_Telegram_v8.json). A1/A2 explicam em portugues; B1+ explicam em ingles.
-// Se o LANG do fluxo mudar, mude aqui tambem.
-const LANG = {
-  A1: 'Escreva a explicacao em PORTUGUES simples (aluno brasileiro iniciante), sempre com o termo em ingles seguido da traducao entre parenteses.',
-  A2: 'Escreva a explicacao em PORTUGUES simples, com os exemplos em ingles seguidos de traducao.',
-  B1: 'Write the whole explanation in clear, simple ENGLISH. No Portuguese at all.',
-  B2: 'Write the whole explanation in natural ENGLISH. No Portuguese at all.',
-  C1: 'Write the whole explanation in sophisticated, concise ENGLISH. No Portuguese at all.',
-  C2: 'Write the whole explanation in native-level, concise ENGLISH. No Portuguese at all.'
+// Contrato de idioma por nivel — DERIVADO do `const LANG` do no "Professor Engine", nao
+// copiado. `idiomaPorNivel()` le o fluxo e devolve 'pt' ou 'en' por nivel; a diretiva do
+// prompt sai de um dos dois moldes abaixo. Assim o gerador e o validador seguem juntos a
+// politica que o Breno mudar no fluxo, sem uma terceira verdade para envelhecer.
+const DIRETIVA_IDIOMA = {
+  pt: 'Escreva a explicacao em PORTUGUES simples (aluno brasileiro), sempre com o termo em ingles seguido da traducao.',
+  en: 'Write the whole explanation in clear ENGLISH, at the level of the student. No Portuguese at all.'
 };
 
 // Tags que o Telegram entende em parse_mode=HTML e que autorizamos no corpo.
@@ -82,7 +84,9 @@ function rotuloDe(t) {
 
 // O prompt e o coracao da tarefa. A regua vem do handoff sec.1: "a explicacao de um topico
 // tem de bastar para o aluno acertar as questoes dele sozinho, sem buscar fora".
-function montaPrompt(t, total) {
+function montaPrompt(t, total, idioma) {
+  const diretiva = DIRETIVA_IDIOMA[idioma];
+  if (!diretiva) throw new Error('idioma "' + idioma + '" nao tem molde de diretiva (nivel ' + t.nivel + ')');
   return [
     'Voce e o IAChat, um professor de ingles paciente e muito didatico, escrevendo a EXPLICACAO',
     'oficial de um topico da trilha do MODO PROFESSOR. Este texto sera guardado e servido a TODOS',
@@ -93,7 +97,7 @@ function montaPrompt(t, total) {
     'MATERIA A ENSINAR (cobrir TUDO isto, sem pular nada):',
     t.descricao,
     '',
-    'IDIOMA: ' + LANG[t.nivel],
+    'IDIOMA: ' + diretiva,
     'NIVEL: fique dentro do que se aprende em ' + t.nivel + '. Nao use nem pressuponha estrutura,',
     'tempo verbal ou vocabulario de niveis acima — se precisar de um termo mais avancado, explique-o.',
     '',
@@ -265,6 +269,34 @@ function montaMd(t, corpo, data) {
   ].join('\n');
 }
 
+// Gravacao ATOMICA: escreve num temporario e so entao renomeia para o destino. Um Ctrl-C
+// (ou queda de energia) no meio da escrita deixa no maximo um .tmp orfao — nunca um .md
+// pela metade, que o guard de retomada tomaria por bom.
+function gravaAtomico(destino, conteudo) {
+  fs.mkdirSync(path.dirname(destino), { recursive: true });
+  const tmp = destino + '.tmp-' + process.pid;
+  fs.writeFileSync(tmp, conteudo, 'utf8');
+  try {
+    fs.renameSync(tmp, destino);
+  } catch (e) {
+    try { fs.unlinkSync(tmp); } catch (_) { /* nada a fazer */ }
+    throw e;
+  }
+}
+
+// Guard de retomada. "Existe" NAO basta: o arquivo tem de passar no validador do T005.
+function precisaGerar(t, ctx, caminho) {
+  const destino = caminho || caminhoDe(t);
+  if (!fs.existsSync(destino)) return { gerar: true, motivo: 'nao existe' };
+  const r = arquivoValido(destino, ctx || contexto());
+  if (r.ok) return { gerar: false, motivo: 'ja existe e passa no validador' };
+  return {
+    gerar: true,
+    motivo: 'existe mas NAO passa no validador: ' +
+      r.problemas.map((p) => '[' + p.codigo + '] ' + p.msg).join(' · ')
+  };
+}
+
 // ---------------------------------------------------------------- CLI
 
 function parseArgs(argv) {
@@ -296,13 +328,15 @@ async function main() {
   const porNivel = {};
   todos.forEach((t) => { porNivel[t.nivel] = (porNivel[t.nivel] || 0) + 1; });
   const alvo = filtra(todos, opt.apenas);
+  const ctx = contexto();   // TRACK + idioma por nivel, os dois derivados do fluxo
 
   if (opt.dryRun) {
     console.log('DRY-RUN — nenhuma chamada de rede. Modelo que seria usado: ' + MODELO);
     alvo.forEach((t) => {
-      const p = caminhoDe(t);
-      const marca = fs.existsSync(p) ? 'JA EXISTE' : 'geraria  ';
-      console.log(marca + '  ' + path.relative(RAIZ, p).replace(/\\/g, '/'));
+      const d = precisaGerar(t, ctx);
+      const marca = d.gerar ? (fs.existsSync(caminhoDe(t)) ? 'REGERARIA' : 'geraria  ') : 'JA EXISTE';
+      console.log(marca + '  ' + path.relative(RAIZ, caminhoDe(t)).replace(/\\/g, '/') +
+        (d.gerar && fs.existsSync(caminhoDe(t)) ? '  <- ' + d.motivo : ''));
     });
     console.log('total: ' + alvo.length + ' topicos');
     return 0;
@@ -312,18 +346,28 @@ async function main() {
   for (const t of alvo) {
     const destino = caminhoDe(t);
     const rel = path.relative(RAIZ, destino).replace(/\\/g, '/');
-    if (fs.existsSync(destino)) {           // retomavel: nao regera
-      console.log('PULA   ' + rotuloDe(t) + '  ' + rel + ' (ja existe)');
+    const decisao = precisaGerar(t, ctx);
+    if (!decisao.gerar) {                   // retomavel: so pula o que PASSA no validador
+      console.log('PULA   ' + rotuloDe(t) + '  ' + rel + ' (' + decisao.motivo + ')');
       pulados++;
       continue;
     }
+    if (fs.existsSync(destino)) console.log('REGERA ' + rotuloDe(t) + '  ' + decisao.motivo);
     process.stdout.write('GERA   ' + rotuloDe(t) + '  ' + t.titulo + ' ... ');
     try {
-      const corpo = await chamaModelo(montaPrompt(t, porNivel[t.nivel]));
+      const corpo = await chamaModelo(montaPrompt(t, porNivel[t.nivel], ctx.idioma[t.nivel]));
       const problemas = confereCorpo(corpo);
       if (problemas.length) throw new Error(problemas.join('; '));
-      fs.mkdirSync(path.dirname(destino), { recursive: true });
-      fs.writeFileSync(destino, montaMd(t, corpo, new Date().toISOString().slice(0, 10)), 'utf8');
+      gravaAtomico(destino, montaMd(t, corpo, new Date().toISOString().slice(0, 10)));
+      const veredito = arquivoValido(destino, ctx);
+      if (!veredito.ok) {
+        // Resposta escrita NAO e aprovacao (handoff sec.6 nº1): conta como falha, e o
+        // arquivo fica no disco para inspecao — a proxima rodada o regera.
+        console.log('GRAVOU MAS NAO PASSA NO VALIDADOR:');
+        veredito.problemas.forEach((p) => console.log('         [' + p.codigo + '] ' + p.msg));
+        falhas++;
+        continue;
+      }
       console.log(corpo.length + ' chars -> ' + rel);
       gerados++;
     } catch (e) {
@@ -335,7 +379,10 @@ async function main() {
   return falhas ? 1 : 0;
 }
 
-module.exports = { caminhoDe, montaPrompt, confereCorpo, montaMd, LANG, MODELO, DIR_SAIDA };
+module.exports = {
+  caminhoDe, montaPrompt, confereCorpo, montaMd, gravaAtomico, precisaGerar,
+  DIRETIVA_IDIOMA, MODELO, DIR_SAIDA
+};
 
 if (require.main === module) {
   main().then((c) => process.exit(c)).catch((e) => {

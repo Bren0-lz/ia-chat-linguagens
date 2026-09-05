@@ -1,0 +1,1576 @@
+{
+  "_fonte": "postgres :: practice_questions (por track_topic) + exam_questions (por cefr_level)",
+  "_aviso": "NAO editar a mao. Gerado por conteudo/extrai_questoes.js; confira com --conferir (precisa do Postgres).",
+  "practice": [
+    {
+      "id": 1,
+      "nivel": "A2",
+      "topico": "Passado simples (to be e regulares)",
+      "qtype": "mc",
+      "prompt": "Yesterday I ___ to the park.",
+      "answer": "went"
+    },
+    {
+      "id": 2,
+      "nivel": "A2",
+      "topico": "Passado simples (to be e regulares)",
+      "qtype": "written",
+      "prompt": "Complete no passado: \"She ___ (study) all night.\"",
+      "answer": "studied"
+    },
+    {
+      "id": 3,
+      "nivel": "B1",
+      "topico": "Passado simples (to be e regulares)",
+      "qtype": "written",
+      "prompt": "Corrija a frase: \"I didn't went home.\"",
+      "answer": "i didn't go home"
+    },
+    {
+      "id": 4,
+      "nivel": "A2",
+      "topico": "Present perfect",
+      "qtype": "mc",
+      "prompt": "I ___ already finished my homework.",
+      "answer": "have"
+    },
+    {
+      "id": 5,
+      "nivel": "B1",
+      "topico": "Present perfect",
+      "qtype": "written",
+      "prompt": "Complete: \"She ___ (live) here since 2010.\"",
+      "answer": "has lived"
+    },
+    {
+      "id": 6,
+      "nivel": "B1",
+      "topico": "Present perfect",
+      "qtype": "written",
+      "prompt": "Corrija: \"I have seen him yesterday.\"",
+      "answer": "i saw him yesterday"
+    },
+    {
+      "id": 7,
+      "nivel": "A1",
+      "topico": "Preposições de lugar e tempo",
+      "qtype": "mc",
+      "prompt": "The book is ___ the table.",
+      "answer": "on"
+    },
+    {
+      "id": 8,
+      "nivel": "A2",
+      "topico": "Preposições de lugar e tempo",
+      "qtype": "mc",
+      "prompt": "I'll see you ___ Monday.",
+      "answer": "on"
+    },
+    {
+      "id": 9,
+      "nivel": "B1",
+      "topico": "Preposições de lugar e tempo",
+      "qtype": "written",
+      "prompt": "Complete: \"She's good ___ math.\" (preposição)",
+      "answer": "at"
+    },
+    {
+      "id": 10,
+      "nivel": "A1",
+      "topico": "Plural dos substantivos",
+      "qtype": "mc",
+      "prompt": "I saw ___ elephant at the zoo.",
+      "answer": "an"
+    },
+    {
+      "id": 11,
+      "nivel": "A2",
+      "topico": "Plural dos substantivos",
+      "qtype": "written",
+      "prompt": "Complete com a/an/the ou deixe vazio: \"She plays ___ piano.\"",
+      "answer": "the"
+    },
+    {
+      "id": 12,
+      "nivel": "B1",
+      "topico": "Plural dos substantivos",
+      "qtype": "written",
+      "prompt": "Corrija: \"I love the nature.\"",
+      "answer": "i love nature"
+    },
+    {
+      "id": 13,
+      "nivel": "A2",
+      "topico": "Conectores e phrasal verbs comuns",
+      "qtype": "mc",
+      "prompt": "Please ___ your shoes before entering.",
+      "answer": "take off"
+    },
+    {
+      "id": 14,
+      "nivel": "B1",
+      "topico": "Conectores e phrasal verbs comuns",
+      "qtype": "mc",
+      "prompt": "I need to ___ this word in the dictionary.",
+      "answer": "look up"
+    },
+    {
+      "id": 16,
+      "nivel": "A1",
+      "topico": "Presente simples",
+      "qtype": "mc",
+      "prompt": "He ___ soccer every weekend.",
+      "answer": "plays"
+    },
+    {
+      "id": 17,
+      "nivel": "A2",
+      "topico": "Presente simples",
+      "qtype": "written",
+      "prompt": "Complete: \"My sister ___ (watch) TV at night.\"",
+      "answer": "watches"
+    },
+    {
+      "id": 18,
+      "nivel": "B1",
+      "topico": "Presente simples",
+      "qtype": "written",
+      "prompt": "Corrija: \"She don't like coffee.\"",
+      "answer": "she doesn't like coffee"
+    },
+    {
+      "id": 19,
+      "nivel": "A1",
+      "topico": "Passado simples (to be e regulares)",
+      "qtype": "written",
+      "prompt": "Passado de \"eat\":",
+      "answer": "ate"
+    },
+    {
+      "id": 20,
+      "nivel": "A2",
+      "topico": "Passado simples (to be e regulares)",
+      "qtype": "mc",
+      "prompt": "We ___ a great movie last night.",
+      "answer": "saw"
+    },
+    {
+      "id": 21,
+      "nivel": "A2",
+      "topico": "Present perfect",
+      "qtype": "mc",
+      "prompt": "Have you ___ been to London?",
+      "answer": "ever"
+    },
+    {
+      "id": 22,
+      "nivel": "A2",
+      "topico": "Preposições de lugar e tempo",
+      "qtype": "written",
+      "prompt": "Complete: \"The meeting is ___ 3 o'clock.\" (preposição de horário)",
+      "answer": "at"
+    },
+    {
+      "id": 23,
+      "nivel": "A1",
+      "topico": "Plural dos substantivos",
+      "qtype": "mc",
+      "prompt": "She is ___ honest person.",
+      "answer": "an"
+    },
+    {
+      "id": 24,
+      "nivel": "B1",
+      "topico": "Conectores e phrasal verbs comuns",
+      "qtype": "written",
+      "prompt": "Complete: \"We ran ___ of milk.\" (acabar — phrasal com run)",
+      "answer": "out"
+    },
+    {
+      "id": 25,
+      "nivel": "A1",
+      "topico": "Presente simples",
+      "qtype": "written",
+      "prompt": "Complete: \"It ___ (rain) a lot here.\"",
+      "answer": "rains"
+    },
+    {
+      "id": 26,
+      "nivel": "B1",
+      "topico": "Passado simples (to be e regulares)",
+      "qtype": "mc",
+      "prompt": "When I was a child, I ___ in the countryside.",
+      "answer": "lived"
+    },
+    {
+      "id": 27,
+      "nivel": "B1",
+      "topico": "Present perfect",
+      "qtype": "mc",
+      "prompt": "They ___ just arrived.",
+      "answer": "have"
+    },
+    {
+      "id": 29,
+      "nivel": "A2",
+      "topico": "Plural dos substantivos",
+      "qtype": "mc",
+      "prompt": "___ sun rises in the east.",
+      "answer": "The"
+    },
+    {
+      "id": 31,
+      "nivel": "B2",
+      "topico": "Present perfect continuous",
+      "qtype": "mc",
+      "prompt": "She ___ for three hours and she is still working.",
+      "answer": "has been working"
+    },
+    {
+      "id": 32,
+      "nivel": "B2",
+      "topico": "Present perfect continuous",
+      "qtype": "written",
+      "prompt": "Complete: I ___ (learn) English since 2020.",
+      "answer": "have been learning"
+    },
+    {
+      "id": 33,
+      "nivel": "B2",
+      "topico": "Past perfect",
+      "qtype": "mc",
+      "prompt": "When we arrived, the film ___ already ___.",
+      "answer": "had / started"
+    },
+    {
+      "id": 34,
+      "nivel": "B2",
+      "topico": "Past perfect",
+      "qtype": "written",
+      "prompt": "Complete: She told me she ___ (never/see) snow before.",
+      "answer": "had never seen"
+    },
+    {
+      "id": 35,
+      "nivel": "B2",
+      "topico": "Segunda condicional",
+      "qtype": "mc",
+      "prompt": "If I ___ rich, I would travel the world.",
+      "answer": "were"
+    },
+    {
+      "id": 36,
+      "nivel": "B2",
+      "topico": "Segunda condicional",
+      "qtype": "written",
+      "prompt": "Complete: If he studied more, he ___ (pass) the exam.",
+      "answer": "would pass"
+    },
+    {
+      "id": 37,
+      "nivel": "B2",
+      "topico": "Voz passiva",
+      "qtype": "mc",
+      "prompt": "The bridge ___ in 1995.",
+      "answer": "was built"
+    },
+    {
+      "id": 38,
+      "nivel": "B2",
+      "topico": "Voz passiva",
+      "qtype": "written",
+      "prompt": "Rewrite in the passive: \"They clean the office every day.\"",
+      "answer": "The office is cleaned every day"
+    },
+    {
+      "id": 39,
+      "nivel": "B2",
+      "topico": "Discurso indireto",
+      "qtype": "mc",
+      "prompt": "She said: \"I am tired.\" → She said she ___ tired.",
+      "answer": "was"
+    },
+    {
+      "id": 40,
+      "nivel": "B2",
+      "topico": "Discurso indireto",
+      "qtype": "written",
+      "prompt": "Report it: He said, \"I will call you tomorrow.\"",
+      "answer": "He said he would call me the next day"
+    },
+    {
+      "id": 41,
+      "nivel": "B2",
+      "topico": "Orações relativas",
+      "qtype": "mc",
+      "prompt": "The woman ___ lives next door is a doctor.",
+      "answer": "who"
+    },
+    {
+      "id": 42,
+      "nivel": "B2",
+      "topico": "Orações relativas",
+      "qtype": "written",
+      "prompt": "Join: \"That is the man. His car was stolen.\"",
+      "answer": "That is the man whose car was stolen"
+    },
+    {
+      "id": 43,
+      "nivel": "B2",
+      "topico": "Gerúndio vs infinitivo",
+      "qtype": "mc",
+      "prompt": "I enjoy ___ to music.",
+      "answer": "listening"
+    },
+    {
+      "id": 44,
+      "nivel": "B2",
+      "topico": "Gerúndio vs infinitivo",
+      "qtype": "written",
+      "prompt": "Complete: She decided ___ (leave) early.",
+      "answer": "to leave"
+    },
+    {
+      "id": 45,
+      "nivel": "B2",
+      "topico": "Modais de dedução",
+      "qtype": "mc",
+      "prompt": "The light is on, so she ___ be at home.",
+      "answer": "must"
+    },
+    {
+      "id": 46,
+      "nivel": "B2",
+      "topico": "Modais de dedução",
+      "qtype": "written",
+      "prompt": "Complete with a modal: He never eats meat, so this ___ be his dish.",
+      "answer": "cannot"
+    },
+    {
+      "id": 47,
+      "nivel": "B2",
+      "topico": "Used to / would",
+      "qtype": "mc",
+      "prompt": "When I was a child, I ___ live in Brazil.",
+      "answer": "used to"
+    },
+    {
+      "id": 48,
+      "nivel": "B2",
+      "topico": "Used to / would",
+      "qtype": "written",
+      "prompt": "True or false: \"I would live in Paris\" correctly means a past habit of living there.",
+      "answer": "false"
+    },
+    {
+      "id": 49,
+      "nivel": "B2",
+      "topico": "Phrasal verbs e collocations avançadas",
+      "qtype": "mc",
+      "prompt": "I need to ___ my report before Friday.",
+      "answer": "hand in"
+    },
+    {
+      "id": 50,
+      "nivel": "B2",
+      "topico": "Phrasal verbs e collocations avançadas",
+      "qtype": "written",
+      "prompt": "Complete the collocation: to ___ a decision.",
+      "answer": "make"
+    },
+    {
+      "id": 51,
+      "nivel": "C1",
+      "topico": "Terceira e mistas condicionais",
+      "qtype": "mc",
+      "prompt": "If she ___ harder, she would have passed.",
+      "answer": "had studied"
+    },
+    {
+      "id": 52,
+      "nivel": "C1",
+      "topico": "Terceira e mistas condicionais",
+      "qtype": "written",
+      "prompt": "Mixed: If I had taken that job, I ___ (be) in Tokyo now.",
+      "answer": "would be"
+    },
+    {
+      "id": 53,
+      "nivel": "C1",
+      "topico": "Inversão",
+      "qtype": "mc",
+      "prompt": "___ had I arrived when the phone rang.",
+      "answer": "No sooner"
+    },
+    {
+      "id": 54,
+      "nivel": "C1",
+      "topico": "Inversão",
+      "qtype": "written",
+      "prompt": "Invert: \"I have never seen such chaos.\"",
+      "answer": "Never have I seen such chaos"
+    },
+    {
+      "id": 55,
+      "nivel": "C1",
+      "topico": "Cleft sentences",
+      "qtype": "mc",
+      "prompt": "___ I need is a holiday.",
+      "answer": "What"
+    },
+    {
+      "id": 56,
+      "nivel": "C1",
+      "topico": "Cleft sentences",
+      "qtype": "written",
+      "prompt": "Make it a cleft emphasising \"Maria\": \"Maria broke the window.\"",
+      "answer": "It was Maria who broke the window"
+    },
+    {
+      "id": 57,
+      "nivel": "C1",
+      "topico": "Voz passiva avançada",
+      "qtype": "mc",
+      "prompt": "It ___ that the company will merge next year.",
+      "answer": "is expected"
+    },
+    {
+      "id": 58,
+      "nivel": "C1",
+      "topico": "Voz passiva avançada",
+      "qtype": "written",
+      "prompt": "Rewrite: \"People believe he is innocent.\" (start with \"He\")",
+      "answer": "He is believed to be innocent"
+    },
+    {
+      "id": 59,
+      "nivel": "C1",
+      "topico": "Modais e probabilidade (nuance)",
+      "qtype": "mc",
+      "prompt": "She ___ have missed the train — she left two hours ago.",
+      "answer": "cant"
+    },
+    {
+      "id": 60,
+      "nivel": "C1",
+      "topico": "Modais e probabilidade (nuance)",
+      "qtype": "written",
+      "prompt": "Which is more certain: \"He may have left\" or \"He must have left\"?",
+      "answer": "must"
+    },
+    {
+      "id": 61,
+      "nivel": "C1",
+      "topico": "Marcadores de discurso",
+      "qtype": "mc",
+      "prompt": "The plan is expensive. ___, it is the only option we have.",
+      "answer": "Nevertheless"
+    },
+    {
+      "id": 62,
+      "nivel": "C1",
+      "topico": "Marcadores de discurso",
+      "qtype": "written",
+      "prompt": "Give a formal marker that introduces a consequence.",
+      "answer": "therefore"
+    },
+    {
+      "id": 63,
+      "nivel": "C1",
+      "topico": "Collocations e preposições dependentes",
+      "qtype": "mc",
+      "prompt": "She is entirely dependent ___ her parents.",
+      "answer": "on"
+    },
+    {
+      "id": 64,
+      "nivel": "C1",
+      "topico": "Collocations e preposições dependentes",
+      "qtype": "written",
+      "prompt": "Complete: The results are consistent ___ our hypothesis.",
+      "answer": "with"
+    },
+    {
+      "id": 65,
+      "nivel": "C1",
+      "topico": "Linguagem idiomática e figurada",
+      "qtype": "mc",
+      "prompt": "\"The negotiations hit a brick wall\" means they ___.",
+      "answer": "reached a deadlock"
+    },
+    {
+      "id": 66,
+      "nivel": "C1",
+      "topico": "Linguagem idiomática e figurada",
+      "qtype": "written",
+      "prompt": "What does \"to bite the bullet\" mean in one word?",
+      "answer": "endure"
+    },
+    {
+      "id": 67,
+      "nivel": "C1",
+      "topico": "Hedging e registro",
+      "qtype": "mc",
+      "prompt": "Choose the most hedged form: \"This ___ suggest a correlation.\"",
+      "answer": "may"
+    },
+    {
+      "id": 68,
+      "nivel": "C1",
+      "topico": "Hedging e registro",
+      "qtype": "written",
+      "prompt": "Rewrite with hedging: \"This proves the theory.\"",
+      "answer": "This appears to support the theory"
+    },
+    {
+      "id": 69,
+      "nivel": "C1",
+      "topico": "Nominalização e estilo acadêmico",
+      "qtype": "mc",
+      "prompt": "Nominalise \"They decided quickly\": \"Their ___ was quick.\"",
+      "answer": "decision"
+    },
+    {
+      "id": 70,
+      "nivel": "C1",
+      "topico": "Nominalização e estilo acadêmico",
+      "qtype": "written",
+      "prompt": "Nominalise the verb \"analyse\".",
+      "answer": "analysis"
+    },
+    {
+      "id": 71,
+      "nivel": "C2",
+      "topico": "Registro e conotação sutis",
+      "qtype": "mc",
+      "prompt": "Which word has the most negative connotation?",
+      "answer": "stingy"
+    },
+    {
+      "id": 72,
+      "nivel": "C2",
+      "topico": "Registro e conotação sutis",
+      "qtype": "written",
+      "prompt": "Which is more formal: \"buy\" or \"purchase\"?",
+      "answer": "purchase"
+    },
+    {
+      "id": 73,
+      "nivel": "C2",
+      "topico": "Idioms avançados e metáfora",
+      "qtype": "mc",
+      "prompt": "\"A pyrrhic victory\" is a victory that ___.",
+      "answer": "costs too much"
+    },
+    {
+      "id": 74,
+      "nivel": "C2",
+      "topico": "Idioms avançados e metáfora",
+      "qtype": "written",
+      "prompt": "Complete: to throw the baby out with the ___.",
+      "answer": "bathwater"
+    },
+    {
+      "id": 75,
+      "nivel": "C2",
+      "topico": "Elipse e substituição",
+      "qtype": "mc",
+      "prompt": "\"Are you coming?\" \"I might ___.\"",
+      "answer": "be"
+    },
+    {
+      "id": 76,
+      "nivel": "C2",
+      "topico": "Elipse e substituição",
+      "qtype": "written",
+      "prompt": "Substitute to avoid repetition: \"I like jazz and she likes jazz too.\"",
+      "answer": "I like jazz and so does she"
+    },
+    {
+      "id": 77,
+      "nivel": "C2",
+      "topico": "Fronting e ênfase",
+      "qtype": "mc",
+      "prompt": "Which sentence uses fronting?",
+      "answer": "Never have I seen it"
+    },
+    {
+      "id": 78,
+      "nivel": "C2",
+      "topico": "Fronting e ênfase",
+      "qtype": "written",
+      "prompt": "Front the complement: \"I will never forget that day.\"",
+      "answer": "That day I will never forget"
+    },
+    {
+      "id": 79,
+      "nivel": "C2",
+      "topico": "Coesão e discurso avançado",
+      "qtype": "mc",
+      "prompt": "___ the evidence, the conclusion seems premature.",
+      "answer": "Despite"
+    },
+    {
+      "id": 80,
+      "nivel": "C2",
+      "topico": "Coesão e discurso avançado",
+      "qtype": "written",
+      "prompt": "Give a formal connector meaning \"in other words\".",
+      "answer": "namely"
+    },
+    {
+      "id": 81,
+      "nivel": "C2",
+      "topico": "Ironia, humor e understatement",
+      "qtype": "mc",
+      "prompt": "After a disaster, \"That went well\" is an example of ___.",
+      "answer": "irony"
+    },
+    {
+      "id": 82,
+      "nivel": "C2",
+      "topico": "Ironia, humor e understatement",
+      "qtype": "written",
+      "prompt": "\"It is a bit chilly\" during a snowstorm is an example of what?",
+      "answer": "understatement"
+    },
+    {
+      "id": 83,
+      "nivel": "C2",
+      "topico": "Estilo acadêmico e formal",
+      "qtype": "mc",
+      "prompt": "Which is most appropriate in an academic paper?",
+      "answer": "Data were collected"
+    },
+    {
+      "id": 84,
+      "nivel": "C2",
+      "topico": "Estilo acadêmico e formal",
+      "qtype": "written",
+      "prompt": "Rewrite formally: \"The results were pretty good.\"",
+      "answer": "The results were satisfactory"
+    },
+    {
+      "id": 85,
+      "nivel": "C2",
+      "topico": "Phrasal e prepositional verbs raros",
+      "qtype": "mc",
+      "prompt": "To \"pore over\" a document means to ___ it.",
+      "answer": "examine closely"
+    },
+    {
+      "id": 86,
+      "nivel": "C2",
+      "topico": "Phrasal e prepositional verbs raros",
+      "qtype": "written",
+      "prompt": "What does \"the effect wore off\" mean about the effect?",
+      "answer": "it gradually disappeared"
+    },
+    {
+      "id": 87,
+      "nivel": "C2",
+      "topico": "Pragmática e implicatura",
+      "qtype": "mc",
+      "prompt": "\"It is cold in here\" said to a host usually functions as ___.",
+      "answer": "an indirect request"
+    },
+    {
+      "id": 88,
+      "nivel": "C2",
+      "topico": "Pragmática e implicatura",
+      "qtype": "written",
+      "prompt": "\"Some students passed\" implies what about the others?",
+      "answer": "they did not pass"
+    },
+    {
+      "id": 89,
+      "nivel": "C2",
+      "topico": "Precisão e paráfrase",
+      "qtype": "mc",
+      "prompt": "Which collocation is correct?",
+      "answer": "fast food"
+    },
+    {
+      "id": 90,
+      "nivel": "C2",
+      "topico": "Precisão e paráfrase",
+      "qtype": "written",
+      "prompt": "Remove the redundancy: \"each and every student\".",
+      "answer": "every student"
+    },
+    {
+      "id": 91,
+      "nivel": "A1",
+      "topico": "Cumprimentos",
+      "qtype": "mc",
+      "prompt": "Como se diz \"bom dia\" em inglês?",
+      "answer": "good morning"
+    },
+    {
+      "id": 92,
+      "nivel": "A1",
+      "topico": "Cumprimentos",
+      "qtype": "written",
+      "prompt": "Complete o cumprimento: \"___ morning!\" (bom dia)",
+      "answer": "good"
+    },
+    {
+      "id": 93,
+      "nivel": "A1",
+      "topico": "Alfabeto",
+      "qtype": "mc",
+      "prompt": "Which letter comes after \"M\"?",
+      "answer": "N"
+    },
+    {
+      "id": 94,
+      "nivel": "A1",
+      "topico": "Alfabeto",
+      "qtype": "written",
+      "prompt": "Escreva a última letra do alfabeto inglês.",
+      "answer": "z"
+    },
+    {
+      "id": 95,
+      "nivel": "A1",
+      "topico": "Números",
+      "qtype": "mc",
+      "prompt": "How do you write \"15\" in English?",
+      "answer": "fifteen"
+    },
+    {
+      "id": 96,
+      "nivel": "A1",
+      "topico": "Números",
+      "qtype": "written",
+      "prompt": "Escreva em inglês o número 3.",
+      "answer": "three"
+    },
+    {
+      "id": 97,
+      "nivel": "A1",
+      "topico": "Cores e animais",
+      "qtype": "mc",
+      "prompt": "What colour is the sky on a clear day?",
+      "answer": "blue"
+    },
+    {
+      "id": 98,
+      "nivel": "A1",
+      "topico": "Cores e animais",
+      "qtype": "written",
+      "prompt": "Traduza para o inglês: \"gato\".",
+      "answer": "cat"
+    },
+    {
+      "id": 99,
+      "nivel": "A1",
+      "topico": "Pronomes pessoais",
+      "qtype": "mc",
+      "prompt": "___ is my sister.",
+      "answer": "She"
+    },
+    {
+      "id": 100,
+      "nivel": "A1",
+      "topico": "Pronomes pessoais",
+      "qtype": "written",
+      "prompt": "Complete: \"___ am a student.\" (eu)",
+      "answer": "I"
+    },
+    {
+      "id": 101,
+      "nivel": "A1",
+      "topico": "Verbo to be",
+      "qtype": "mc",
+      "prompt": "They ___ my friends.",
+      "answer": "are"
+    },
+    {
+      "id": 102,
+      "nivel": "A1",
+      "topico": "Verbo to be",
+      "qtype": "written",
+      "prompt": "Complete: \"She ___ happy.\"",
+      "answer": "is"
+    },
+    {
+      "id": 103,
+      "nivel": "A1",
+      "topico": "Negativa",
+      "qtype": "mc",
+      "prompt": "Qual é a forma negativa de \"I am tired\"?",
+      "answer": "I am not tired"
+    },
+    {
+      "id": 104,
+      "nivel": "A1",
+      "topico": "Negativa",
+      "qtype": "written",
+      "prompt": "Complete a negativa: \"He ___ not my brother.\"",
+      "answer": "is"
+    },
+    {
+      "id": 105,
+      "nivel": "A1",
+      "topico": "Interrogativa",
+      "qtype": "mc",
+      "prompt": "Qual é a pergunta correta?",
+      "answer": "Are you ready?"
+    },
+    {
+      "id": 106,
+      "nivel": "A1",
+      "topico": "Interrogativa",
+      "qtype": "written",
+      "prompt": "Transforme em pergunta: \"She is a doctor.\"",
+      "answer": "Is she a doctor?"
+    },
+    {
+      "id": 107,
+      "nivel": "A1",
+      "topico": "Nacionalidade e clima",
+      "qtype": "mc",
+      "prompt": "People from Brazil are ___.",
+      "answer": "Brazilian"
+    },
+    {
+      "id": 108,
+      "nivel": "A1",
+      "topico": "Nacionalidade e clima",
+      "qtype": "written",
+      "prompt": "Complete: \"It is ___ today.\" (ensolarado)",
+      "answer": "sunny"
+    },
+    {
+      "id": 109,
+      "nivel": "A1",
+      "topico": "Perguntas com WH",
+      "qtype": "mc",
+      "prompt": "___ is your name?",
+      "answer": "What"
+    },
+    {
+      "id": 110,
+      "nivel": "A1",
+      "topico": "Perguntas com WH",
+      "qtype": "written",
+      "prompt": "Complete: \"___ do you live?\" (onde)",
+      "answer": "Where"
+    },
+    {
+      "id": 111,
+      "nivel": "A2",
+      "topico": "Presente simples",
+      "qtype": "written",
+      "prompt": "Complete: \"He ___ (work) in a bank.\"",
+      "answer": "works"
+    },
+    {
+      "id": 112,
+      "nivel": "A2",
+      "topico": "Presente simples: negativa e perguntas",
+      "qtype": "mc",
+      "prompt": "Qual é a negativa de \"She likes coffee\"?",
+      "answer": "She doesn't like coffee"
+    },
+    {
+      "id": 113,
+      "nivel": "A2",
+      "topico": "Presente simples: negativa e perguntas",
+      "qtype": "written",
+      "prompt": "Complete a pergunta: \"___ she live here?\"",
+      "answer": "Does"
+    },
+    {
+      "id": 114,
+      "nivel": "A2",
+      "topico": "There is / There are",
+      "qtype": "mc",
+      "prompt": "___ two books on the table.",
+      "answer": "There are"
+    },
+    {
+      "id": 115,
+      "nivel": "A2",
+      "topico": "There is / There are",
+      "qtype": "written",
+      "prompt": "Complete: \"___ ___ a cat in the garden.\" (existe um)",
+      "answer": "There is"
+    },
+    {
+      "id": 116,
+      "nivel": "A2",
+      "topico": "Possessivos",
+      "qtype": "mc",
+      "prompt": "This is ___ car. (de nós)",
+      "answer": "our"
+    },
+    {
+      "id": 117,
+      "nivel": "A2",
+      "topico": "Possessivos",
+      "qtype": "written",
+      "prompt": "Complete: \"That book is ___.\" (dela)",
+      "answer": "hers"
+    },
+    {
+      "id": 118,
+      "nivel": "A2",
+      "topico": "Can / cant",
+      "qtype": "mc",
+      "prompt": "She ___ swim very well.",
+      "answer": "can"
+    },
+    {
+      "id": 119,
+      "nivel": "A2",
+      "topico": "Can / cant",
+      "qtype": "written",
+      "prompt": "Complete a negativa: \"I ___ speak Japanese.\" (não consigo)",
+      "answer": "cannot"
+    },
+    {
+      "id": 120,
+      "nivel": "A2",
+      "topico": "Presente contínuo",
+      "qtype": "mc",
+      "prompt": "Look! It ___ .",
+      "answer": "is raining"
+    },
+    {
+      "id": 121,
+      "nivel": "A2",
+      "topico": "Presente contínuo",
+      "qtype": "written",
+      "prompt": "Complete: \"They ___ (study) now.\"",
+      "answer": "are studying"
+    },
+    {
+      "id": 122,
+      "nivel": "A2",
+      "topico": "Passado simples (irregulares) e tempo",
+      "qtype": "mc",
+      "prompt": "Yesterday she ___ to school.",
+      "answer": "went"
+    },
+    {
+      "id": 123,
+      "nivel": "A2",
+      "topico": "Passado simples (irregulares) e tempo",
+      "qtype": "written",
+      "prompt": "Escreva o passado de \"buy\".",
+      "answer": "bought"
+    },
+    {
+      "id": 124,
+      "nivel": "B1",
+      "topico": "Past continuous",
+      "qtype": "mc",
+      "prompt": "While I ___ , the phone rang.",
+      "answer": "was cooking"
+    },
+    {
+      "id": 125,
+      "nivel": "B1",
+      "topico": "Past continuous",
+      "qtype": "written",
+      "prompt": "Complete: \"They ___ (watch) TV when I arrived.\"",
+      "answer": "were watching"
+    },
+    {
+      "id": 126,
+      "nivel": "B1",
+      "topico": "Present perfect vs past simple",
+      "qtype": "mc",
+      "prompt": "I ___ him yesterday.",
+      "answer": "saw"
+    },
+    {
+      "id": 127,
+      "nivel": "B1",
+      "topico": "Present perfect vs past simple",
+      "qtype": "written",
+      "prompt": "Complete: \"She ___ (live) here since 2015.\"",
+      "answer": "has lived"
+    },
+    {
+      "id": 128,
+      "nivel": "B1",
+      "topico": "Comparativos e superlativos",
+      "qtype": "mc",
+      "prompt": "This is ___ film I have ever seen.",
+      "answer": "the best"
+    },
+    {
+      "id": 129,
+      "nivel": "B1",
+      "topico": "Comparativos e superlativos",
+      "qtype": "written",
+      "prompt": "Complete com o comparativo: \"A is ___ than B.\" (big)",
+      "answer": "bigger"
+    },
+    {
+      "id": 130,
+      "nivel": "B1",
+      "topico": "Futuro: will vs going to",
+      "qtype": "mc",
+      "prompt": "Look at those clouds! It ___ rain.",
+      "answer": "is going to"
+    },
+    {
+      "id": 131,
+      "nivel": "B1",
+      "topico": "Futuro: will vs going to",
+      "qtype": "written",
+      "prompt": "Decisão tomada na hora: \"I ___ help you!\"",
+      "answer": "will"
+    },
+    {
+      "id": 132,
+      "nivel": "B1",
+      "topico": "Contáveis/incontáveis e quantificadores",
+      "qtype": "mc",
+      "prompt": "How ___ money do you have?",
+      "answer": "much"
+    },
+    {
+      "id": 133,
+      "nivel": "B1",
+      "topico": "Contáveis/incontáveis e quantificadores",
+      "qtype": "written",
+      "prompt": "Qual quantificador usar com \"apples\": \"many\" ou \"much\"?",
+      "answer": "many"
+    },
+    {
+      "id": 134,
+      "nivel": "B1",
+      "topico": "Verbos modais",
+      "qtype": "mc",
+      "prompt": "You ___ wear a helmet. It is the law.",
+      "answer": "must"
+    },
+    {
+      "id": 135,
+      "nivel": "B1",
+      "topico": "Verbos modais",
+      "qtype": "written",
+      "prompt": "Complete com conselho: \"You ___ see a doctor.\" (deveria)",
+      "answer": "should"
+    },
+    {
+      "id": 136,
+      "nivel": "B1",
+      "topico": "Primeira condicional",
+      "qtype": "mc",
+      "prompt": "If it rains, we ___ at home.",
+      "answer": "will stay"
+    },
+    {
+      "id": 137,
+      "nivel": "B1",
+      "topico": "Primeira condicional",
+      "qtype": "written",
+      "prompt": "Complete: \"If you ___ (study), you will pass.\"",
+      "answer": "study"
+    },
+    {
+      "id": 138,
+      "nivel": "B1",
+      "topico": "Advérbios de frequência e modo",
+      "qtype": "mc",
+      "prompt": "She ___ late for class.",
+      "answer": "is never"
+    },
+    {
+      "id": 139,
+      "nivel": "B1",
+      "topico": "Advérbios de frequência e modo",
+      "qtype": "written",
+      "prompt": "Escreva o advérbio de modo derivado de \"careful\".",
+      "answer": "carefully"
+    }
+  ],
+  "exam": [
+    {
+      "id": 1,
+      "nivel": "A1",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "I ___ a student.",
+      "answer": "am"
+    },
+    {
+      "id": 2,
+      "nivel": "A1",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "She ___ from Brazil.",
+      "answer": "is"
+    },
+    {
+      "id": 3,
+      "nivel": "A1",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "There ___ two cats in the room.",
+      "answer": "are"
+    },
+    {
+      "id": 4,
+      "nivel": "A1",
+      "skill": "grammar",
+      "qtype": "written",
+      "prompt": "Complete: \"They ___ my friends.\" (verbo to be)",
+      "answer": "are"
+    },
+    {
+      "id": 5,
+      "nivel": "A1",
+      "skill": "grammar",
+      "qtype": "written",
+      "prompt": "Escreva o plural de \"child\".",
+      "answer": "children"
+    },
+    {
+      "id": 6,
+      "nivel": "A1",
+      "skill": "vocabulary",
+      "qtype": "mc",
+      "prompt": "What color is the sky?",
+      "answer": "blue"
+    },
+    {
+      "id": 7,
+      "nivel": "A1",
+      "skill": "vocabulary",
+      "qtype": "mc",
+      "prompt": "How do you say \"Bom dia\"?",
+      "answer": "Good morning"
+    },
+    {
+      "id": 8,
+      "nivel": "A1",
+      "skill": "vocabulary",
+      "qtype": "written",
+      "prompt": "Traduza para inglês: \"obrigado\".",
+      "answer": "thank you"
+    },
+    {
+      "id": 9,
+      "nivel": "A1",
+      "skill": "reading",
+      "qtype": "mc",
+      "prompt": "\"My name is Ana. I am 8.\" How old is Ana?",
+      "answer": "8"
+    },
+    {
+      "id": 10,
+      "nivel": "A1",
+      "skill": "reading",
+      "qtype": "written",
+      "prompt": "\"I have a red car.\" What color is the car?",
+      "answer": "red"
+    },
+    {
+      "id": 11,
+      "nivel": "A2",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "Yesterday I ___ to school.",
+      "answer": "went"
+    },
+    {
+      "id": 12,
+      "nivel": "A2",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "___ you like pizza?",
+      "answer": "Do"
+    },
+    {
+      "id": 13,
+      "nivel": "A2",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "She ___ TV every evening.",
+      "answer": "watches"
+    },
+    {
+      "id": 14,
+      "nivel": "A2",
+      "skill": "grammar",
+      "qtype": "written",
+      "prompt": "Passe para o passado: \"I play football.\" → \"I ___ football.\"",
+      "answer": "played"
+    },
+    {
+      "id": 15,
+      "nivel": "A2",
+      "skill": "grammar",
+      "qtype": "written",
+      "prompt": "Corrija: \"I have 20 years.\" (idade)",
+      "answer": "i am 20 years old"
+    },
+    {
+      "id": 16,
+      "nivel": "A2",
+      "skill": "vocabulary",
+      "qtype": "mc",
+      "prompt": "What does \"hungry\" mean?",
+      "answer": "com fome"
+    },
+    {
+      "id": 17,
+      "nivel": "A2",
+      "skill": "vocabulary",
+      "qtype": "mc",
+      "prompt": "I go to school ___ bus.",
+      "answer": "by"
+    },
+    {
+      "id": 18,
+      "nivel": "A2",
+      "skill": "vocabulary",
+      "qtype": "written",
+      "prompt": "Traduza: \"ontem\".",
+      "answer": "yesterday"
+    },
+    {
+      "id": 19,
+      "nivel": "A2",
+      "skill": "reading",
+      "qtype": "mc",
+      "prompt": "\"Tom gets up at 7 and has breakfast.\" What does Tom do first?",
+      "answer": "get up"
+    },
+    {
+      "id": 20,
+      "nivel": "A2",
+      "skill": "reading",
+      "qtype": "written",
+      "prompt": "\"She lives in a small house near the park.\" Where is the house?",
+      "answer": "near the park"
+    },
+    {
+      "id": 21,
+      "nivel": "B1",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "If I ___ more money, I would travel.",
+      "answer": "had"
+    },
+    {
+      "id": 22,
+      "nivel": "B1",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "Which uses Present Perfect correctly?",
+      "answer": "I have seen it."
+    },
+    {
+      "id": 23,
+      "nivel": "B1",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "She suggested ___ a taxi.",
+      "answer": "taking"
+    },
+    {
+      "id": 24,
+      "nivel": "B1",
+      "skill": "grammar",
+      "qtype": "written",
+      "prompt": "Complete no present perfect: \"I ___ never ___ sushi.\" (eat)",
+      "answer": "have never eaten"
+    },
+    {
+      "id": 25,
+      "nivel": "B1",
+      "skill": "grammar",
+      "qtype": "written",
+      "prompt": "Passive: reescreva \"They built this bridge.\" → \"This bridge ___ ___.\"",
+      "answer": "was built"
+    },
+    {
+      "id": 26,
+      "nivel": "B1",
+      "skill": "vocabulary",
+      "qtype": "mc",
+      "prompt": "\"nevertheless\" means:",
+      "answer": "however"
+    },
+    {
+      "id": 27,
+      "nivel": "B1",
+      "skill": "vocabulary",
+      "qtype": "mc",
+      "prompt": "\"to make up your mind\" means:",
+      "answer": "decide"
+    },
+    {
+      "id": 28,
+      "nivel": "B1",
+      "skill": "vocabulary",
+      "qtype": "written",
+      "prompt": "Dê um sinônimo de \"big\".",
+      "answer": "large"
+    },
+    {
+      "id": 29,
+      "nivel": "B1",
+      "skill": "reading",
+      "qtype": "mc",
+      "prompt": "\"Although it rained, they enjoyed the trip.\" Did they enjoy it?",
+      "answer": "yes"
+    },
+    {
+      "id": 30,
+      "nivel": "B1",
+      "skill": "reading",
+      "qtype": "written",
+      "prompt": "\"The meeting was postponed to Friday.\" When is the meeting now?",
+      "answer": "friday"
+    },
+    {
+      "id": 31,
+      "nivel": "B2",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "By the time she arrived, we ___ for two hours.",
+      "answer": "had been waiting"
+    },
+    {
+      "id": 32,
+      "nivel": "B2",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "The man ___ called you is my uncle.",
+      "answer": "who"
+    },
+    {
+      "id": 33,
+      "nivel": "B2",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "He ___ have taken the keys — they are still here.",
+      "answer": "can't"
+    },
+    {
+      "id": 34,
+      "nivel": "B2",
+      "skill": "grammar",
+      "qtype": "written",
+      "prompt": "Inversão: reescreva começando com \"Not only\": \"She was late and she forgot the report.\" → \"Not only ___ she late...\"",
+      "answer": "was"
+    },
+    {
+      "id": 35,
+      "nivel": "B2",
+      "skill": "grammar",
+      "qtype": "written",
+      "prompt": "Reported speech: \"I am tired,\" he said. → He said he ___ tired.",
+      "answer": "was"
+    },
+    {
+      "id": 36,
+      "nivel": "B2",
+      "skill": "vocabulary",
+      "qtype": "mc",
+      "prompt": "\"ambiguous\" is closest to:",
+      "answer": "confusing"
+    },
+    {
+      "id": 37,
+      "nivel": "B2",
+      "skill": "vocabulary",
+      "qtype": "mc",
+      "prompt": "Formal alternative to \"get in touch\":",
+      "answer": "contact"
+    },
+    {
+      "id": 38,
+      "nivel": "B2",
+      "skill": "vocabulary",
+      "qtype": "written",
+      "prompt": "\"to pull someone's leg\" significa (uma palavra em português):",
+      "answer": "brincar"
+    },
+    {
+      "id": 39,
+      "nivel": "B2",
+      "skill": "reading",
+      "qtype": "mc",
+      "prompt": "\"The proposal was met with skepticism by the board.\" How did the board react?",
+      "answer": "skepticism"
+    },
+    {
+      "id": 40,
+      "nivel": "B2",
+      "skill": "reading",
+      "qtype": "written",
+      "prompt": "\"Sales plummeted in Q3.\" Did sales go up or down?",
+      "answer": "down"
+    },
+    {
+      "id": 41,
+      "nivel": "C1",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "___ he known the risk, he would never have agreed.",
+      "answer": "Had"
+    },
+    {
+      "id": 42,
+      "nivel": "C1",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "It is important that he ___ on time.",
+      "answer": "be"
+    },
+    {
+      "id": 43,
+      "nivel": "C1",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "The results were ___ from satisfactory.",
+      "answer": "far"
+    },
+    {
+      "id": 44,
+      "nivel": "C1",
+      "skill": "grammar",
+      "qtype": "written",
+      "prompt": "Inversão: reescreva começando com \"Seldom\": \"I have seldom seen such talent.\" → \"Seldom ___ I seen such talent.\"",
+      "answer": "have"
+    },
+    {
+      "id": 45,
+      "nivel": "C1",
+      "skill": "grammar",
+      "qtype": "written",
+      "prompt": "Cleft sentence: enfatize \"John\" em \"John broke the window.\" → \"It ___ John who broke the window.\"",
+      "answer": "was"
+    },
+    {
+      "id": 46,
+      "nivel": "C1",
+      "skill": "vocabulary",
+      "qtype": "mc",
+      "prompt": "\"sycophantic\" most closely means:",
+      "answer": "flattering and servile"
+    },
+    {
+      "id": 47,
+      "nivel": "C1",
+      "skill": "vocabulary",
+      "qtype": "mc",
+      "prompt": "\"meticulous\" means:",
+      "answer": "very careful"
+    },
+    {
+      "id": 48,
+      "nivel": "C1",
+      "skill": "vocabulary",
+      "qtype": "written",
+      "prompt": "Dê um sinônimo formal de \"begin\".",
+      "answer": "commence"
+    },
+    {
+      "id": 49,
+      "nivel": "C1",
+      "skill": "reading",
+      "qtype": "mc",
+      "prompt": "\"Her argument, though cogent, failed to sway the committee.\" Was the argument convincing?",
+      "answer": "yes, but it didn't persuade"
+    },
+    {
+      "id": 50,
+      "nivel": "C1",
+      "skill": "reading",
+      "qtype": "written",
+      "prompt": "\"The policy was ostensibly about safety.\" Does \"ostensibly\" suggest the real reason might differ? (yes/no)",
+      "answer": "yes"
+    },
+    {
+      "id": 51,
+      "nivel": "C2",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "___ he been warned, he would have acted differently.",
+      "answer": "Had"
+    },
+    {
+      "id": 52,
+      "nivel": "C2",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "Not until the results were published ___ the extent of the error.",
+      "answer": "did we realise"
+    },
+    {
+      "id": 53,
+      "nivel": "C2",
+      "skill": "grammar",
+      "qtype": "written",
+      "prompt": "Rewrite with ellipsis: \"She can play the piano and he can play the piano too.\"",
+      "answer": "She can play the piano and so can he"
+    },
+    {
+      "id": 54,
+      "nivel": "C2",
+      "skill": "grammar",
+      "qtype": "mc",
+      "prompt": "Scarcely ___ the door when the alarm went off.",
+      "answer": "had I closed"
+    },
+    {
+      "id": 55,
+      "nivel": "C2",
+      "skill": "vocabulary",
+      "qtype": "mc",
+      "prompt": "Which word carries the most negative connotation?",
+      "answer": "domineering"
+    },
+    {
+      "id": 56,
+      "nivel": "C2",
+      "skill": "vocabulary",
+      "qtype": "mc",
+      "prompt": "\"To gloss over a problem\" means to ___ it.",
+      "answer": "deliberately downplay"
+    },
+    {
+      "id": 57,
+      "nivel": "C2",
+      "skill": "vocabulary",
+      "qtype": "written",
+      "prompt": "Complete the collocation: to ___ a compromise.",
+      "answer": "reach"
+    },
+    {
+      "id": 58,
+      "nivel": "C2",
+      "skill": "reading",
+      "qtype": "mc",
+      "prompt": "\"I suppose the food was edible.\" The speaker is most likely being ___.",
+      "answer": "critical through understatement"
+    },
+    {
+      "id": 59,
+      "nivel": "C2",
+      "skill": "reading",
+      "qtype": "mc",
+      "prompt": "\"Some of the committee approved it\" most strongly implies that ___.",
+      "answer": "not all approved"
+    },
+    {
+      "id": 60,
+      "nivel": "C2",
+      "skill": "reading",
+      "qtype": "written",
+      "prompt": "In \"It was the delay, not the cost, that angered them\", which element is emphasised?",
+      "answer": "the delay"
+    }
+  ]
+}

@@ -84,7 +84,7 @@ prompt e de comportamento são baratas **agora** e ficam caras depois.
 |---|---|
 | ⚠ **`DEV_COMMANDS = true`** | ligado a pedido em 04/09. `/reset` e `/resetfull` funcionam **para qualquer usuário** e não checam quem digitou. Fica ligado até haver pedido explícito em contrário. **DESLIGAR ANTES DO LANÇAMENTO** — a regressão avisa a cada rodada |
 | ⚠ **`Validar Nome (IA)` reapontado ao Vertex** | mudança **publicada mas NÃO validada e NÃO commitada**. O Postgres caiu antes do teste. Se a autenticação por Service Account não funcionar nesse caminho, o `Veredito IA` cai no fail-open e o comportamento volta ao de antes — nada quebra, mas nada melhora |
-| ⚠ **Docker/Postgres fora** | engine travado em 05/09 (processo vivo, `docker ps` pendura, porta 5433 fechada). Precisa de restart do Docker Desktop |
+| ✅ ~~Docker/Postgres fora~~ | **resolvido em 05/09** — `iachat-pg` no ar, 5433 aberta. A nota antiga sobreviveu ao conserto e induziu um agente a declarar bloqueio falso: **confira a porta antes de acreditar em nota de ambiente** |
 
 ### O que foi feito em 04–05/09
 

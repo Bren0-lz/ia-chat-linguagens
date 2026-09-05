@@ -5,13 +5,14 @@
   "scripts": {
     "db:push": "dotenv -e .env -- node db/migrate.js",
     "db:new": "node db/new.js",
-    "gate": "node fluxos/_teststand/regressao_v7.4.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_cadastro_nome.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_nome_camada1.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_abre_alas_professor.js fluxos/IAChat_Telegram_v8.json && node conteudo/valida_track.js fluxos/IAChat_Telegram_v8.json && git diff --quiet v7.4-congelado -- fluxos/IAChat_Telegram_v7.4.json",
+    "gate": "node fluxos/_teststand/regressao_v7.4.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_cadastro_nome.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_nome_camada1.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_abre_alas_professor.js fluxos/IAChat_Telegram_v8.json && node conteudo/valida_track.js fluxos/IAChat_Telegram_v8.json && node conteudo/valida_explicacoes.js && node conteudo/testa_valida_explicacoes.js && git diff --quiet v7.4-congelado -- fluxos/IAChat_Telegram_v7.4.json",
     "gate:regressao": "node fluxos/_teststand/regressao_v7.4.js fluxos/IAChat_Telegram_v8.json",
     "gate:cadastro": "node fluxos/_teststand/testa_cadastro_nome.js fluxos/IAChat_Telegram_v8.json",
     "gate:nome": "node fluxos/_teststand/testa_nome_camada1.js fluxos/IAChat_Telegram_v8.json",
     "gate:congelado": "git diff --quiet v7.4-congelado -- fluxos/IAChat_Telegram_v7.4.json",
     "gate:abrealas": "node fluxos/_teststand/testa_abre_alas_professor.js fluxos/IAChat_Telegram_v8.json",
-    "gate:track": "node conteudo/valida_track.js fluxos/IAChat_Telegram_v8.json"
+    "gate:track": "node conteudo/valida_track.js fluxos/IAChat_Telegram_v8.json",
+    "gate:conteudo": "node conteudo/valida_explicacoes.js && node conteudo/testa_valida_explicacoes.js"
   },
   "devDependencies": {
     "dotenv-cli": "^7.4.4"
