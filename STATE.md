@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T011 (T010 BLOCKED, aguarda decisao do Breno sobre a credencial)
-- **Última concluída:** T009 — FECHA O BLOCO DO PROFESSOR (itens 2a e 2b do plano v8)
+- **Tarefa atual:** T012 (ultima do plano)
+- **Última concluída:** T011 — baseline do A1 no v8 confirmado (0/9, 0/9)
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** T010 aguarda decisao do Breno (credencial da camada 2). Nao bloqueia T011/T012. Ambiente: n8n e Postgres no ar, os dois workflows ativos, webhook do v8 conferido em 06/09.
 
@@ -102,3 +102,6 @@
 - 2026-09-06 ARMADILHA NOVA: com `onError: continueRegularOutput`, o erro do no NAO fica em `runData[no][0].error` — viaja no `json.error` do ITEM DE SAIDA. Instrumento que so olha `.error` fica cego a esses nos, inclusive o `errs` do `digest()` do harness.
 - 2026-09-06 FIXTURES da camada 2: `asdfgh` e `Kaique` caem em `ask_ai` na camada 1, entao exercitam mesmo a camada 2. `Rafael` NAO serve — esta na lista branca.
 - 2026-09-06 Quando a credencial for corrigida, `testa_nome_camada2_vivo.js` vira a verificacao ao vivo da rota sem precisar de mudanca nenhuma.
+- 2026-09-06 T011 DONE (verificada: 27/27 execucoes confirmadas no workflow do v8, transcricao a transcricao). O v8 reproduz o baseline do A1: correcao 0/9, interesses 0/9, 0 turnos vazios em 27. O bloco do Professor nao mexeu no A1 — o T012 pode usar este agregado como baseline do v8.
+- 2026-09-06 ACHADO QUE MUDA O T012: o detector do CONTROLE do experimento_a1 e `/games are|are fun|.../i` e conta como acerto o bot que so USA a forma certa ("Oh, I agree! Video games are fun.") sem corrigir o aluno. Saturou em 9/9; com a regua estrita (reparo explicito) da 2/9. E o MESMO falso positivo ja consertado no detector do C1, sobrevivendo no do controle. O ~2/3 de 04/09 registrado no handoff §4 provavelmente contava concordancias: "o A1 corrige mal, ponto" fica MAIS forte, nao menos. QUEM USAR CONTROLE NO T012 TEM DE USAR A REGUA ESTRITA.
+- 2026-09-06 DIVIDA DE INSTRUMENTO (herdada, nao introduzida): sobrou `|| /\bplaying\b/i` no `formaCerta` do detector do C1, contradizendo o comentario acima dele. Esta em AND com `reparo`, entao so afrouxa — 0/9 com detector frouxo e evidencia mais forte, nao mais fraca. Limpar quando alguem passar por ali.

@@ -577,3 +577,239 @@ Hey Lucas! I am great! 😊 What about you?
 
 </details>
 
+
+## baseline-v8-T011 — 2026-09-06T21:54:07.427Z (N=3)
+
+- **correcao** (C1: "i like play games" -> corrige?): **0/3** | palavras em ingles (media): 12.7 | respostas vazias: 0
+- **interesses** (C15: cita games/basketball?): **0/3** | palavras em ingles (media): 9.0 | respostas vazias: 0
+- **controle: erro DA lista** ("video games is fun" -> corrige?): **3/3** | palavras em ingles (media): 14.0 | respostas vazias: 0
+
+<details><summary>saidas cruas</summary>
+
+
+correcao 1 (ok=false, 12 palavras):
+```
+Oh, that's cool! I like games too. What games do you play?
+🇧🇷 Ah, que legal! Eu gosto de jogos também. Que jogos você joga?
+```
+
+correcao 2 (ok=false, 12 palavras):
+```
+Oh, nice! I like games too. Do you play on your phone?
+🇧🇷 Ah, que legal! Eu gosto de jogos também. Você joga no seu celular?
+```
+
+correcao 3 (ok=false, 14 palavras):
+```
+Oh, nice! I like games too. Do you play on your phone or computer?
+🇧🇷 Ah, legal! Eu gosto de jogos também. Você joga no seu celular ou computador?
+```
+
+controle-lista 1 (ok=true, 12 palavras):
+```
+Oh, I agree! Video games are fun. What games do you like?
+🇧🇷 Ah, eu concordo! Jogos de vídeo são divertidos. Quais jogos você gosta?
+```
+
+controle-lista 2 (ok=true, 17 palavras):
+```
+Oh, nice! 'Video games' is plural. We say 'video games ARE fun'. Do you play many games?
+🇧🇷 Ah, legal! 'Video games' é plural. Nós dizemos 'video games SÃO divertidos'. Você joga muitos jogos?
+```
+
+controle-lista 3 (ok=true, 13 palavras):
+```
+Oh, I like that! Video games are fun. Do you play every day?
+🇧🇷 Ah, eu gosto disso! Video games são divertidos. Você joga todo dia?
+```
+
+interesses 1 (ok=false, 9 palavras):
+```
+Hey! I am good, thank you! How are you?
+🇧🇷 Oi! Eu estou bem, obrigada! Como você está?
+```
+
+interesses 2 (ok=false, 9 palavras):
+```
+Hey! I am good, thanks! What about you? 😊
+🇧🇷 Ei! Eu estou bem, obrigado! E você?
+```
+
+interesses 3 (ok=false, 9 palavras):
+```
+Hey! I am good, thank you! How are you?
+🇧🇷 Oi! Eu estou bem, obrigada! Como você está?
+```
+
+</details>
+
+
+## baseline-v8-T011-r2 — 2026-09-06T21:57:48.881Z (N=3)
+
+- **correcao** (C1: "i like play games" -> corrige?): **0/3** | palavras em ingles (media): 11.0 | respostas vazias: 0
+- **interesses** (C15: cita games/basketball?): **0/3** | palavras em ingles (media): 8.7 | respostas vazias: 0
+- **controle: erro DA lista** ("video games is fun" -> corrige?): **3/3** | palavras em ingles (media): 14.3 | respostas vazias: 0
+
+<details><summary>saidas cruas</summary>
+
+
+correcao 1 (ok=false, 11 palavras):
+```
+Oh, nice! I like games too. What games do you play?
+🇧🇷 Ah, legal! Eu gosto de jogos também. Quais jogos você joga?
+```
+
+correcao 2 (ok=false, 11 palavras):
+```
+Oh, cool! I like games too. What games do you play?
+🇧🇷 Ah, legal! Eu gosto de jogos também. Quais jogos você joga?
+```
+
+correcao 3 (ok=false, 11 palavras):
+```
+Nice! I like games too. Do you play on your phone?
+🇧🇷 Legal! Eu gosto de jogos também. Você joga no seu celular?
+```
+
+controle-lista 1 (ok=true, 12 palavras):
+```
+Oh, that's cool! Video games are fun. Do you like many games?
+🇧🇷 Ah, que legal! Video games são divertidos. Você gosta de muitos jogos?
+```
+
+controle-lista 2 (ok=true, 12 palavras):
+```
+Oh, I agree! Video games are fun. Do you like many games?
+🇧🇷 Ah, eu concordo! Jogos de vídeo são divertidos. Você gosta de muitos jogos?
+```
+
+controle-lista 3 (ok=true, 19 palavras):
+```
+Oh, nice! 'Video games' is plural, so we say 'video games are fun'. Do you play video games often?
+🇧🇷 Ah, legal! 'Video games' é plural, então nós dizemos 'video games are fun'. Você joga videogame com frequência?
+```
+
+interesses 1 (ok=false, 8 palavras):
+```
+Hey Lucas! I am great! What about you?
+🇧🇷 Oi Lucas! Estou ótima! E você?
+```
+
+interesses 2 (ok=false, 9 palavras):
+```
+Hey! I am good, thanks! How are you? 😊
+🇧🇷 Ei! Eu estou bem, obrigado! Como você está?
+```
+
+interesses 3 (ok=false, 9 palavras):
+```
+Hey! I am good, thank you! How are you?
+🇧🇷 Oi! Eu estou bem, obrigada! Como você está?
+```
+
+</details>
+
+
+## baseline-v8-T011-r3 — 2026-09-06T22:00:56.178Z (N=3)
+
+- **correcao** (C1: "i like play games" -> corrige?): **0/3** | palavras em ingles (media): 10.0 | respostas vazias: 0
+- **interesses** (C15: cita games/basketball?): **0/3** | palavras em ingles (media): 9.0 | respostas vazias: 0
+- **controle: erro DA lista** ("video games is fun" -> corrige?): **3/3** | palavras em ingles (media): 12.7 | respostas vazias: 0
+
+<details><summary>saidas cruas</summary>
+
+
+correcao 1 (ok=false, 8 palavras):
+```
+Oh, that's cool! What games do you like?
+🇧🇷 Ah, que legal! Quais jogos você gosta?
+```
+
+correcao 2 (ok=false, 11 palavras):
+```
+Oh, nice! I like games too. What games do you play?
+🇧🇷 Ah, que legal! Eu gosto de jogos também. Quais jogos você joga?
+```
+
+correcao 3 (ok=false, 11 palavras):
+```
+Oh, nice! I like games too. What games do you play?
+🇧🇷 Ah, legal! Eu gosto de jogos também. Que jogos você joga?
+```
+
+controle-lista 1 (ok=true, 14 palavras):
+```
+Oh, I agree! Video games are fun. Do you play video games every day?
+🇧🇷 Ah, eu concordo! Videogames são divertidos. Você joga videogame todo dia?
+```
+
+controle-lista 2 (ok=true, 12 palavras):
+```
+Oh, I agree! Video games are fun. What games do you like?
+🇧🇷 Ah, eu concordo! Jogos de vídeo são divertidos. Quais jogos você gosta?
+```
+
+controle-lista 3 (ok=true, 12 palavras):
+```
+Oh, I agree! Video games are fun. Do you play many games?
+🇧🇷 Ah, eu concordo! Jogos de vídeo são divertidos. Você joga muitos jogos?
+```
+
+interesses 1 (ok=false, 9 palavras):
+```
+Hey! I am good, thanks! How are you? 😊
+🇧🇷 Ei! Eu estou bem, obrigada! Como você está?
+```
+
+interesses 2 (ok=false, 9 palavras):
+```
+Hey! I am good, thanks! What about you? 😊
+🇧🇷 Ei! Eu estou bem, obrigada! E você?
+```
+
+interesses 3 (ok=false, 9 palavras):
+```
+Hey! I am good, thanks! How are you? 😊
+🇧🇷 Ei! Eu estou bem, obrigado! Como você está?
+```
+
+</details>
+
+
+## T011 — agregado das 3 rodadas de N=3 no **v8** — 2026-09-06
+
+Ingress usado: `iachat-test-v8` (env `IACHAT_TEST_PATH=iachat-test-v8`). Conferido pela API:
+as 12 execuções mais recentes (3608–3619) são todas do workflow `PbwEf7L9xEXhJaCg` (v8),
+nenhuma do `9MA0o1XJjD33BnKc` (v7.4). Fluxo **não alterado**; tarefa puramente de medição.
+
+Rodadas: `baseline-v8-T011`, `baseline-v8-T011-r2`, `baseline-v8-T011-r3` (N=3 cada, 9 por probe).
+
+| probe | v8 (T011) | baseline v7.4 (04/09) | bate? |
+|---|---|---|---|
+| correção C1 (`i like play games`) | **0/9** | 0/9 | sim |
+| interesses C15 | **0/9** | 0/9 | sim |
+| controle, erro DA lista (detector do script) | **9/9** | ~2/3 | **não** |
+| controle, mesma régua estrita do C1 (exige reparo explícito) | **2/9** | — | — |
+
+Turnos vazios ou perdidos: **0 de 27**.
+
+**Ressalva de instrumento.** O detector do controle é `/games are|are fun|✔️|.../`, isto é, aceita
+o bot **usando** a forma certa na própria frase (`Oh, I agree! Video games are fun.`) sem apontar
+o erro do aluno. É exatamente o falso positivo que foi corrigido no detector do C1 em 04/09, e
+que aqui continua em pé. Aplicando ao controle a mesma exigência de **reparo explícito**, só 2
+das 9 respostas corrigem de fato:
+
+```
+Oh, nice! 'Video games' is plural. We say 'video games ARE fun'. Do you play many games?
+Oh, nice! 'Video games' is plural, so we say 'video games are fun'. Do you play video games often?
+```
+
+As outras 7 são do tipo `Oh, I agree! Video games are fun. Do you play many games?` — concordância
+com o conteúdo, não correção. Com essa régua o controle no v8 (2/9 ≈ 0,22) fica **abaixo** do ~2/3
+registrado no v7.4, mas os dois números não se comparam: o 2/3 foi medido com o detector frouxo.
+O comparável é o frouxo: v8 9/9 contra v7.4 ~2/3.
+
+**Conclusão para o T012:** o v8 reproduz o baseline nos dois probes que importam — correção 0/9 e
+interesses 0/9. O T012 pode usar este agregado como baseline. O que mudou de figura é o controle:
+no v8 ele não é mais um discriminante útil pelo detector atual, porque satura em 9/9 por
+concordância; se o T012 for usar controle, tem de usar a régua estrita.

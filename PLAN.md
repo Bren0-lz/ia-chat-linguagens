@@ -176,7 +176,7 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
   o baseline conhecido (0/9 correção, 0/9 interesses) antes de qualquer variante.
 - **Gate:** relatório gravado com N=3 e as duas taxas registradas
 - **Depende de:** T001
-- **Status:** TODO
+- **Status:** DONE — v8 reproduz o baseline: correcao 0/9, interesses 0/9, 0 turnos perdidos em 27 (execs 3593-3619, todas no v8). O CONTROLE saturou em 9/9 por falso positivo do detector; regua estrita da 2/9
 
 ### T012 — hipótese do exemplo de formato (C1/C15)
 - **Escopo:** a única hipótese que resta (handoff §4): a linha de IDIOMA do A1 traz um exemplo de
