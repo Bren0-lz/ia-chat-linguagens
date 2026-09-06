@@ -67,7 +67,30 @@ function corrigiuLikePlay(t) {
   return reparo && formaCerta;
 }
 
-(async () => {
+// Detector do CONTROLE: o aluno escreveu "video games is fun" — concordancia sujeito-verbo,
+// primeiro item da lista "ERROS QUE CONTAM".
+//
+// A regua antiga era `/games are|are fun|✔️|not\s+.video games is/i` e SATUROU: contava como
+// acerto o bot que apenas USA a forma certa na propria frase ("Oh, I agree! Video games are
+// fun.") sem corrigir o aluno. Isso deu 9/9 no baseline do T011 — e o baseline nao corrige
+// nada. O proprio prompt do fluxo ja diz: "Sinalizar significa fazer o reparo explicito do
+// contrato acima — nao basta usar a forma certa na sua propria frase".
+//
+// Aqui vale a MESMA regua do C1 (`corrigiuLikePlay`): marcador de reparo EM CONJUNCAO com a
+// forma certa. Recomputada sobre as saidas cruas gravadas em `tr_experimento_a1.md`, ela da
+// 2/9 no baseline do T011 e 8/9 na variante do T012 — os numeros que o T011 e o T012 ja
+// calcularam a mao. Ver `testa_detector_controle.js`.
+//
+// Os detectores do C1 e do C15 NAO mudam: sao a regua com que baseline e variante foram
+// medidos, e mexer neles quebraria a comparacao ja publicada.
+function corrigiuVideoGamesAre(t) {
+  const s = String(t || '');
+  const reparo = /\b(we say|say|it'?s|correct|not)\b/i.test(s);
+  const formaCerta = /\bgames\s+are\b/i.test(s) || /\bare\s+fun\b/i.test(s);
+  return reparo && formaCerta;
+}
+
+const principal = async () => {
   const linhas = [];
   const reg = (s) => { console.log(s); linhas.push(s); };
   reg('\n## ' + ROTULO + ' — ' + new Date().toISOString() + ' (N=' + N + ')\n');
@@ -101,7 +124,7 @@ function corrigiuLikePlay(t) {
     const d = digest(await msg(u, 'video games is fun'));
     const t = soConversa(d);
     if (!t.trim()) { lista.push({ vazio: true }); continue; }
-    lista.push({ ok: /games are|are fun|✔️|not\s+.video games is/i.test(t), pal: palavrasIngles(t), t });
+    lista.push({ ok: corrigiuVideoGamesAre(t), pal: palavrasIngles(t), t });
   }
 
   const taxa = (a) => a.filter((x) => x.ok).length + '/' + a.length;
@@ -116,7 +139,7 @@ function corrigiuLikePlay(t) {
   reg('- **interesses** (C15: cita games/basketball?): **' + taxa(inte) + '**'
     + ' | palavras em ingles (media): ' + mediaPal(inte) + ' | respostas vazias: ' + vazios(inte));
 
-  reg('- **controle: erro DA lista** ("video games is fun" -> corrige?): **' + taxa(lista) + '**'
+  reg('- **controle: erro DA lista** ("video games is fun" -> corrige? regua estrita: reparo explicito, nao basta usar a forma certa): **' + taxa(lista) + '**'
     + ' | palavras em ingles (media): ' + mediaPal(lista) + ' | respostas vazias: ' + vazios(lista));
 
   reg('\n<details><summary>saidas cruas</summary>\n');
@@ -127,4 +150,10 @@ function corrigiuLikePlay(t) {
 
   fs.appendFileSync(SAIDA, linhas.join('\n') + '\n');
   console.log('\nanexado em ' + SAIDA);
-})();
+};
+
+// Os detectores sao exportados para a regressao offline (`testa_detector_controle.js`); o
+// experimento em si so roda quando o arquivo e chamado direto, porque conversa com o banco.
+module.exports = { corrigiuLikePlay, corrigiuVideoGamesAre, soConversa };
+
+if (require.main === module) principal();

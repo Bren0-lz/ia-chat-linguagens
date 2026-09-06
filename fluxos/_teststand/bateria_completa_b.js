@@ -45,6 +45,11 @@ require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.e
 const fs = require('fs');
 const { Client } = require('pg');
 const { msg, cb, digest } = require('./harness');
+const { contratoIdioma, vereditoT3 } = require('./idioma_professor');
+
+// Contrato de idioma da TRILHA, derivado do fluxo (T013). Se o LANG mudar de forma, isto
+// estoura aqui, no comeco, em vez de virar veredito errado la na frente.
+const CONTRATO_TRILHA = contratoIdioma();
 
 const TR = './tr_bateria_b.md';
 const UID_BASE = 990000000 + (Date.now() % 9000000); // mesma faixa da limpeza (ver Fase A)
@@ -147,11 +152,8 @@ function soConversa(d) {
   const m = String(d.reply || '').match(/\[CONVERSA\]\s*([\s\S]*)/);
   return m ? m[1].trim() : String(d.reply || '');
 }
-function temPortugues(t) {
-  const s = ' ' + String(t || '').toLowerCase() + ' ';
-  const pt = [' que ', ' nao ', ' não ', ' você ', ' voce ', ' com ', ' para ', ' mais ', ' isso ', ' seu ', ' sua ', ' muito ', ' bem ', ' tambem ', ' também '];
-  return pt.some((w) => s.includes(w));
-}
+// `temPortugues` e o veredito de idioma da trilha vivem em `idioma_professor.js`, que deriva o
+// contrato do `LANG` do fluxo em vez de cravar a politica aqui (ver T013).
 function contaPalavras(t) { return String(t || '').trim().split(/\s+/).filter(Boolean).length; }
 
 const RUBRICA = {
@@ -255,6 +257,8 @@ const RUBRICA = {
   }
 
   // C2: A1 escrevendo em portugues -> convite ao ingles, sem repreensao
+  // (contrato do modo CONVERSA — `Prompt Conversa A1`, bilingue. O T005b mexeu no `LANG` do
+  //  Professor, que e outro contrato: nada aqui mudou. Conferido no T013.)
   if (!pular('C2')) {
     const u = novoUid(); await semear(u, 'P1', { profileExtra: { conv: { pt_streak: 2 } } });
     const d = digest(await msg(u, 'eu gosto muito de jogar videogame com meus amigos'));
@@ -400,14 +404,23 @@ const RUBRICA = {
     if (llmRespondeu(d, 'T2')) reg('T2', 'revisar', RUBRICA.T2 + ' | gabarito=' + JSON.stringify(d.expectedAnswer), d.reply);
   }
 
-  // T3: B2 -> conteudo em ingles
+  // T3: B2 -> contrato de idioma da trilha (explicacao PT / enunciado EN)
+  //
+  // Ate 06/09 este teste asseria "explicacao de B2 SEM portugues", que era o produto ate o
+  // T005b. Depois do T005b B1..C2 explicam em PORTUGUES e so o enunciado da pergunta fica em
+  // ingles — o teste velho reprovava o comportamento correto (falso vermelho). A expectativa
+  // agora vem do `LANG` do "Professor Engine" (`idioma_professor.js`), nao de constante aqui.
   if (!pular('T3')) {
     const u = novoUid();
     const d = await entrarProfessor(u, 'P5');
     if (llmRespondeu(d, 'T3')) {
-      const t = String(d.reply || '').replace(/^\[prof\.feedback\][^\n]*\n?/gm, '');
-      const pt = temPortugues(t);
-      reg('T3', !pt, 'nivel B2: portugues detectado na explicacao=' + pt, t);
+      const expl = String(d.reply || '').replace(/^\[prof\.feedback\][^\n]*\n?/gm, '');
+      const dq = digest(await cb(u, 't_start'));
+      if (llmRespondeu(dq, 'T3')) {
+        const perg = String(dq.reply || '').replace(/^\[prof\.feedback\][^\n]*\n?/gm, '');
+        const v = vereditoT3('B2', expl, perg, CONTRATO_TRILHA);
+        reg('T3', v.ok, v.detalhe, '--- explicacao ---\n' + expl + '\n--- enunciado ---\n' + perg);
+      }
     }
   }
 

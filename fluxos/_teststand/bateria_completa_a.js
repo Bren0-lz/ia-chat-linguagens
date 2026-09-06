@@ -9,6 +9,16 @@
 // (a Fase B cobre os que dependem do LLM)
 //
 //   N8N_API_KEY=... node bateria_completa_a.js
+//
+// CODIGO DE SAIDA (T013). Ate 06/09 o script saia 0 mesmo com testes FALHOU — so o `.catch`
+// de erro fatal saia 1. "Verde" nao queria dizer nada, e um relatorio de 17/17 podia nunca ter
+// sido conferido. Agora:
+//   0  todos passaram
+//   1  ao menos um FALHOU            (reprovacao de produto)
+//   2  nenhuma falha, mas ha INCONCLUSIVO / nao executado  (o teste nao rodou; nao e aprovacao)
+//   1  erro fatal (o `.catch` do fim)
+// O relatorio impresso e o `tr_bateria_a.md` NAO mudaram de formato: quem compara com a rodada
+// de 04/09 continua comparando a mesma coisa.
 require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.env') });
 const fs = require('fs');
 const { Client } = require('pg');
@@ -378,4 +388,6 @@ async function semear(uid, campos) {
   for (const r of resultados.filter(x => x.ok !== true)) console.log('  ATENÇÃO ' + r.id + ': ' + r.detalhe);
   fs.appendFileSync(TR, '\n**Resumo:** ' + p + ' passaram, ' + f + ' falharam, ' + i + ' inconclusivos\n');
   console.log('\ntranscrição: ' + TR);
+  // 1 = reprovou · 2 = so inconclusivo/nao executado · 0 = tudo passou (ver cabecalho)
+  process.exit(f > 0 ? 1 : (i > 0 ? 2 : 0));
 })().catch(e => { console.error('ERRO FATAL:', e.message); process.exit(1); });

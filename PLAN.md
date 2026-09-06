@@ -223,10 +223,14 @@ que foi medido** — comparar status entre versões sem dizer qual engana (§9).
   forçada e 0 sem ela; (3) o controle estrito rejeita `"Oh, I agree! Video games are fun."` e
   aceita `"We say 'video games ARE'"`. Mais `npm run gate` verde.
 - **Depende de:** T012
-- **Status:** TODO
+- **Status:** DONE — tres instrumentos consertados, cada um com teste que reprova a versao anterior (reproduzido pelo verifier). Gate segue offline, 5,3 s, 14 comandos
 
 ### T014 — Fase A no v8 (17 determinísticos)
-- **Escopo:** rodar `bateria_completa_a.js` contra o ingress do v8 e gravar `tr_bateria_a_v8.md`
+- **Escopo (AMPLIADO em 06/09, achado do T013):** ANTES de medir, consertar o alvo: `bateria_completa_a.js`
+  monta a URL cravada em **tres lugares** (linhas 193, 370, 379: `BASE + '/webhook/iachat-test'`) em vez de
+  usar o `IACHAT_TEST_PATH` do harness. Rodando "no v8", esses testes batem no **v7.4 que atende usuarios
+  reais** — R3 mandaria uma foto e S1 uma requisicao sem header para producao, e o relatorio diria v8.
+  Consertar e provar que o alvo passou a ser o v8. Depois disso, rodar `bateria_completa_a.js` contra o ingress do v8 e gravar `tr_bateria_a_v8.md`
   no formato de 04/09 (uma linha por teste, evidência curta, resumo no fim). Sem semear o que o
   teste deveria percorrer.
 - **Gate:** relatório com os 17 vereditos e o **exit code real** registrado (já confiável depois

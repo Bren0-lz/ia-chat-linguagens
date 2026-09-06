@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T013 (abre o Bloco 2 — bateria diagnostica no v8)
-- **Última concluída:** T012 — hipotese do exemplo de formato CONFIRMADA (correcao 0/9 -> 9/9)
+- **Tarefa atual:** T014, T015, T016 em paralelo (medicoes)
+- **Última concluída:** T013 — instrumentos consertados antes de medir
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** T010 aguarda decisao do Breno (credencial da camada 2). Nao bloqueia T011/T012. Ambiente: n8n e Postgres no ar, os dois workflows ativos, webhook do v8 conferido em 06/09.
 
@@ -112,3 +112,8 @@
 - 2026-09-06 RESSALVA 2: o detector do C1 continua frouxo em principio (`\bsay\b` sozinho casa) e agora mede um comportamento que o proprio prompt ensina a formular. De hoje em diante ele e MENOS informativo — o conserto da regua no T013 fica mais urgente, nao menos.
 - 2026-09-06 O `\n` do exemplo e literal: o jsCode guarda `\n`, entao o prompt manda o texto `\n` ao modelo, nao uma quebra de linha. Funciona, mas e acidente. Nao mexido (seria uma segunda variavel).
 - 2026-09-06 Bloco 2 planejado (T013-T018): repetir a bateria diagnostica no v8 e comparar com o v7.4 de 04/09. Decisoes do Breno: Fase B com N=3 nos qualitativos, escopo = 2 fases + jornada continua, e nos REVISAR o agente propoe veredito pela rubrica §8 para o Breno confirmar.
+- 2026-09-06 T013 DONE (verificada; o verifier reproduziu as tres reprovacoes em vez de acreditar no relatorio). Instrumentos consertados: T3 da Fase B deriva o contrato de idioma do `LANG` do fluxo (modulo novo `idioma_professor.js`), Fase A sai 1 em reprovacao e 2 em inconclusivo, detector do controle do experimento_a1 usa a regua estrita. Gate: 14 comandos, 5,3 s, offline (provado com net/http/fetch/dns envenenados).
+- 2026-09-06 DIVIDA FANTASMA CORRIGIDA: o handoff registrava TRES lugares com a premissa velha de idioma (T3, linha ~257, cabecalho do revalida_niveis.js). So o T3 era real — os outros dois tratam do modo CONVERSA, onde B1+ segue "INTEIRAMENTE em ingles" e o T005b nao mexeu. O cabecalho do revalida_niveis.js ja explicitava a distincao antes da tarefa.
+- 2026-09-06 ACHADO QUE MUDA O T014: `bateria_completa_a.js` crava `BASE + '/webhook/iachat-test'` em TRES lugares (193, 370, 379) e ignora o IACHAT_TEST_PATH. Rodar "no v8" mandaria R3 (foto) e S1 (requisicao sem header) para o V7.4 EM PRODUCAO, com o relatorio dizendo v8. Consertar antes de medir — entrou no escopo do T014.
+- 2026-09-06 `testa_detector_controle.js` carrega dotenv transitivamente via experimento_a1.js: poe leitura de .env no caminho do gate. Inofensivo hoje, vale limpar.
+- 2026-09-06 FRONTEIRA da regua estrita: a unica perda no corpus da variante e "Video games 'are' fun." (correcao so por aspas). Rejeicao conservadora e coerente, mas o 8/9 tem essa borda.
