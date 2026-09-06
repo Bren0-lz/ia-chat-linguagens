@@ -236,7 +236,7 @@ que foi medido** — comparar status entre versões sem dizer qual engana (§9).
 - **Gate:** relatório com os 17 vereditos e o **exit code real** registrado (já confiável depois
   do T013); toda execução comprovadamente no workflow do v8, não no v7.4.
 - **Depende de:** T013
-- **Status:** TODO
+- **Status:** DONE — 17/17 no v8, exit 0, e 93/93 execucoes provadamente no workflow do v8 (auditoria refeita pelo verifier). Alvo consertado: 3 URLs cravadas iam para PRODUCAO
 
 ### T015 — Fase B no v8, com N=3
 - **Escopo:** rodar `bateria_completa_b.js` contra o v8 com **N=3** nos testes qualitativos,

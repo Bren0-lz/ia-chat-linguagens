@@ -22,11 +22,17 @@
 require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.env') });
 const fs = require('fs');
 const { Client } = require('pg');
-const { msg, cb, digest } = require('./harness');
+const { msg, cb, digest, WEBHOOK, TEST_PATH } = require('./harness');
+const { rotuloDe, transcricaoDe } = require('./alvo');
 const { matchQuestion } = require('./seed');
 
-const BASE = process.env.N8N_URL || 'http://localhost:5678';
-const TR = './tr_bateria_a.md';
+// ALVO (T014). Ate 06/09 tres requisicoes desta bateria -- A6, R3 e S1 -- montavam a URL
+// CRAVADA (BASE + '/webhook/iachat-test') em vez de usar o ingress do harness. Rodando "no v8"
+// elas batiam no v7.4, o workflow que atende usuarios REAIS: o R3 mandava uma foto e o S1 uma
+// requisicao sem header para producao, e o relatorio dizia v8. Armadilha no 13 do handoff.
+// Agora TODO request sai pelo WEBHOOK do harness, que respeita IACHAT_TEST_PATH.
+const ALVO = rotuloDe(TEST_PATH);
+const TR = transcricaoDe('tr_bateria_a', TEST_PATH);
 const TEST_SECRET = (() => {
   try {
     const t = fs.readFileSync(require('path').join(__dirname, '..', '..', '.env'), 'utf8');
@@ -55,6 +61,7 @@ const novoUid = () => ++uidSeq;
 // `semear()` continua usando 'Teste' de proposito -- escreve direto no banco e
 // nao passa pela validacao, entao serve para checar preservacao de estado (X1).
 const NOME_VALIDO = 'Rafael';
+console.log('alvo: ' + ALVO + ' -> ' + WEBHOOK);
 console.log("faixa de user_id desta rodada: " + (UID_BASE+1) + "+");
 const resultados = [];
 
@@ -83,7 +90,7 @@ async function semear(uid, campos) {
 }
 
 (async () => {
-  fs.writeFileSync(TR, '# Bateria completa — Fase A (determinísticos) — v7.4\n\n');
+  fs.writeFileSync(TR, '# Bateria completa — Fase A (determinísticos) — ' + ALVO + '\n\n');
   console.log('BATERIA COMPLETA — Fase A (determinísticos, sem consumo de cota)\n');
 
   // ============ A. ONBOARDING ============
@@ -190,7 +197,7 @@ async function semear(uid, campos) {
     const upd = Math.floor(Date.now() / 1000) + 5000;
     const pacote = { update_id: upd, message: { message_id: upd, from: { id: u, is_bot: false, first_name: 'T' }, chat: { id: u, type: 'private' }, date: 1, text: '/menu' } };
     const post = async () => {
-      const r = await fetch(BASE + '/webhook/iachat-test', {
+      const r = await fetch(WEBHOOK, {
         method: 'POST', headers: { 'content-type': 'application/json', 'x-iachat-test': TEST_SECRET }, body: JSON.stringify(pacote),
       });
       await r.text().catch(() => {});
@@ -367,7 +374,7 @@ async function semear(uid, campos) {
     await semear(u, {});
     const upd = Math.floor(Date.now() / 1000) + 9000;
     const foto = { update_id: upd, message: { message_id: upd, from: { id: u, is_bot: false, first_name: 'T' }, chat: { id: u, type: 'private' }, date: 1, photo: [{ file_id: 'x', width: 10, height: 10 }] } };
-    const r = await fetch(BASE + '/webhook/iachat-test', { method: 'POST', headers: { 'content-type': 'application/json', 'x-iachat-test': TEST_SECRET }, body: JSON.stringify(foto) });
+    const r = await fetch(WEBHOOK, { method: 'POST', headers: { 'content-type': 'application/json', 'x-iachat-test': TEST_SECRET }, body: JSON.stringify(foto) });
     await r.text().catch(() => {});
     await new Promise(x => setTimeout(x, 7000));
     const st = await estado(u);
@@ -376,7 +383,7 @@ async function semear(uid, campos) {
 
   // S1: ingress sem autenticação
   {
-    const r = await fetch(BASE + '/webhook/iachat-test', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
+    const r = await fetch(WEBHOOK, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
     reg('S1', r.status === 403, 'chamada sem header -> HTTP ' + r.status + ' (esperado 403)');
   }
 
