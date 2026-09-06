@@ -48,10 +48,11 @@ Três lacunas conhecidas, em ordem de impacto:
 
 1. **O A1 não corrige e não usa interesses.** Medido, reproduzido, e com duas hipóteses já
    refutadas (§4). É o nível de entrada — ou seja, o pior lugar possível para falhar.
-2. **O modo Professor é lento e a explicação é gerada na hora.** p90 de **9,0 s** no v7.4 (o
-   17,8 s que circulava era o instrumento com viés — §6 nº 16) e de 8,0 s no v8; servindo do
-   banco cai para 0,98 s (`MEDICOES_professor_v8.md`). A qualidade
-   varia a cada aluno porque nada é revisado antes de ir ao ar.
+2. ~~**O modo Professor é lento e a explicação é gerada na hora.**~~ **Resolvido no v8, ainda não
+   no bot.** As 60 explicações vêm do banco: p90 de 0,98 s contra 8,00 s da geração ao vivo
+   (`MEDICOES_professor_v8.md`). O 17,8 s que motivou isto era o instrumento com viés — o real
+   era 9,0 s (§6 nº 16). **Falta a sua revisão dos 60 textos**, que é a única coisa que garante
+   qualidade: o gate confere forma e cobertura, não se o texto ensina. E falta o v8 virar o bot.
 3. **O material de referência ainda não existe.** Os livros WAYS 6º–9º ano estão sendo
    convertidos em `.md` para o agente usar como fonte. Isso muda o teto de qualidade do
    Professor, e ainda não começou.
@@ -67,25 +68,48 @@ prompt e de comportamento são baratas **agora** e ficam caras depois.
 
 | | |
 |---|---|
-| **Fluxo ativo** | `IAChat_Telegram_v7.4` — n8n id `9MA0o1XJjD33BnKc`, **101 nós**, `active=true` |
-| **Arquivo de edição** | `fluxos/IAChat_Telegram_v7.4.json` |
+| **Fluxo do bot** | `IAChat_Telegram_v7.4` — n8n id `9MA0o1XJjD33BnKc`, **101 nós**, `active=true`. **CONGELADO** na tag git `v7.4-congelado`; é ele que atende o Telegram |
+| **Fluxo de trabalho** | `IAChat_Telegram_v8` — n8n id `PbwEf7L9xEXhJaCg`, **106 nós**, `active=true` **em paralelo**. Só recebe tráfego de teste: ingress em `iachat-test-v8` e `Gatilho Telegram` desabilitado |
+| **Arquivo de edição** | `fluxos/IAChat_Telegram_v8.json` — **nunca** o v7.4 |
+| **Publicar o v8** | `node fluxos/_teststand/publica_v8.js` (único caminho autorizado; alvo cravado, aborta se o arquivo puder roubar o bot) |
+| **Loop de desenvolvimento** | `PLAN.md` + `STATE.md` + `/next`; agentes em `.claude/agents/`. Gate: `npm run gate` (~7 s, offline) |
 | **Nudge** | `IAChat_Nudge_Retencao_v1` — id `DBF6NoEXRXrHAy85`, **DESATIVADO** de propósito |
 | **Modelos** | Vertex/Gemini desde 03/09: `gemini-2.5-flash` (Conversa, Professor, Dúvida), `gemini-2.5-flash-lite` (Extrator, Validar Nome). Áudio na Groq: `whisper-large-v3` |
-| **Banco** | Postgres `127.0.0.1:5433` (Docker, `iachat-pg`), 13 migrations |
-| **Regressão offline** | `node fluxos/_teststand/regressao_v7.4.js` |
+| **Banco** | Postgres `127.0.0.1:5433` (Docker, `iachat-pg`), **14 migrations** (a 013 criou `topic_explanations`, 60 linhas) |
+| **Regressão offline** | `npm run gate` — regressão dos nós de código, cadastro de nome, camada 1, abre-alas, explicação do banco, TRACK, conteúdo, vazamento, latência, e a prova de que o v7.4 não foi tocado |
 | **Fase A** (determinísticos) | **17/17** |
 | **Fase B** (LLM) | **16 passaram · 2 falharam (C1, C15) · 11 revisar · 0 inconclusivos** |
 | **Latência (L1)** | **recalculado em 06/09** sobre os mesmos 80 turnos (execs 3099–3178): média **2,55 s**, p90 **6,16 s**, 4/80 acima de 8 s; infra ≤0,40 s. Os valores antigos (4,83 s / 11,59 s / 18 acima de 8 s) vinham do `decompoe()` que somava nó aninhado — ver §6 nº 16. `professor:intro`: p90 **9,01 s**, não 17,81 s |
 
-**Nunca deixe duas versões ativas** — v7.2, v7.3 e v7.4 usam o mesmo `webhookId`
-(`telegram-iachat-webhook`).
+**Nunca deixe duas versões ativas no mesmo webhook** — v7.2, v7.3 e v7.4 usam o mesmo
+`webhookId` (`telegram-iachat-webhook`). O v8 convive com o v7.4 **porque tem ingress próprio e o
+`Gatilho Telegram` desabilitado**; publicá-lo sem isso derruba o bot. O `publica_v8.js` aborta
+antes de publicar se essas duas condições não estiverem no arquivo.
+
+### Como retomar numa sessão nova do Claude Code
+
+Todo o estado do loop está em arquivo — a conversa não é necessária.
+
+1. Leia `CLAUDE.md` (convenções, gates, zonas proibidas) e este documento.
+2. Leia `STATE.md` (tarefa atual, ambiente, diário de descobertas) e `PLAN.md` (T001–T012).
+3. Confira o ambiente **de verdade**, não pela nota: portas 5433 e 5678 abertas, e
+   `node fluxos/_teststand/gate_vivo_v8.js` respondendo — `active: true` não prova que o webhook
+   registrou.
+4. Rode `npm run gate`. Se estiver vermelho num repositório limpo, pare e descubra por quê antes
+   de qualquer coisa.
+5. `/next` executa uma tarefa: escolhe a próxima `TODO` com dependências satisfeitas, delega ao
+   `implementer`, verifica com o `verifier` (que não vê o raciocínio do implementer e roda os
+   gates do zero), commita e atualiza o estado. Três reprovações na mesma tarefa param o loop.
+
+Se o n8n estiver fora, suba-o **na mesma janela** com o bloco `WEBHOOK_URL` do §7 — é a armadilha
+mais cara do projeto.
 
 ### Estado que exige atenção agora
 
 | | |
 |---|---|
 | ⚠ **`DEV_COMMANDS = true`** | ligado a pedido em 04/09. `/reset` e `/resetfull` funcionam **para qualquer usuário** e não checam quem digitou. Fica ligado até haver pedido explícito em contrário. **DESLIGAR ANTES DO LANÇAMENTO** — a regressão avisa a cada rodada |
-| ⚠ **`Validar Nome (IA)` reapontado ao Vertex** | mudança **publicada mas NÃO validada e NÃO commitada**. O Postgres caiu antes do teste. Se a autenticação por Service Account não funcionar nesse caminho, o `Veredito IA` cai no fail-open e o comportamento volta ao de antes — nada quebra, mas nada melhora |
+| ⚠ **`Validar Nome (IA)` reapontado ao Vertex** | commitado em 05/09 (`929f5d4`) e presente nos dois fluxos, mas **ainda NÃO validado ao vivo** — é a tarefa **T010** do `PLAN.md`. Se a Service Account não autenticar nesse caminho, o `Veredito IA` cai no fail-open: nada quebra, mas nada melhora, e o `asdfgh` continua virando nome |
 | ✅ ~~Docker/Postgres fora~~ | **resolvido em 05/09** — `iachat-pg` no ar, 5433 aberta. A nota antiga sobreviveu ao conserto e induziu um agente a declarar bloqueio falso: **confira a porta antes de acreditar em nota de ambiente** |
 
 ### O que foi feito em 04–05/09
@@ -96,6 +120,20 @@ prompt e de comportamento são baratas **agora** e ficam caras depois.
 - Bateria completa ao vivo, jornada de usuário ponta a ponta, L1 fechado com n=80.
 - Experimento do A1: duas hipóteses refutadas com medição.
 - Higiene: 296 → 161 arquivos rastreados.
+
+### O que foi feito em 05–06/09 — o bloco do Professor
+
+Nove tarefas do `PLAN.md`, cada uma com implementação e **verificação independente** (o verificador
+não vê o raciocínio de quem implementou e roda os gates do zero). Três foram reprovadas e refeitas.
+
+- **v8 isolado e publicado como workflow separado**, ativo em paralelo ao bot, com ingress próprio.
+- **Abre-alas do Professor**: o aluno recebe `📚 Tópico N/10` 1,16 s antes de o modelo ser chamado.
+- **60 explicações pré-geradas** (Gemini 2.5 Pro), validadas, versionadas em `conteudo/explicacoes/`
+  e servidas do Postgres, com fallback para a geração ao vivo — provado inclusive com o banco
+  inacessível.
+- **Política de idioma**: B1–C2 passaram a explicar em português; enunciado em português em A1/A2 e
+  em inglês de B1 para cima; resposta sempre em inglês.
+- **O medidor de latência mentia** (§6 nº 16) e foi consertado; o L1 inteiro foi recalculado.
 
 ---
 
@@ -183,49 +221,60 @@ explícito**, não apenas o bot usando a forma certa na própria frase.
 > Ordem por retorno, não por facilidade. Os itens 1–4 são o caminho para "agente no mais alto
 > nível"; 5–7 são infraestrutura e decisões já tomadas.
 
-### Concluído em 04–05/09
+### Concluído em 04–06/09
 
 | | Item | Estado |
 |---|---|---|
 | ✅ | Cast do `int_await_ts` | publicado, verificado ao vivo |
 | ✅ | `Etapa de Cadastro` consumir o `nameCheck` | publicado, verificado ao vivo |
 | ✅ | Testes que teriam pego os dois | A2 com entradas reais + A2b; reprovam a versão anterior |
-| ✅ | Sincronizar handoff | este documento |
 | ✅ | Higiene do repositório | 296 → 161 arquivos rastreados |
 | ✅ | Experimento do A1 | duas hipóteses refutadas, detector corrigido |
+| ✅ | **Item 2 inteiro — modo Professor** | abre-alas + 60 explicações servidas do banco (T002–T009) |
+| ✅ | **Loop de desenvolvimento** | `PLAN.md`/`STATE.md`/`/next` + implementer e verifier |
+| ✅ | **Medidor de latência** | defeito de nó aninhado corrigido, L1 recalculado (§6 nº 16) |
 
-### 1 — Fechar a camada 2 da validação de nome · **em voo**
+### 1 — Fechar a camada 2 da validação de nome · **próxima tarefa (T010)**
 
 Reapontado para o Vertex, reusando a `Google Service Account` (id `mKfC2ANkOKHfbKal`) que os 4
 nós de modelo já usam — assim não é preciso criar conta no Google AI Studio.
 
-**Publicado, não validado.** Falta: subir o Postgres, mandar `asdfgh` e `Kaique` pelo ingress, e
-conferir se o nó autentica. Se não autenticar, a alternativa é criar a credencial
-`googlePalmApi` com uma API key do AI Studio.
+**Commitado (`929f5d4`) e presente nos dois fluxos, ainda não validado ao vivo.** Falta mandar
+`asdfgh` (deve recusar) e `Kaique` (deve aceitar) pelo ingress do v8 e conferir se o nó autentica.
+Se não autenticar, a alternativa é criar a credencial `googlePalmApi` com uma API key do AI Studio.
+**Enquanto isso não fecha, `asdfgh` vira nome de aluno** — a camada 1 pega `asdf` e `qwerty`, mas
+não sequências de 6 letras.
 
-### 2 — Modo Professor: abre-alas determinístico + explicações pré-geradas · **o maior**
+### 2 — Modo Professor · **CONCLUÍDO em 05–06/09**
 
-Decisão de 04/09: **quanto mais determinismo, melhor**, e a explicação tem de ser bem didática,
-"bem mastigada".
+Decisão de 04/09: quanto mais determinismo, melhor, e a explicação tem de ser "bem mastigada".
 
-Duas partes:
+**(a) Abre-alas determinístico** — o aluno recebe `📚 Tópico N/10: <título>` **antes** da chamada
+ao modelo. Medido ao vivo: cabeçalho aos 521 ms, modelo aos 1681 ms, explicação aos 7827 ms. Só na
+rota de explicação; em questão, correção e dúvida o nó roda e devolve `[]`.
 
-**(a) Abre-alas determinístico.** Mandar `📚 Tópico 3/10: Past Simple` *antes* de chamar o
-modelo. Não reduz o tempo, mas mata a sensação de travamento. Barato, um nó.
+**(b) 60 explicações pré-geradas** — geradas com Gemini 2.5 Pro, validadas, versionadas em
+`conteudo/explicacoes/<NIVEL>/<NN>-<slug>.md` e servidas da tabela `topic_explanations` pelo nó
+`Buscar Explicação`. Fallback para a geração ao vivo, provado nas duas formas de falha: linha
+ausente **e** banco inacessível.
 
-**(b) Explicações pré-geradas.** Sair de "gerar na hora" para "gerar uma vez, revisar, servir do
-banco". Escopo: **6 níveis × 10 tópicos = 60 explicações**.
+Resultado medido, n=12 por condição no mesmo v8:
 
-Ganhos, em ordem de importância:
+| | mediana | p90 |
+|---|---|---|
+| servida do banco | 0,25 s | **0,98 s** |
+| gerada ao vivo | 5,82 s | **8,00 s** |
 
-1. **Qualidade** — dá para usar um modelo forte e **revisar o texto antes de publicar**, coisa
-   impossível na geração ao vivo. É o que mais aproxima do "mais alto nível".
-2. **Latência** — resposta instantânea na rota mais lenta do produto (p90 17,8 s).
-3. **Custo** — 60 gerações únicas em vez de uma por aluno por tópico.
+Ganho de **7,02 s (88%)** no p90. Todo ele vem do LLM: na condição servida o `Agente Professor`
+não roda.
 
-Precisa de: migration com a tabela, script de geração com o modelo forte, o nó servindo do banco
-com **fallback para geração ao vivo** (nunca deixar o aluno sem explicação), e uma forma de
-revisão humana antes de entrar no ar.
+> **O 17,8 s nunca existiu.** Era 9,01 s — o medidor somava nós aninhados (§6 nº 16). O ganho é
+> real e medido, mas a motivação original deste bloco estava inflada em ~1,9×.
+
+**O que o gate NÃO garante, e por isso a revisão humana continua devendo:** o validador confere
+forma, cobertura de vocabulário, idioma, HTML e vazamento de gabarito — **não se o texto ensina**.
+Está medido: um arquivo gramaticalmente correto, sem repetição, cobrindo os termos e com as cinco
+seções, que nunca enuncia a regra, **passa**. Ler os 60 no diff é a única rede contra isso.
 
 ### 3 — Material de referência: livros → `.md`
 
@@ -272,6 +321,13 @@ tentativas sobrepostas. O backend (`api/`, 9 handlers) é a parte decente.
 | `DEV_COMMANDS` de volta a `false` | antes do lançamento |
 | Ligar `jornada_usuario.js` e `mede_c8_teto_a1.js` à suíte | hoje rodam só à mão |
 | 7 testes sem automação: `A7 B2 C8 L2 R7 S2 S3` | **teste descartado é dívida** |
+| **Revisar os 60 `.md` de explicação** | antes de o v8 virar o bot — o gate não julga se o texto ensina |
+| **`bateria_completa_b.js` T3 contradiz o produto** | assere "sem português na explicação de B2"; com o T005b isso é o comportamento correto. Vai dar **falso vermelho** na próxima bateria. Conferir junto a linha 257 e o cabeçalho do `revalida_niveis.js` |
+| **`gate_vivo_v8.js` só percorre o onboarding** | qualquer tarefa que mexa em outra rota passa sem tocar no que mudou. Hoje se compensa com verificação manual por rota |
+| **`postUpdate` do harness não tem teto** | com o n8n fora, cada turno leva ~100 min em vez de falhar. Bateria longa trava em silêncio |
+| **`bateria_completa_a.js` sai 0 mesmo reprovando** | só sai ≠0 em erro fatal. Não serve como gate enquanto isso não mudar |
+| **`COBERTURA` quase cega em `C2/4` e `C2/7`** | 1 e 2 termos exigíveis; a `descricao` desses tópicos no TRACK quase não tem matéria fora dos exemplos |
+| **Corpo do banco não é escapado** | hoje é seguro (varri os 60), mas se a fonte do corpo mudar vira HTML quebrado no Telegram |
 
 ---
 
@@ -406,6 +462,16 @@ Leem `N8N_API_KEY` e `IACHAT_TEST_SECRET` do ambiente ou do `.env` da raiz.
 | `experimento_a1.js` | C1/C15 com baseline e variantes |
 | `mede_c8_teto_a1.js` | C8 — teto de palavras do A1, por distribuição |
 | `regressao_v7.4.js` | regressão offline dos nós de código |
+| `publica_v8.js` | **único** caminho autorizado de publicação; alvo cravado no v8 |
+| `gate_vivo_v8.js` | gate ao vivo — uma mensagem pelo ingress do v8 (**só cobre onboarding**) |
+| `vivo_explicacao_banco.js` | os dois caminhos da explicação, ao vivo |
+| `mede_professor_v8.js` | latência banco × modelo |
+| `testa_abre_alas_professor.js` · `testa_explicacao_do_banco.js` · `testa_decompoe_latencia.js` | offline, dentro do `npm run gate` |
+| `conteudo/extrai_track.js` · `valida_track.js` | TRACK do fluxo → `track.json`, e a prova de que são a mesma verdade |
+| `conteudo/gerar_explicacoes.js` | gera os 60 `.md` com Gemini 2.5 Pro (ADC, projeto `agent-hackton`) |
+| `conteudo/valida_explicacoes.js` · `simula_vazamento.js` | validação de conteúdo e a simulação do detector |
+| `conteudo/seed_explicacoes.js` · `confere_explicacoes_db.js` | `.md` → Postgres, e a conferência |
+| `conteudo/extrai_questoes.js` | retrato versionado das questões (`--conferir` bate contra o banco) |
 | `analisa_latencia.js` | L1 por rota, a partir das execuções gravadas |
 | `mede_latencia_real.js` | L1 com `chat_id` real (**envia mensagens de verdade**) |
 | `revalida_personas.js` / `revalida_niveis.js` | PS3/PS4 · C5/C6 |

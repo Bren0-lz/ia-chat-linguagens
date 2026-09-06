@@ -28,3 +28,6 @@ documentos/livros/*.pdf
 # Se quiser versiona-los, apague as duas linhas.
 /logo/
 /Claude outputs/
+
+# PDF de leitura gerado a partir do PLAN.md — regeravel, nao e fonte
+/IAChat_tarefas_futuras.pdf
