@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T007
-- **Última concluída:** T006
+- **Tarefa atual:** T008
+- **Última concluída:** T007
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum — T006 destravado em 05/09
 
@@ -72,4 +72,10 @@
 - 2026-09-05 TETO DO INSTRUMENTO, medido: um .md gramaticalmente correto, sem repeticao, cobrindo os termos e com as 5 secoes, que NUNCA enuncia a regra, PASSA. Esta declarado no codigo. Julgar "ensina ou nao ensina" exige leitura humana.
 - 2026-09-05 Escape conhecido do idioma: aula em ingles escrita inteira em sentencas de <=8 palavras mede 88% PT e passa. Alcancado pelo verifier, mas exige texto adversarial; nenhum LLM escreve assim espontaneamente.
 - 2026-09-05 COBERTURA quase cega em C2/4 (1 termo) e C2/7 (2 termos): a descricao do TRACK desses topicos quase nao tem termo ensinavel fora dos exemplos. Culpa do TRACK, nao do validador.
-- 2026-09-05 DIVIDA pre-existente: o validador quebra em arquivo CRLF ("data: 2026-09-05"). Vai morder quem clonar no Windows com autocrlf=true.
+- 2026-09-05 DIVIDA pre-existente: o validador quebra em arquivo CRLF ("data: 2026-09-05
+"). Vai morder quem clonar no Windows com autocrlf=true.
+- 2026-09-05 T007 DONE. `topic_explanations`, chave (cefr_level, topic_order) — NAO por titulo: "Presente simples" existe sob 3 niveis em practice_questions, entao (nivel, titulo) nao identifica topico.
+- 2026-09-05 PARA O T008: o nivel vem de `teacher_state_new.level`, NAO de `$json.level` (este vem do Roteador e pode estar minusculo ou invalido enquanto o lvl normalizado caiu no fallback A1). Verificado no jsCode do Professor Engine.
+- 2026-09-05 `seed_explicacoes.js` APAGA linha da tabela sem .md correspondente. O .md e a fonte da verdade; linha curada a mao no banco morre no proximo seed.
+- 2026-09-05 CRLF resolvido com `.gitattributes` (`* text=auto eol=lf`). Sem ele, clone novo no Windows com autocrlf=true dava gate vermelho em repositorio limpo.
+- 2026-09-05 Base limpa: `cleanup_test_users.js --apply` removeu os 9 alunos de teste; sobraram as 2 contas reais. Rodar isso ao fim de cada bloco com gate ao vivo.

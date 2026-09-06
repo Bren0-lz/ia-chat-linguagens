@@ -143,11 +143,14 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
   Aplicar no Postgres local.
 - **Gate:** script que lê as 60 linhas do banco e confere que batem com os `.md`
 - **Depende de:** T006
-- **Status:** TODO
+- **Status:** DONE — `topic_explanations`, 60 linhas, chave (cefr_level, topic_order)
 
 ### T008 — o fluxo servindo do banco, com fallback
 - **Escopo:** nó `Buscar Explicação` (Postgres) antes do `Agente Professor`. Com linha: envia
   direto. Sem linha: **cai na geração ao vivo de hoje** — o aluno nunca fica sem explicação.
+  Consulta por `WHERE cefr_level=$1 AND topic_order=$2`. **O nível vem de
+  `teacher_state_new.level`, NÃO de `$json.level`** — este último vem do Roteador e pode estar
+  minúsculo ou inválido enquanto o `lvl` normalizado caiu no fallback A1. Verificado no `jsCode`.
 - **Gate:** teste offline dos dois caminhos + `gate_vivo_v8.js` percorrendo um tópico com
   explicação no banco e outro sem
 - **Depende de:** T007, T002

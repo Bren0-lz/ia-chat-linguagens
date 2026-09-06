@@ -1,0 +1,7 @@
+# O parser de frontmatter das explicacoes quebra em CRLF ("data: 2026-09-05\r"),
+# e com autocrlf=true um clone novo no Windows devolvia CRLF — gate vermelho em
+# repositorio limpo. Achado na verificacao do T007.
+* text=auto eol=lf
+*.png binary
+*.pdf binary
+*.svg text eol=lf
