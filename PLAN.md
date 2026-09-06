@@ -154,7 +154,7 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
 - **Gate:** teste offline dos dois caminhos + `gate_vivo_v8.js` percorrendo um tópico com
   explicação no banco e outro sem
 - **Depende de:** T007, T002
-- **Status:** TODO
+- **Status:** DONE — os dois caminhos medidos ao vivo, inclusive com o banco inacessível
 
 ### T009 — medir o ganho
 - **Escopo:** latência da rota Professor no v8, antes e depois, pelas execuções gravadas

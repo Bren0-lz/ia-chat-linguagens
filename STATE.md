@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T008
-- **Última concluída:** T007
+- **Tarefa atual:** T009
+- **Última concluída:** T008
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum — T006 destravado em 05/09
 
@@ -79,3 +79,9 @@
 - 2026-09-05 `seed_explicacoes.js` APAGA linha da tabela sem .md correspondente. O .md e a fonte da verdade; linha curada a mao no banco morre no proximo seed.
 - 2026-09-05 CRLF resolvido com `.gitattributes` (`* text=auto eol=lf`). Sem ele, clone novo no Windows com autocrlf=true dava gate vermelho em repositorio limpo.
 - 2026-09-05 Base limpa: `cleanup_test_users.js --apply` removeu os 9 alunos de teste; sobraram as 2 contas reais. Rodar isso ao fim de cada bloco com gate ao vivo.
+- 2026-09-05 T008 DONE. v8 com 106 nos: `Buscar Explicacao` (Postgres) -> `Rota Explicacao` (If) -> `Explicacao do Banco` (Code). Os dois caminhos saem pelo mesmo `Enviar Explicacao Prof`, via `$json.finalText`.
+- 2026-09-05 Fallback provado nas DUAS formas: linha ausente E banco inacessivel (credencial isolada em porta morta, sem derrubar o container que o v7.4 usa). `alwaysOutputData:true` + `onError:continueRegularOutput`.
+- 2026-09-05 `mode_teacher` NAO dispara a explicacao — so confirma o modo. E a MENSAGEM SEGUINTE que cai no subroute intro. Todo teste da rota Professor precisa dos dois turnos.
+- 2026-09-05 O item carrega `explicacao_origem: 'banco'|'modelo'` — e por ele que o T009 separa as duas condicoes na medicao.
+- 2026-09-05 O banco so serve em default/intro e em check->advance. Duvida, questao, correcao e resume_q continuam indo ao modelo (a consulta roda e e descartada — leitura indexada local).
+- 2026-09-05 O `body` do banco NAO e escapado (o `Parse Professor` escapa a saida crua do modelo). Varredura dos 60: nenhuma tag invalida, nenhum & solto, maior body 3420 chars contra o teto de 4096 do Telegram. Se a fonte do corpo mudar, isso vira vetor de HTML invalido.

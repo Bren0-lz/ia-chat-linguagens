@@ -46,10 +46,17 @@ if (!noCod || !code[NO_CODIGO] || !noEnv) fim();
 const conn = flow.connections;
 const saidaLlm = (conn['Envio Professor'] && conn['Envio Professor'].main && conn['Envio Professor'].main[0] || []).map(c => c.node);
 ok(saidaLlm.indexOf(NO_CODIGO) >= 0, 'saida "llm" do Envio Professor alimenta o abre-alas (nao ficou orfao)');
-ok(saidaLlm.indexOf('Agente Professor') >= 0, 'saida "llm" continua alimentando o Agente Professor');
-ok(saidaLlm.indexOf(NO_CODIGO) < saidaLlm.indexOf('Agente Professor'), 'abre-alas vem ANTES do Agente Professor na ordem das conexoes');
+// T008 moveu a cabeca do ramo da explicacao: o Envio Professor nao chama mais o Agente Professor
+// direto, e sim o `Buscar Explicação`, que serve do banco ou cai na geracao ao vivo. A invariante
+// do T002 e a mesma de antes — o abre-alas vem ANTES de tudo que produz a explicacao —, so que
+// agora medida contra a cabeca desse ramo, e ainda contra o Agente Professor la no fim dele.
+const NO_EXPLICA = 'Buscar Explicação';
+ok(saidaLlm.indexOf(NO_EXPLICA) >= 0, 'saida "llm" alimenta o ramo da explicacao ("' + NO_EXPLICA + '")');
+ok(saidaLlm.indexOf(NO_CODIGO) < saidaLlm.indexOf(NO_EXPLICA), 'abre-alas vem ANTES do ramo da explicacao na ordem das conexoes');
+ok(noCod.position[1] < nodeByName(NO_EXPLICA).position[1],
+   'abre-alas esta acima do ramo da explicacao no canvas (executionOrder v1 roda de cima para baixo)');
 ok(noCod.position[1] < nodeByName('Agente Professor').position[1],
-   'abre-alas esta acima do Agente Professor no canvas (executionOrder v1 roda de cima para baixo)');
+   'abre-alas continua acima do Agente Professor no canvas');
 const saidaCab = (conn[NO_CODIGO] && conn[NO_CODIGO].main && conn[NO_CODIGO].main[0] || []).map(c => c.node);
 ok(saidaCab.length === 1 && saidaCab[0] === NO_ENVIO, 'abre-alas alimenta o "' + NO_ENVIO + '"');
 

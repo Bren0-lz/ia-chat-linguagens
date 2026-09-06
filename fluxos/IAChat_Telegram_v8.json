@@ -3424,7 +3424,7 @@
     {
       "parameters": {
         "chatId": "={{ $('Normalizar').first().json.chatId }}",
-        "text": "={{ $('Parse Professor').first().json.finalText }}",
+        "text": "={{ $json.finalText }}",
         "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": {
           "rows": [
@@ -3905,6 +3905,87 @@
       },
       "onError": "continueRegularOutput",
       "notes": "Cabecalho determinista do topico, enviado antes do Agente Professor. onError=continueRegularOutput: uma falha aqui nunca derruba o turno."
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT title, body FROM topic_explanations WHERE cefr_level = $1 AND topic_order = $2 LIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ $('Professor Engine').first().json.teacher_state_new.level }},{{ $('Professor Engine').first().json.teacher_state_new.idx + 1 }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1104,
+        1900
+      ],
+      "id": "c0ffee03-ab1e-4a1a-9a00-000000000003",
+      "name": "Buscar Explicação",
+      "credentials": {
+        "postgres": {
+          "id": "7yVoSD0b3u0DoK0D",
+          "name": "Banco Local"
+        }
+      },
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "t008-cond-task",
+              "leftValue": "={{ $('Professor Engine').first().json.llmTask }}",
+              "rightValue": "explain",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "t008-cond-body",
+              "leftValue": "={{ String($json.body || '') }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1264,
+        1900
+      ],
+      "id": "c0ffee04-ab1e-4a1a-9a00-000000000004",
+      "name": "Rota Explicação"
+    },
+    {
+      "parameters": {
+        "jsCode": "// T008 — a explicacao vem PRONTA do banco (topic_explanations, 60 linhas revisadas).\n// Monta o mesmo campo `finalText` que o `Parse Professor` monta na geracao ao vivo, para\n// sair pelo MESMO `Enviar Explicacao Prof` (mesmos botoes, mesmo parse_mode HTML).\n// O corpo do banco JA e HTML do Telegram (so <b> e <i>, validado por conteudo/valida_explicacoes.js):\n// escapar aqui mostraria as tags cruas ao aluno. O feedback do engine tambem ja vai cru la.\nconst e = $('Professor Engine').first().json;\nconst row = $input.first().json || {};\nconst body = String(row.body == null ? '' : row.body).trim();\nconst feedback = e.feedback || '';\nlet finalText = (feedback ? feedback + '\\n\\n' : '') + body;\nif (finalText.length > 4096) { finalText = finalText.slice(0, 4080) + '…'; }\nreturn [{ json: {\n  pkind: 'explain',\n  finalText: finalText,\n  explicacao_origem: 'banco',\n  topicTitle: e.topicTitle,\n  topicNum: e.topicNum,\n} }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1456,
+        1720
+      ],
+      "id": "c0ffee05-ab1e-4a1a-9a00-000000000005",
+      "name": "Explicação do Banco"
     }
   ],
   "connections": {
@@ -4763,7 +4844,7 @@
             "index": 0
           },
           {
-            "node": "Agente Professor",
+            "node": "Buscar Explicação",
             "type": "main",
             "index": 0
           }
@@ -4997,6 +5078,46 @@
         [
           {
             "node": "Enviar Cabeçalho Tópico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Explicação": {
+      "main": [
+        [
+          {
+            "node": "Rota Explicação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rota Explicação": {
+      "main": [
+        [
+          {
+            "node": "Explicação do Banco",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente Professor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explicação do Banco": {
+      "main": [
+        [
+          {
+            "node": "Enviar Explicacao Prof",
             "type": "main",
             "index": 0
           }

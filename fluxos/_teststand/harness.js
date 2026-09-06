@@ -125,6 +125,10 @@ function digest(exec) {
   const conv = nodeOut(rd, 'Agente Conversa'); if (conv) push('CONVERSA', conv.output);
   const peng = nodeOut(rd, 'Professor Engine'); if (peng) { push('prof.feedback', peng.feedback); push('prof.det', peng.deterministicText); }
   const pp = nodeOut(rd, 'Parse Professor'); if (pp) push('PROFESSOR', pp.finalText);
+  // T008: na explicacao servida do banco o `Parse Professor` nao roda — quem monta o texto e
+  // `Explicação do Banco`. Sem ler este no, o caminho rapido apareceria como resposta VAZIA
+  // (armadilha nº 14: no nao lido e invisivel, e invisivel vira falso "o bot ficou mudo").
+  const pbanco = nodeOut(rd, 'Explicação do Banco'); if (pbanco) push('PROFESSOR', pbanco.finalText);
   // DUVIDA: o texto que o ALUNO recebe e o do `Filtro Anti-Spoiler`, nao o do
   // agente. O filtro roda depois e mascara o gabarito pendente. Ler o agente
   // aqui fazia todo teste de vazamento julgar a string errada: dava alarme
