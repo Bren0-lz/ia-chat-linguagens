@@ -161,7 +161,7 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
   (`analisa_latencia.js`); registrar em `MEDICOES_professor_v8.md`.
 - **Gate:** o arquivo existe com n≥10 por condição e o p90 servido do banco é menor que o gerado
 - **Depende de:** T008
-- **Status:** TODO
+- **Status:** DONE — p90 0,98 s contra 8,00 s; ganho de 7,02 s (88%)
 
 ### T010 — validação de nome, camada 2, ao vivo
 - **Escopo:** `fluxos/_teststand/testa_nome_camada2_vivo.js` — manda `asdfgh` (deve recusar) e

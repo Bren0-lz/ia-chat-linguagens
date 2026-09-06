@@ -1,16 +1,16 @@
 # Estado do loop
 
-- **Tarefa atual:** T009
-- **Última concluída:** T008
+- **Tarefa atual:** T010
+- **Última concluída:** T009 — FECHA O BLOCO DO PROFESSOR (itens 2a e 2b do plano v8)
 - **Tentativas na atual:** 0/3
-- **Bloqueios:** T009 aguarda verificacao — **n8n FORA** (porta 5678 fechada), e com ele o bot do v7.4. Postgres e ngrok de pe.
+- **Bloqueios:** nenhum — n8n resubido em 06/09, os dois workflows ativos e o webhook do v8 respondendo.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
 
 | | Estado em 05/09/2026 |
 |---|---|
 | Postgres `127.0.0.1:5433` | **NO AR** — container `iachat-pg`, porta aberta |
-| n8n `localhost:5678` | **FORA em 06/09** — caiu durante a corrida do T009. Subir com o bloco WEBHOOK_URL do handoff §7 |
+| n8n `localhost:5678` | **NO AR** (resubido em 06/09; webhook do v8 conferido, nao so `active:true`) |
 | Fluxo ao vivo | `IAChat_Telegram_v7.4` ativo, id `9MA0o1XJjD33BnKc`, 101 nós — **não mexer** |
 | Fluxo v8 no n8n | `PbwEf7L9xEXhJaCg`, **ativo** em paralelo ao v7.4; ingress `iachat-test-v8`, Gatilho Telegram desabilitado |
 
@@ -88,3 +88,13 @@
 - 2026-09-06 T009 medido, verificacao PENDENTE: o n8n caiu durante a corrida (depois dos 24 turnos de explicacao). Os numeros estao coletados; falta o verifier, que precisa da API do n8n.
 - 2026-09-06 `postUpdate` do harness NAO tem timeout global: com o n8n fora, cada turno leva ~100 min (5 tentativas x 5 retries dentro de 120 iteracoes de polling). Qualquer bateria longa trava em silencio. Vale um teto.
 - 2026-09-06 O caminho de geracao ao vivo nao carimba `explicacao_origem` — so o do banco carimba. A medicao rotulou pelo runData. Carimbar 'modelo' no `Parse Professor` fecharia isso.
+- 2026-09-06 T009 tentativa 1 REPROVADA por DEFEITO DE INSTRUMENTO, nao de medicao: `decompoe()` SOMA nos ANINHADOS. `Agente Professor` e `Modelo Vertex Professor` nao sao sequenciais — o sub-no roda DENTRO da janela do agente. Numero de LLM contado 2x.
+- 2026-09-06 O viés atinge SO a condicao com LLM, entao inflava o ganho. Recalculado por uniao de intervalos: modelo p90 8,00 s (nao 12,80), ganho 7,02 s / 88% (nao 11,82 s / 92%). A condicao banco (0,98 s) esta correta — nao tem no de LLM.
+- 2026-09-06 CONTAMINACAO MAIS AMPLA: `decompoe()` vem do `analisa_latencia.js`, o medidor do L1. TODA medicao de LLM ja feita neste repositorio carrega o mesmo vies — inclusive o L1 do handoff (media 4,83 s, p90 11,59 s) e possivelmente o p90 historico de 17,8 s do Professor.
+- 2026-09-06 T009 tentativa 2 REPROVADA. (a) A alegacao "L1 irrecuperavel, execucoes apagadas" veio de chamada a API SEM PAGINAR — ha 1201 execucoes gravadas, a mais antiga a 2377 (24/08), 449 de 04/09 do v7.4 (ids 3022-3470), que e a populacao do L1. (b) A conferencia `estouro` e cega ao defeito que diz cobrir: reintroduzindo a soma, ela acusa 0 de 59.
+- 2026-09-06 LICAO: `nextCursor` na resposta da API do n8n. Nao paginar produziu um "fato" publicado no handoff que estava errado — e que travaria o proximo leitor num numero estimado com o exato a dois minutos de distancia.
+- 2026-09-06 Fator de inflacao medido sobre 122 turnos com LLM de 04/09: mediana 1,88x, media 1,84x. E o fator que e transferivel; os valores absolutos do L1 do handoff (media 4,83 s, p90 11,59 s, n=80) vem de populacao selecionada diferente e nao se substituem direto.
+- 2026-09-06 T009 DONE (3 tentativas). Professor servido do banco: p90 0,98 s contra 8,00 s da geracao ao vivo, ganho de 7,02 s (88%), n=12 por condicao no MESMO v8.
+- 2026-09-06 L1 RECUPERADO e recalculado: media 4,83 -> 2,55 s, p90 11,59 -> 6,16 s; `professor:intro` p90 17,81 -> 9,01 s. Os 80 turnos foram isolados na janela 3099-3178, a menos de 8 turnos de borda (9 janelas batem as 5 estatisticas, mas diferem so em turnos triviais sem LLM e todas dao os mesmos numeros).
+- 2026-09-06 Os baldes do `decompoe()` viraram DISJUNTOS (precedencia LLM > infra > envio). `infra` encolheu ate 0,275 s e 19 dos 80 turnos do L1 mudaram >10 ms. A regua mudou de definicao — handoff §2 ja atualizado de "infra <=0,48 s" para "<=0,40 s".
+- 2026-09-06 O alarme `estouroDe()` recebe os ESCALARES PUBLICADOS, nao recalcula pelo mesmo caminho que produziu o numero. Com o defeito reintroduzido acusa 29/59 — e as 30 silenciosas nao tem no de LLM, ou seja, 29 de 29 das afetadas.

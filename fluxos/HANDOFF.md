@@ -48,7 +48,9 @@ Três lacunas conhecidas, em ordem de impacto:
 
 1. **O A1 não corrige e não usa interesses.** Medido, reproduzido, e com duas hipóteses já
    refutadas (§4). É o nível de entrada — ou seja, o pior lugar possível para falhar.
-2. **O modo Professor é lento e a explicação é gerada na hora.** p90 de 17,8 s, e a qualidade
+2. **O modo Professor é lento e a explicação é gerada na hora.** p90 de **9,0 s** no v7.4 (o
+   17,8 s que circulava era o instrumento com viés — §6 nº 16) e de 8,0 s no v8; servindo do
+   banco cai para 0,98 s (`MEDICOES_professor_v8.md`). A qualidade
    varia a cada aluno porque nada é revisado antes de ir ao ar.
 3. **O material de referência ainda não existe.** Os livros WAYS 6º–9º ano estão sendo
    convertidos em `.md` para o agente usar como fonte. Isso muda o teto de qualidade do
@@ -73,7 +75,7 @@ prompt e de comportamento são baratas **agora** e ficam caras depois.
 | **Regressão offline** | `node fluxos/_teststand/regressao_v7.4.js` |
 | **Fase A** (determinísticos) | **17/17** |
 | **Fase B** (LLM) | **16 passaram · 2 falharam (C1, C15) · 11 revisar · 0 inconclusivos** |
-| **Latência (L1)** | fechado, n=80: média **4,83 s**, p90 **11,59 s**; infra ≤0,48 s |
+| **Latência (L1)** | **recalculado em 06/09** sobre os mesmos 80 turnos (execs 3099–3178): média **2,55 s**, p90 **6,16 s**, 4/80 acima de 8 s; infra ≤0,40 s. Os valores antigos (4,83 s / 11,59 s / 18 acima de 8 s) vinham do `decompoe()` que somava nó aninhado — ver §6 nº 16. `professor:intro`: p90 **9,01 s**, não 17,81 s |
 
 **Nunca deixe duas versões ativas** — v7.2, v7.3 e v7.4 usam o mesmo `webhookId`
 (`telegram-iachat-webhook`).
@@ -275,7 +277,7 @@ tentativas sobrepostas. O backend (`api/`, 9 handlers) é a parte decente.
 
 ## 6. Armadilhas já pagas — NÃO repetir
 
-As dez primeiras vêm de julho/agosto; as demais de 24/08 e 04/09.
+As dez primeiras vêm de julho/agosto; as demais de 24/08, 04/09 e 06/09.
 
 1. **Resposta vazia não é aprovação.** Testes de negativa passam trivialmente quando o bot não
    responde. Gerou dois falsos PASSOU enquanto a Groq dava 404.
@@ -308,7 +310,27 @@ As dez primeiras vêm de julho/agosto; as demais de 24/08 e 04/09.
 15. **Turno iniciado por CALLBACK precisa de ~35 s**, não os 12 s da nº 7: `Responder Callback`
     também entra em retry. Confira o relógio do campo gravado contra o `startedAt` da execução
     antes de culpar o produto.
-16. **Mudança de produto quebra fixture de teste.** A validação de nome passou a recusar
+16. **Nó aninhado contado duas vezes.** O `decompoe()` do `analisa_latencia.js` **somava**
+    `executionTime`, mas o `Modelo Vertex X` roda **dentro** da janela do `Agente X` (e o
+    `Memória Dúvida`, que é infra, roda dentro do agente também). Na exec 3538 do T009, 4,89 s
+    viraram 9,60 s — número **maior que o relógio de parede da execução**, que é impossível. O
+    viés atingia só os turnos com nó de modelo — ou seja, exatamente o braço de comparação. Toda
+    medição de LLM feita antes de 06/09 saiu deste instrumento e está inflada. **Não reuse número
+    antigo sem recalcular.** Recalculados: L1 4,83 → **2,55 s** de média e 11,59 →
+    **6,16 s** de p90; `professor:intro` 17,81 → **9,01 s** de p90. Fator ~1,9× nos turnos com
+    nó de modelo; turnos sem LLM ficam idênticos, e é por isso que ninguém viu.
+    **Duas lições de método, além do conserto:** (a) *a API do n8n pagina* — a primeira tentativa
+    de recálculo declarou o L1 perdido porque leu só a primeira página e tomou o fim dela pelo
+    fim do histórico; há 1201 execuções gravadas, desde 24/08, e os 80 turnos do L1 estavam lá;
+    (b) *conferência de sanidade tem de conferir o que é publicado* — a primeira versão do alarme
+    recalculava o total a partir dos intervalos, isto é, conferia o instrumento contra ele mesmo,
+    e acusava em 0 de 59 execuções com o defeito reintroduzido. Conferindo os escalares
+    publicados contra o relógio de parede, acusa em 29 de 59.
+    Corrigido em 06/09: soma por **união de intervalos**, baldes **disjuntos** (infra que roda
+    dentro de um agente pertence a um balde só), `estouroDe()` e a regressão offline
+    `_teststand/testa_decompoe_latencia.js`, no `npm run gate`. Detalhes em
+    `MEDICOES_professor_v8.md` §0.
+17. **Mudança de produto quebra fixture de teste.** A validação de nome passou a recusar
     `'Teste'`, que o `jornadaPlacement` digitava — B1, B3, B5 e A8 reprovaram de uma vez, por
     causa do fixture. Extraído para `NOME_VALIDO`.
 

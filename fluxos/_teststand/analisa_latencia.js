@@ -27,11 +27,58 @@ const sd = a => a.length < 2 ? 0
   : Math.sqrt(a.map(v => Math.pow(v - mean(a), 2)).reduce((x, y) => x + y, 0) / (a.length - 1));
 const pct = (a, p) => { const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(s.length * p))]; };
 
+// UNIAO DE INTERVALOS, nao soma de duracoes. Nos aninhados existem: o
+// `Modelo Vertex Professor` roda DENTRO da janela do `Agente Professor` (o agente
+// abre, chama o sub-no, fecha). Somar `executionTime` conta o mesmo tempo duas
+// vezes e infla exatamente o balde de LLM — na exec 3538, 4,89 s de trabalho real
+// viraram 9,60 s, numero MAIOR que o relogio de parede da execucao inteira, que e
+// fisicamente impossivel. O viés atinge so quem tem no de modelo: a condicao sem
+// LLM sempre esteve certa, e por isso o erro passou despercebido desde o L1.
+function uniao(intervalos) {
+  if (!intervalos.length) return 0;
+  const s = [...intervalos].sort((a, b) => a[0] - b[0]);
+  let total = 0, ini = s[0][0], fim = s[0][1];
+  for (let k = 1; k < s.length; k++) {
+    if (s[k][0] > fim) { total += fim - ini; ini = s[k][0]; fim = s[k][1]; }
+    else if (s[k][1] > fim) { fim = s[k][1]; }
+  }
+  return total + (fim - ini);
+}
+
+// A CONFERENCIA DE SANIDADE, e ela conferindo o que e PUBLICADO.
+//
+// Recebe os escalares que vao para o relatorio, nao os intervalos: um instrumento que
+// se confere recalculando a si mesmo nunca acusa nada. A soma dos tres baldes tem de
+// caber no relogio de parede da execucao — se passa, alguem contou o mesmo tempo duas
+// vezes. Foi exatamente o que a soma de `executionTime` fazia: na exec 3538 dava
+// 9,60 + 0,14 + 7,84 = 17,58 s numa execucao de 12,95 s.
+// Tolerancia de 50 ms para o arredondamento do proprio n8n.
+function estouroDe(baldes, wall) {
+  if (wall == null) return null;
+  const soma = Number(baldes.llm || 0) + Number(baldes.infra || 0) + Number(baldes.envio || 0);
+  if (soma <= wall + 0.05) return null;
+  return 'os baldes publicados somam ' + soma.toFixed(2) + 's numa execucao de ' + wall.toFixed(2)
+    + 's de relogio de parede (LLM ' + Number(baldes.llm || 0).toFixed(2) + ' + infra '
+    + Number(baldes.infra || 0).toFixed(2) + ' + envio ' + Number(baldes.envio || 0).toFixed(2)
+    + ') — o mesmo tempo esta sendo contado duas vezes';
+}
+
 // Decompoe UMA execucao nos tres baldes, com a mesma regra de classificacao usada
 // aqui. Exportado para que outros medidores (ex.: mede_professor_v8.js) reusem o
 // instrumento em vez de reescrever a separacao LLM/infra/envio — que e justamente
 // onde moram as armadilhas nº 2 (envio em retry) e nº 3 (rotulo pelo Roteador).
 // Devolve null quando a execucao nao tem `Roteador Mestre` (nada a rotular).
+//
+// Os tres baldes sao DISJUNTOS: um trecho de tempo pertence a um balde so. Quando um
+// no de infra roda dentro da janela de um no de LLM (o `Memória Dúvida` dentro do
+// `Agente Dúvida`, exec 3565), aquele tempo ja esta contado em LLM e NAO e contado de
+// novo em infra. Sem isso os baldes se somariam a mais que o relogio de parede — e o
+// alarme abaixo teria de ser silenciado para conviver com o proprio defeito.
+//
+// `wall` e o relogio de parede da execucao. `estouro` compara a SOMA DOS ESCALARES
+// PUBLICADOS (llm+infra+envio) com ele: e a unica forma de o alarme enxergar um erro
+// de somatorio. Conferir recalculando a uniao a partir dos intervalos seria circular —
+// nunca acusaria nada, porque a uniao esta certa por construcao.
 function decompoe(exec) {
   const rd = exec && exec.data && exec.data.resultData && exec.data.resultData.runData;
   if (!rd || !rd['Roteador Mestre']) return null;
@@ -40,54 +87,80 @@ function decompoe(exec) {
     const r = rd['Roteador Mestre'][0].data.main[0][0].json;
     rota = r.route + (r.subroute ? ':' + r.subroute : '');
   } catch (x) { return null; }
-  let llm = 0, infra = 0, envio = 0;
-  const porNo = {};
+  const balde = { llm: [], infra: [], envio: [] };
+  const porNoInt = {};
   for (const nome of Object.keys(rd)) {
+    const qual = ehEnvio(nome) ? 'envio' : (ehLLM(nome) ? 'llm' : 'infra');
     for (const run of rd[nome]) {
+      const ini = Number(run.startTime || 0);
       const ms = Number(run.executionTime || 0);
-      porNo[nome] = (porNo[nome] || 0) + ms / 1000;
-      if (ehEnvio(nome)) envio += ms;
-      else if (ehLLM(nome)) llm += ms;
-      else infra += ms;
+      const iv = [ini, ini + ms];
+      balde[qual].push(iv);
+      (porNoInt[nome] = porNoInt[nome] || []).push(iv);
     }
   }
-  return { id: exec.id, rota, real: (llm + infra) / 1000, llm: llm / 1000, infra: infra / 1000, envio: envio / 1000, porNo };
+  const porNo = {};
+  for (const nome of Object.keys(porNoInt)) porNo[nome] = uniao(porNoInt[nome]) / 1000;
+  // Baldes disjuntos, por precedencia LLM > infra > envio: cada um recebe so o tempo
+  // que ainda nao pertence a um balde anterior. As tres parcelas somam exatamente a
+  // uniao de tudo, o que torna a conferencia abaixo uma identidade — e nao um palpite.
+  const uLLM = uniao(balde.llm);
+  const uLLMInfra = uniao(balde.llm.concat(balde.infra));
+  const uTudo = uniao(balde.llm.concat(balde.infra, balde.envio));
+  const llm = uLLM / 1000;
+  const infra = (uLLMInfra - uLLM) / 1000;
+  const envio = (uTudo - uLLMInfra) / 1000;
+  const real = uLLMInfra / 1000;
+  const wall = (exec.startedAt && exec.stoppedAt)
+    ? (new Date(exec.stoppedAt) - new Date(exec.startedAt)) / 1000 : null;
+  return { id: exec.id, rota, real, llm, infra, envio, wall, estouro: estouroDe({ llm, infra, envio }, wall), porNo };
 }
 
-module.exports = { decompoe, ehEnvio, ehLLM, mean, sd, pct };
+// A API do n8n PAGINA: `/executions?limit=N` devolve no maximo 250 e um `nextCursor`.
+// Pedir 400 e receber 250 em silencio ja fez um recalculo declarar perdidas 449 execucoes
+// que estavam gravadas — o fim da primeira pagina foi tomado pelo fim do historico.
+async function listaExecucoes(limite) {
+  const out = [];
+  let cursor = null;
+  do {
+    const pagina = Math.min(250, limite - out.length);
+    const j = await jget(API + '/executions?limit=' + pagina + (cursor ? '&cursor=' + encodeURIComponent(cursor) : ''));
+    const d = (j && j.data) || [];
+    out.push(...d);
+    cursor = (j && j.nextCursor) || null;
+    if (!d.length) break;
+  } while (cursor && out.length < limite);
+  return out.slice(0, limite);
+}
+
+module.exports = { decompoe, estouroDe, uniao, listaExecucoes, ehEnvio, ehLLM, mean, sd, pct };
 
 if (require.main === module) (async () => {
-  const j = await jget(API + '/executions?limit=' + LIMITE);
+  const lista = await listaExecucoes(LIMITE);
+  if (lista.length < LIMITE) console.log('(so ' + lista.length + ' execucoes gravadas; pedidas ' + LIMITE + ')');
   const porRota = {};
   const porNo = {};
   let total = 0;
 
-  for (const m of (j.data || [])) {
+  let estouros = 0;
+  for (const m of lista) {
     const e = await jget(API + '/executions/' + m.id + '?includeData=true');
-    const rd = e && e.data && e.data.resultData && e.data.resultData.runData;
-    if (!rd || !rd['Roteador Mestre']) continue;
-
-    let rota;
-    try {
-      const r = rd['Roteador Mestre'][0].data.main[0][0].json;
-      rota = r.route + (r.subroute ? ':' + r.subroute : '');
-    } catch (x) { continue; }
+    const dec = decompoe(e);
+    if (!dec) continue;
+    const rd = e.data.resultData.runData;
     // turnos com LLM ficam mais legíveis separados dos puramente determinísticos
     const temLLM = Object.keys(rd).some(ehLLM);
-    const chave = rota + (temLLM ? '' : ' (sem LLM)');
-
-    let llm = 0, infra = 0, envio = 0;
-    for (const nome of Object.keys(rd)) {
-      for (const run of rd[nome]) {
-        const ms = Number(run.executionTime || 0);
-        if (ehEnvio(nome)) envio += ms;
-        else if (ehLLM(nome)) { llm += ms; (porNo[nome] = porNo[nome] || []).push(ms / 1000); }
-        else { infra += ms; if (ms > 300) (porNo[nome] = porNo[nome] || []).push(ms / 1000); }
-      }
+    const chave = dec.rota + (temLLM ? '' : ' (sem LLM)');
+    // conferencia de sanidade: nenhum balde pode passar do relogio de parede
+    if (dec.estouro) { estouros++; console.log('  AVISO exec ' + dec.id + ': ' + dec.estouro); }
+    for (const nome of Object.keys(dec.porNo)) {
+      if (ehEnvio(nome)) continue;
+      if (ehLLM(nome) || dec.porNo[nome] > 0.3) (porNo[nome] = porNo[nome] || []).push(dec.porNo[nome]);
     }
-    (porRota[chave] = porRota[chave] || []).push({ real: (llm + infra) / 1000, llm: llm / 1000, infra: infra / 1000, envio: envio / 1000 });
+    (porRota[chave] = porRota[chave] || []).push({ real: dec.real, llm: dec.llm, infra: dec.infra, envio: dec.envio });
     total++;
   }
+  if (estouros) console.log('\n' + estouros + ' execucao(oes) com balde acima do relogio de parede — instrumento suspeito.\n');
 
   console.log('L1 — latência real por rota (' + total + ' execuções analisadas)\n');
   console.log('rota                          n   media  desvio    p90     max    LLM  infra');

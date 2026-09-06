@@ -15,6 +15,10 @@
 //   nº 2  duracao total nao e latencia — o balde de envio (retry do chat_id sintetico,
 //         7 a 27 s) e separado e DESCARTADO do numero. Quem separa e o `decompoe()` do
 //         `analisa_latencia.js`, reusado aqui em vez de reescrito.
+//   NOVA  no aninhado nao pode ser contado duas vezes: o `Modelo Vertex Professor` roda
+//         DENTRO da janela do `Agente Professor`. O `decompoe()` soma por uniao de
+//         intervalos, e cada turno passa por uma conferencia de sanidade contra o relogio
+//         de parede da execucao (turno que estoura e DESCARTADO, nao publicado).
 //   nº 3  o turno e rotulado pelo que o `Roteador Mestre` REGISTROU (`professor:intro`),
 //         nunca pela ordem de envio. Turno com outra rota e descartado, com aviso.
 //   nº 7  ≥12 s entre turnos sequenciais do mesmo aluno; nº 15: ~35 s quando o turno
@@ -90,6 +94,9 @@ async function turnoExplicacao(uid, nivel, condicao) {
   const d = digest(exec);
   const dec = decompoe(exec);
   if (!dec) { avisos.push(condicao + '/' + nivel + ': execucao sem `Roteador Mestre`'); return null; }
+  // Conferencia de sanidade: nenhum balde pode somar mais que o relogio de parede da
+  // execucao. Foi a falta deste assert que deixou passar a soma de nos aninhados.
+  if (dec.estouro) { avisos.push('DESCARTADO ' + condicao + '/' + nivel + ' exec ' + d.id + ': ' + dec.estouro); return null; }
   if (dec.rota !== 'professor:intro') {
     avisos.push('DESCARTADO ' + condicao + '/' + nivel + ' exec ' + d.id + ': o Roteador registrou `'
       + dec.rota + '`, nao `professor:intro` (armadilha nº 3)');
@@ -102,7 +109,7 @@ async function turnoExplicacao(uid, nivel, condicao) {
   }
   const t = {
     fase: 'explicacao', condicao, nivel, rota: dec.rota, exec: d.id,
-    real: dec.real, llm: dec.llm, infra: dec.infra, envio: dec.envio,
+    real: dec.real, llm: dec.llm, infra: dec.infra, envio: dec.envio, wall: dec.wall,
     busca: dec.porNo['Buscar Explicação'] || 0,
     chars: ((nodeOut(exec.data.resultData.runData, 'Explicação do Banco') || nodeOut(exec.data.resultData.runData, 'Parse Professor') || {}).finalText || '').length,
   };
@@ -119,6 +126,7 @@ async function turnoExtra(fase, exec, esperada) {
   const d = digest(exec);
   const dec = decompoe(exec);
   if (!dec) { avisos.push(fase + ': execucao sem Roteador'); return; }
+  if (dec.estouro) { avisos.push('DESCARTADO ' + fase + ' exec ' + d.id + ': ' + dec.estouro); return; }
   if (esperada && dec.rota !== esperada) {
     avisos.push('DESCARTADO ' + fase + ' exec ' + d.id + ': rota `' + dec.rota + '`, esperada `' + esperada + '`');
     return;
@@ -181,8 +189,12 @@ function resumo(rotulo, arr, campo) {
       const nivel = NIVEIS[i % NIVEIS.length];
       const uid = UID_BASE + 500 + i * 10;
       await semear(uid, nivel);
-      const intro = await msg(uid, 'oi');                 // explicacao (ja medida acima; aqui so posiciona o aluno)
+      // Este turno TAMBEM e uma explicacao servida do banco. Ele nao entra na comparacao
+      // principal (a linha nunca e removida aqui), mas e registrado como `posicionamento`
+      // para que a contabilidade feche: nenhum turno rodado fica fora do relatorio.
+      const intro = await msg(uid, 'oi');
       if (!intro) { avisos.push('sobrecarga: intro sem execucao para ' + uid); continue; }
+      await turnoExtra('posicionamento', intro, 'professor:intro');
       await sleep(13000);                                  // armadilha nº 7
       await turnoExtra('questao', await cb(uid, 't_start'), 'professor:start_quiz');
       await sleep(13000);
@@ -217,7 +229,7 @@ function resumo(rotulo, arr, campo) {
   resumo('banco  (busca PG)', banco, 'busca');
 
   console.log('\n== sobrecarga da consulta descartada ==');
-  for (const fase of ['questao', 'correcao', 'pede_duvida', 'duvida']) {
+  for (const fase of ['posicionamento', 'questao', 'correcao', 'pede_duvida', 'duvida']) {
     const a = turnos.filter((t) => t.fase === fase);
     if (!a.length) { console.log('  ' + fase.padEnd(12) + ' (sem turno valido)'); continue; }
     const rodaram = a.filter((t) => t.buscaRodou);
