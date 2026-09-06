@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T012 (ultima do plano)
-- **Última concluída:** T011 — baseline do A1 no v8 confirmado (0/9, 0/9)
+- **Tarefa atual:** T013 (abre o Bloco 2 — bateria diagnostica no v8)
+- **Última concluída:** T012 — hipotese do exemplo de formato CONFIRMADA (correcao 0/9 -> 9/9)
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** T010 aguarda decisao do Breno (credencial da camada 2). Nao bloqueia T011/T012. Ambiente: n8n e Postgres no ar, os dois workflows ativos, webhook do v8 conferido em 06/09.
 
@@ -105,3 +105,10 @@
 - 2026-09-06 T011 DONE (verificada: 27/27 execucoes confirmadas no workflow do v8, transcricao a transcricao). O v8 reproduz o baseline do A1: correcao 0/9, interesses 0/9, 0 turnos vazios em 27. O bloco do Professor nao mexeu no A1 — o T012 pode usar este agregado como baseline do v8.
 - 2026-09-06 ACHADO QUE MUDA O T012: o detector do CONTROLE do experimento_a1 e `/games are|are fun|.../i` e conta como acerto o bot que so USA a forma certa ("Oh, I agree! Video games are fun.") sem corrigir o aluno. Saturou em 9/9; com a regua estrita (reparo explicito) da 2/9. E o MESMO falso positivo ja consertado no detector do C1, sobrevivendo no do controle. O ~2/3 de 04/09 registrado no handoff §4 provavelmente contava concordancias: "o A1 corrige mal, ponto" fica MAIS forte, nao menos. QUEM USAR CONTROLE NO T012 TEM DE USAR A REGUA ESTRITA.
 - 2026-09-06 DIVIDA DE INSTRUMENTO (herdada, nao introduzida): sobrou `|| /\bplaying\b/i` no `formaCerta` do detector do C1, contradizendo o comentario acima dele. Esta em AND com `reparo`, entao so afrouxa — 0/9 com detector frouxo e evidencia mais forte, nao mais fraca. Limpar quando alguem passar por ali.
+- 2026-09-06 T012 DONE (verificada). HIPOTESE DO EXEMPLO DE FORMATO CONFIRMADA — a ultima aberta do handoff §4. Trocar UMA linha (o exemplo dentro de `IDIOMA (A1, formato OBRIGATORIO)` do `Prompt Conversa A1`) levou a correcao de 0/9 a 9/9 e o controle estrito de 2/9 a 8/9. Few-shot vencia instrucao: o exemplo antigo era uma resposta que nao corrigia nada, e o modelo imitava a forma. SUSPEITAR DO MESMO MECANISMO em qualquer prompt com "Formato EXATO".
+- 2026-09-06 O 9/9 NAO e artefato, e o teste que provou isso vale reusar: o probe do C15 nao tem erro, e nenhuma das 9 saidas dali contem `We say`. Se fosse imitacao cega, a moldura apareceria onde nao ha o que corrigir. O modelo copiou a MOLDURA (`We say 'X'`) e preencheu X com o erro real do aluno.
+- 2026-09-06 C15 CONTINUA MORTO: 0/9 mesmo com o exemplo novo citando um interesse. Detector conferido vivo (devolve true nas saidas do controle). Interesses no A1 sao problema separado e SEM HIPOTESE CANDIDATA — e a lacuna aberta que sobra do §4.
+- 2026-09-06 RESSALVA A CARREGAR: o texto da variante ficou estereotipado — 7 das 9 correcoes sao a mesma frase palavra por palavra. Corrigiu, mas a variedade caiu. MEDIR ISSO no bloco da bateria antes de declarar ganho liquido.
+- 2026-09-06 RESSALVA 2: o detector do C1 continua frouxo em principio (`\bsay\b` sozinho casa) e agora mede um comportamento que o proprio prompt ensina a formular. De hoje em diante ele e MENOS informativo — o conserto da regua no T013 fica mais urgente, nao menos.
+- 2026-09-06 O `\n` do exemplo e literal: o jsCode guarda `\n`, entao o prompt manda o texto `\n` ao modelo, nao uma quebra de linha. Funciona, mas e acidente. Nao mexido (seria uma segunda variavel).
+- 2026-09-06 Bloco 2 planejado (T013-T018): repetir a bateria diagnostica no v8 e comparar com o v7.4 de 04/09. Decisoes do Breno: Fase B com N=3 nos qualitativos, escopo = 2 fases + jornada continua, e nos REVISAR o agente propoe veredito pela rubrica §8 para o Breno confirmar.

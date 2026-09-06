@@ -186,4 +186,92 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
 - **Gate:** relatório comparando baseline e variante com N≥6, e o `git diff` do v8 mostrando a
   mudança adotada ou a reversão limpa
 - **Depende de:** T011
+- **Status:** DONE — HIPOTESE CONFIRMADA. Exemplo de formato trocado no `Prompt Conversa A1`: correcao 0/9 -> 9/9, controle estrito 2/9 -> 8/9. C15 continua 0/9. Mantida e publicada no v8
+
+---
+
+## Bloco 2 — Bateria diagnóstica no v8 (pedido do Breno em 06/09)
+
+**Objetivo:** repetir a bateria diagnóstica no v8, do mesmo jeito que foi conduzida em 04/09
+sobre o v7.4, e produzir um comparativo que mostre o que as atualizações melhoraram — em `.md`
+para agentes e em PDF para o Breno. Meta declarada: chegar a **todos os diagnósticos positivos**
+antes de abrir para usuários reais.
+
+**Decisões do Breno (06/09):** Fase B com **N=3** nos qualitativos · escopo = as duas fases
+**mais** a jornada contínua · nos `REVISAR`, o agente **propõe** veredito pela rubrica §8 e o
+Breno confirma.
+
+**Padrão a seguir** (de `fluxos/TESTES_DIAGNOSTICOS.md` e dos `tr_bateria_*.md` de 04/09):
+uma linha por teste (`PASSOU`/`FALHOU`/`REVISAR`) com evidência curta; transcrição crua sob
+cada teste de LLM; rubrica 0–2 da §8 nos qualitativos; e **todo veredito carrega a versão em
+que foi medido** — comparar status entre versões sem dizer qual engana (§9).
+
+### T013 — consertar os instrumentos antes de medir
+- **Escopo:** três defeitos conhecidos que invalidariam a rodada:
+  1. `bateria_completa_b.js` **T3** (linha ~403) assere "nível B2: português na explicação == false".
+     Desde o T005b isso **contradiz o produto** e daria falso vermelho. Reescrever para
+     "explicação PT / pergunta EN". Conferir junto a **linha 257** e o cabeçalho do
+     `revalida_niveis.js`, que carregam a mesma premissa velha.
+  2. `bateria_completa_a.js` **sai 0 mesmo reprovando** — só sai ≠0 em erro fatal. Enquanto isso
+     não mudar, ela não serve como gate e "verde" não quer dizer nada.
+  3. O detector do **controle** do `experimento_a1.js` saturou (achado do T011): conta como acerto
+     o bot que só USA a forma certa sem corrigir. Aplicar a régua estrita, a mesma do C1.
+     **Não** mexer nos detectores do C1 e do C15 — estão certos, e mudá-los quebraria a
+     comparação com o baseline.
+- **Gate:** para cada um dos três, um teste que **reprova a versão anterior**: (1) o T3 aprova
+  explicação PT + pergunta EN e reprova o inverso; (2) a Fase A sai **≠0** com uma reprovação
+  forçada e 0 sem ela; (3) o controle estrito rejeita `"Oh, I agree! Video games are fun."` e
+  aceita `"We say 'video games ARE'"`. Mais `npm run gate` verde.
+- **Depende de:** T012
+- **Status:** TODO
+
+### T014 — Fase A no v8 (17 determinísticos)
+- **Escopo:** rodar `bateria_completa_a.js` contra o ingress do v8 e gravar `tr_bateria_a_v8.md`
+  no formato de 04/09 (uma linha por teste, evidência curta, resumo no fim). Sem semear o que o
+  teste deveria percorrer.
+- **Gate:** relatório com os 17 vereditos e o **exit code real** registrado (já confiável depois
+  do T013); toda execução comprovadamente no workflow do v8, não no v7.4.
+- **Depende de:** T013
+- **Status:** TODO
+
+### T015 — Fase B no v8, com N=3
+- **Escopo:** rodar `bateria_completa_b.js` contra o v8 com **N=3** nos testes qualitativos,
+  gravando `tr_bateria_b_v8.md`: veredito por teste, **média e desvio** onde a rubrica se aplica,
+  e a transcrição crua de cada rodada. Onde o teste for determinístico, N=1 basta — diga qual é
+  qual. Vereditos seguem rotulados quanto ao N usado.
+- **Gate:** os 29 testes com veredito, N declarado por teste, e as três rodadas presentes na
+  evidência dos qualitativos. Nenhum turno vazio contado como aprovação (armadilha nº 1).
+- **Depende de:** T013
+- **Status:** TODO
+
+### T016 — jornada contínua no v8
+- **Escopo:** `jornada_usuario.js` contra o v8, **sem semear estado**, gravando `tr_jornada_v8.md`.
+  É a rota que percorre as transições do fluxo — foi ela que achou os dois P0 que 45 testes
+  verdes não viram. Se achar defeito novo, **registrar, não consertar**: vira tarefa própria.
+- **Gate:** transcrição completa gravada, com a jornada chegando ao fim ou o ponto exato de parada
+  identificado.
+- **Depende de:** T013
+- **Status:** TODO
+
+### T017 — vereditos propostos para os REVISAR
+- **Escopo:** aplicar a **rubrica 0–2 da §8** a cada teste que saiu `REVISAR` no T015, propondo
+  veredito com a nota por critério e a justificativa em uma linha. **Marcar como proposta**, não
+  como veredito fechado: a confirmação é do Breno. Em 04/09 foram 11 casos.
+- **Gate:** todo `REVISAR` do T015 tem nota por critério, veredito proposto e justificativa; nenhum
+  fica sem proposta.
+- **Depende de:** T015
+- **Status:** TODO
+
+### T018 — o comparativo: `.md` para agentes e PDF para o Breno
+- **Escopo:** `RELATORIO_DIAGNOSTICO_v8.md` no padrão do `TESTES_DIAGNOSTICOS.md`, contendo:
+  (a) tabela **v7.4 (04/09) × v8 (hoje)** teste a teste, com a coluna "medido em" que a §9 exige;
+  (b) o que melhorou, o que regrediu e o que continua aberto, cada um com o número que sustenta;
+  (c) distância até a meta "todos positivos", isto é, a lista do que falta para abrir a usuários
+  reais; (d) as ameaças à validade — N, não-determinismo do LLM, e o que mudou entre as versões
+  além do fluxo. Atualizar a **§9** do `TESTES_DIAGNOSTICOS.md` com a coluna do v8.
+  Gerar o **PDF** a partir do `.md` (Chrome headless `--print-to-pdf`; não há pandoc nem
+  puppeteer na máquina, e nada deve ser instalado para isso).
+- **Gate:** o `.md` existe com a tabela comparativa completa (nenhum teste sem as duas colunas),
+  o PDF existe e abre, e todo número citado no texto tem origem rastreável nos `tr_*_v8.md`.
+- **Depende de:** T014, T015, T016, T017
 - **Status:** TODO

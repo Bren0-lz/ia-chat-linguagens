@@ -813,3 +813,207 @@ O comparável é o frouxo: v8 9/9 contra v7.4 ~2/3.
 interesses 0/9. O T012 pode usar este agregado como baseline. O que mudou de figura é o controle:
 no v8 ele não é mais um discriminante útil pelo detector atual, porque satura em 9/9 por
 concordância; se o T012 for usar controle, tem de usar a régua estrita.
+
+## variante-exemplo-com-correcao-e-interesse — 2026-09-06T22:17:05.789Z (N=9)
+
+- **correcao** (C1: "i like play games" -> corrige?): **9/9** | palavras em ingles (media): 15.1 | respostas vazias: 0
+- **interesses** (C15: cita games/basketball?): **0/9** | palavras em ingles (media): 9.9 | respostas vazias: 0
+- **controle: erro DA lista** ("video games is fun" -> corrige?): **8/9** | palavras em ingles (media): 15.2 | respostas vazias: 0
+
+<details><summary>saidas cruas</summary>
+
+
+correcao 1 (ok=true, 14 palavras):
+```
+Cool! We say 'I like to play games'. What games do you like? 😊
+🇧🇷 Que legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+correcao 2 (ok=true, 15 palavras):
+```
+Oh, nice! We say 'I like to play games'. What games do you like? 😊
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+correcao 3 (ok=true, 17 palavras):
+```
+Oh, nice! We say 'I like to play games'. What kind of games do you like? 😊
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Que tipo de jogos você gosta?
+```
+
+correcao 4 (ok=true, 15 palavras):
+```
+Oh, nice! We say 'I like to play games'. What games do you like? 😊
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+correcao 5 (ok=true, 15 palavras):
+```
+Oh, nice! We say 'I like to play games'. What games do you like? 😊
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+correcao 6 (ok=true, 15 palavras):
+```
+Oh, nice! We say 'I like to play games'. What games do you like? 😊
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+correcao 7 (ok=true, 15 palavras):
+```
+Oh, nice! We say 'I like to play games'. What games do you like? 😊
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+correcao 8 (ok=true, 15 palavras):
+```
+Oh, nice! We say 'I like to play games'. What games do you like? 😊
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+correcao 9 (ok=true, 15 palavras):
+```
+Oh, cool! We say 'I like to play games'. What games do you like? 😊
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+controle-lista 1 (ok=true, 15 palavras):
+```
+Oh, nice! We say 'video games are fun'. What is your favorite video game? 😊
+🇧🇷 Ah, legal! A gente diz 'video games are fun'. Qual é o seu videogame favorito?
+```
+
+controle-lista 2 (ok=true, 14 palavras):
+```
+Oh, cool! We say 'video games are fun'. What games do you like? 😊
+🇧🇷 Ah, legal! A gente diz 'video games are fun'. Quais jogos você gosta?
+```
+
+controle-lista 3 (ok=true, 24 palavras):
+```
+Oh, I agree! Video games are fun. We say 'video games are fun', not 'video games is fun'. What games do you like? 😊
+🇧🇷 Ah, eu concordo! Jogos de vídeo são divertidos. A gente diz 'video games are fun', não 'video games is fun'. Que jogos você gosta?
+```
+
+controle-lista 4 (ok=true, 14 palavras):
+```
+Oh, really? We say 'video games are fun'. What games do you like? 😊
+🇧🇷 Ah, é mesmo? A gente diz 'video games are fun'. Que jogos você gosta?
+```
+
+controle-lista 5 (ok=true, 14 palavras):
+```
+Oh, nice! We say 'video games ARE fun'. What game do you play? 🙂
+🇧🇷 Ah, que legal! A gente diz 'video games ARE fun'. Que jogo você joga?
+```
+
+controle-lista 6 (ok=true, 16 palavras):
+```
+Oh, I like that! We say 'video games are fun'. What games do you play? 😊
+🇧🇷 Ah, eu gostei disso! A gente diz 'video games are fun'. Que jogos você joga?
+```
+
+controle-lista 7 (ok=true, 14 palavras):
+```
+Oh, cool! We say 'video games are fun'. What games do you play? 😊
+🇧🇷 Ah, que legal! A gente diz 'video games are fun'. Quais jogos você joga?
+```
+
+controle-lista 8 (ok=false, 12 palavras):
+```
+Oh, I agree! Video games 'are' fun. What game do you play?
+🇧🇷 Ah, eu concordo! Videogames 'são' divertidos. Que jogo você joga?
+```
+
+controle-lista 9 (ok=true, 14 palavras):
+```
+Oh, nice! We say 'video games are fun'. What games do you like? 😊
+🇧🇷 Ah, que legal! A gente diz 'video games are fun'. Quais jogos você gosta?
+```
+
+interesses 1 (ok=false, 10 palavras):
+```
+Hey! I am good, thanks! How are you today? 😊
+🇧🇷 Ei! Eu estou bem, obrigado! Como você está hoje?
+```
+
+interesses 2 (ok=false, 10 palavras):
+```
+Hey! I am good, thanks! How are you today? 🙂
+🇧🇷 Oi! Eu estou bem, obrigada! Como você está hoje?
+```
+
+interesses 3 (ok=false, 10 palavras):
+```
+Hey! I am good, thanks! How are you today? 😊
+🇧🇷 Ei! Eu estou bem, obrigado! Como você está hoje?
+```
+
+interesses 4 (ok=false, 10 palavras):
+```
+Hey! I am good, thank you! How are you? 😊
+🇧🇷 Ei! Eu estou bem, obrigada! Como você está?
+```
+
+interesses 5 (ok=false, 10 palavras):
+```
+Hey Lucas! I am great, thanks! 😊 What about you?
+🇧🇷 Oi Lucas! Eu estou ótima, obrigada! E você?
+```
+
+interesses 6 (ok=false, 10 palavras):
+```
+Hey! I am good, thanks! How are you today? 😊
+🇧🇷 Ei! Eu estou bem, obrigado! Como você está hoje?
+```
+
+interesses 7 (ok=false, 10 palavras):
+```
+Hey! I am good, thanks. How are you today? 😊
+🇧🇷 Ei! Eu estou bem, obrigada. Como você está hoje?
+```
+
+interesses 8 (ok=false, 9 palavras):
+```
+Hey! I am good, thanks! How are you? 😊
+🇧🇷 Ei! Estou bem, obrigada! Como você está?
+```
+
+interesses 9 (ok=false, 10 palavras):
+```
+Hey! I am good, thanks! How are you today? 😊
+🇧🇷 Ei! Estou bem, obrigado! Como você está hoje?
+```
+
+</details>
+
+
+## T012 — decisão: a hipótese do exemplo de formato SE CONFIRMA — 2026-09-06
+
+Uma variável só: o exemplo dentro de `IDIOMA (A1, formato OBRIGATÓRIO)` do nó `Prompt Conversa A1`
+(v8). Antes: `Nice! Do you play on your phone?` — sem correção e sem interesse. Depois: um exemplo
+que faz o reparo no formato do contrato (`We say 'I like music', not 'I likes music'`) e puxa um
+interesse. Nada mais foi tocado: `correctionLine`, `interestsLine`, ERROS QUE CONTAM e os demais
+níveis ficaram idênticos.
+
+| probe | régua | baseline v8 (T011, N=9) | variante (N=9) |
+|---|---|---|---|
+| correção (C1, `i like play games`) | detector do C1 (reparo explícito) | **0/9** | **9/9** |
+| interesses (C15) | detector do C15 | **0/9** | **0/9** |
+| controle (erro DA lista) | **estrita** (reparo explícito) | 2/9 | **8/9** |
+| controle (erro DA lista) | frouxa (a que saturou no T011) | 9/9 | 8/9 |
+
+> Correcao do verificador: a coluna da variante nesta linha saiu 9/9 na primeira redacao e o
+> numero certo e **8/9** — a saida que reprova (`Video games 'are' fun`, sem reparo) falha nas
+> DUAS reguas. Nao e a linha que sustenta a conclusao, mas evidencia com numero errado envenena
+> quem ler depois.
+
+Turnos vazios: **0 em 27** (mesmo do baseline). A régua estrita foi recomputada sobre as saídas
+cruas do baseline com o mesmo código, e reproduz os 2/9 publicados no T011 — os números comparam.
+
+**Decisão: MANTIDA.** O few-shot estava vencendo a instrução: o modelo imitava a forma do exemplo
+(simpático, curto, sem reparo) em vez de seguir o contrato de correção. Trocado o exemplo, o A1
+passa a corrigir.
+
+**C15 continua morto** (0/9, sem qualquer movimento). Interesses no A1 são um problema separado do
+exemplo de formato — o exemplo novo cita um interesse e ainda assim não induz uso. Fica aberto.
