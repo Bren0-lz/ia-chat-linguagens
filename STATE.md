@@ -3,14 +3,14 @@
 - **Tarefa atual:** T009
 - **Última concluída:** T008
 - **Tentativas na atual:** 0/3
-- **Bloqueios:** nenhum — T006 destravado em 05/09
+- **Bloqueios:** T009 aguarda verificacao — **n8n FORA** (porta 5678 fechada), e com ele o bot do v7.4. Postgres e ngrok de pe.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
 
 | | Estado em 05/09/2026 |
 |---|---|
 | Postgres `127.0.0.1:5433` | **NO AR** — container `iachat-pg`, porta aberta |
-| n8n `localhost:5678` | **NO AR** (ngrok na 4040 também) |
+| n8n `localhost:5678` | **FORA em 06/09** — caiu durante a corrida do T009. Subir com o bloco WEBHOOK_URL do handoff §7 |
 | Fluxo ao vivo | `IAChat_Telegram_v7.4` ativo, id `9MA0o1XJjD33BnKc`, 101 nós — **não mexer** |
 | Fluxo v8 no n8n | `PbwEf7L9xEXhJaCg`, **ativo** em paralelo ao v7.4; ingress `iachat-test-v8`, Gatilho Telegram desabilitado |
 
@@ -85,3 +85,6 @@
 - 2026-09-05 O item carrega `explicacao_origem: 'banco'|'modelo'` — e por ele que o T009 separa as duas condicoes na medicao.
 - 2026-09-05 O banco so serve em default/intro e em check->advance. Duvida, questao, correcao e resume_q continuam indo ao modelo (a consulta roda e e descartada — leitura indexada local).
 - 2026-09-05 O `body` do banco NAO e escapado (o `Parse Professor` escapa a saida crua do modelo). Varredura dos 60: nenhuma tag invalida, nenhum & solto, maior body 3420 chars contra o teto de 4096 do Telegram. Se a fonte do corpo mudar, isso vira vetor de HTML invalido.
+- 2026-09-06 T009 medido, verificacao PENDENTE: o n8n caiu durante a corrida (depois dos 24 turnos de explicacao). Os numeros estao coletados; falta o verifier, que precisa da API do n8n.
+- 2026-09-06 `postUpdate` do harness NAO tem timeout global: com o n8n fora, cada turno leva ~100 min (5 tentativas x 5 retries dentro de 120 iteracoes de polling). Qualquer bateria longa trava em silencio. Vale um teto.
+- 2026-09-06 O caminho de geracao ao vivo nao carimba `explicacao_origem` — so o do banco carimba. A medicao rotulou pelo runData. Carimbar 'modelo' no `Parse Professor` fecharia isso.

@@ -27,7 +27,36 @@ const sd = a => a.length < 2 ? 0
   : Math.sqrt(a.map(v => Math.pow(v - mean(a), 2)).reduce((x, y) => x + y, 0) / (a.length - 1));
 const pct = (a, p) => { const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(s.length * p))]; };
 
-(async () => {
+// Decompoe UMA execucao nos tres baldes, com a mesma regra de classificacao usada
+// aqui. Exportado para que outros medidores (ex.: mede_professor_v8.js) reusem o
+// instrumento em vez de reescrever a separacao LLM/infra/envio — que e justamente
+// onde moram as armadilhas nº 2 (envio em retry) e nº 3 (rotulo pelo Roteador).
+// Devolve null quando a execucao nao tem `Roteador Mestre` (nada a rotular).
+function decompoe(exec) {
+  const rd = exec && exec.data && exec.data.resultData && exec.data.resultData.runData;
+  if (!rd || !rd['Roteador Mestre']) return null;
+  let rota = '';
+  try {
+    const r = rd['Roteador Mestre'][0].data.main[0][0].json;
+    rota = r.route + (r.subroute ? ':' + r.subroute : '');
+  } catch (x) { return null; }
+  let llm = 0, infra = 0, envio = 0;
+  const porNo = {};
+  for (const nome of Object.keys(rd)) {
+    for (const run of rd[nome]) {
+      const ms = Number(run.executionTime || 0);
+      porNo[nome] = (porNo[nome] || 0) + ms / 1000;
+      if (ehEnvio(nome)) envio += ms;
+      else if (ehLLM(nome)) llm += ms;
+      else infra += ms;
+    }
+  }
+  return { id: exec.id, rota, real: (llm + infra) / 1000, llm: llm / 1000, infra: infra / 1000, envio: envio / 1000, porNo };
+}
+
+module.exports = { decompoe, ehEnvio, ehLLM, mean, sd, pct };
+
+if (require.main === module) (async () => {
   const j = await jget(API + '/executions?limit=' + LIMITE);
   const porRota = {};
   const porNo = {};
