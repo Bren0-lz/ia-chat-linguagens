@@ -169,7 +169,7 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
   autenticar nesse caminho, o relatório **diz isso**, em vez de deixar o fail-open mascarar.
 - **Gate:** o script sai 0 com os dois casos corretos
 - **Depende de:** T001
-- **Status:** TODO
+- **Status:** BLOCKED — instrumento pronto e confirmado ao vivo (execs 3586/3588/3590/3592); a camada 2 NAO autentica: `Validar Nome (IA)` recebe "Authorization failed / missing required authentication credential" da Vertex, o `Veredito IA` cai no fail-open e `asdfgh` vira nome de aluno. Decisao do Breno: corrigir `scopes` da credencial `mKfC2ANkOKHfbKal` ou criar `googlePalmApi` com API key do AI Studio
 
 ### T011 — baseline do A1 no v8
 - **Escopo:** `experimento_a1.js` contra o v8, N=3, sem mexer em nada. Confirma que o v8 reproduz

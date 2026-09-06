@@ -1,9 +1,9 @@
 # Estado do loop
 
-- **Tarefa atual:** T010
+- **Tarefa atual:** T011 (T010 BLOCKED, aguarda decisao do Breno sobre a credencial)
 - **Última concluída:** T009 — FECHA O BLOCO DO PROFESSOR (itens 2a e 2b do plano v8)
 - **Tentativas na atual:** 0/3
-- **Bloqueios:** nenhum — n8n resubido em 06/09, os dois workflows ativos e o webhook do v8 respondendo.
+- **Bloqueios:** T010 aguarda decisao do Breno (credencial da camada 2). Nao bloqueia T011/T012. Ambiente: n8n e Postgres no ar, os dois workflows ativos, webhook do v8 conferido em 06/09.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
 
@@ -98,3 +98,7 @@
 - 2026-09-06 L1 RECUPERADO e recalculado: media 4,83 -> 2,55 s, p90 11,59 -> 6,16 s; `professor:intro` p90 17,81 -> 9,01 s. Os 80 turnos foram isolados na janela 3099-3178, a menos de 8 turnos de borda (9 janelas batem as 5 estatisticas, mas diferem so em turnos triviais sem LLM e todas dao os mesmos numeros).
 - 2026-09-06 Os baldes do `decompoe()` viraram DISJUNTOS (precedencia LLM > infra > envio). `infra` encolheu ate 0,275 s e 19 dos 80 turnos do L1 mudaram >10 ms. A regua mudou de definicao — handoff §2 ja atualizado de "infra <=0,48 s" para "<=0,40 s".
 - 2026-09-06 O alarme `estouroDe()` recebe os ESCALARES PUBLICADOS, nao recalcula pelo mesmo caminho que produziu o numero. Com o defeito reintroduzido acusa 29/59 — e as 30 silenciosas nao tem no de LLM, ou seja, 29 de 29 das afetadas.
+- 2026-09-06 T010 BLOCKED. `testa_nome_camada2_vivo.js` criado e confirmado em 4 execucoes (3586/3588/3590/3592): `Validar Nome (IA)` devolve "Authorization failed - missing required authentication credential", `Veredito IA` cai em `reason=ia_indisponivel` (fail-open) e `asdfgh` E GRAVADO como nome do aluno. O `httpRequest` com `nodeCredentialType: googleApi` nao anexa token; hipotese: credencial `mKfC2ANkOKHfbKal` sem `scopes` preenchido (os nos LangChain Vertex montam `cloud-platform` sozinhos, o HTTP generico usa o campo da credencial). Decisao do Breno: corrigir os scopes ou criar `googlePalmApi` com API key do AI Studio.
+- 2026-09-06 ARMADILHA NOVA: com `onError: continueRegularOutput`, o erro do no NAO fica em `runData[no][0].error` — viaja no `json.error` do ITEM DE SAIDA. Instrumento que so olha `.error` fica cego a esses nos, inclusive o `errs` do `digest()` do harness.
+- 2026-09-06 FIXTURES da camada 2: `asdfgh` e `Kaique` caem em `ask_ai` na camada 1, entao exercitam mesmo a camada 2. `Rafael` NAO serve — esta na lista branca.
+- 2026-09-06 Quando a credencial for corrigida, `testa_nome_camada2_vivo.js` vira a verificacao ao vivo da rota sem precisar de mudanca nenhuma.
