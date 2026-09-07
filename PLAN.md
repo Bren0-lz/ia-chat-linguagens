@@ -255,7 +255,7 @@ que foi medido** — comparar status entre versões sem dizer qual engana (§9).
 - **Gate:** transcrição completa gravada, com a jornada chegando ao fim ou o ponto exato de parada
   identificado.
 - **Depende de:** T013
-- **Status:** TODO
+- **Status:** DONE — jornada completa no v8 (C1, Coach). Vazios 4 -> 2; anti-spoiler ok; SINAL: nao corrigiu erro fora da lista em C1, onde o v7.4 corrigiu (N=1, provavel variancia)
 
 ### T017 — vereditos propostos para os REVISAR
 - **Escopo:** aplicar a **rubrica 0–2 da §8** a cada teste que saiu `REVISAR` no T015, propondo
@@ -264,7 +264,7 @@ que foi medido** — comparar status entre versões sem dizer qual engana (§9).
 - **Gate:** todo `REVISAR` do T015 tem nota por critério, veredito proposto e justificativa; nenhum
   fica sem proposta.
 - **Depende de:** T015
-- **Status:** TODO
+- **Status:** DONE — 13 REVISAR com rubrica 0-2 em `tr_revisar_v8.md`. Propostas: 6 PASSOU, 4 ressalva, 3 FALHOU (C10, R4, T17). Confirmacao do Breno pendente
 
 ### T018 — o comparativo: `.md` para agentes e PDF para o Breno
 - **Escopo:** `RELATORIO_DIAGNOSTICO_v8.md` no padrão do `TESTES_DIAGNOSTICOS.md`, contendo:
@@ -278,4 +278,4 @@ que foi medido** — comparar status entre versões sem dizer qual engana (§9).
 - **Gate:** o `.md` existe com a tabela comparativa completa (nenhum teste sem as duas colunas),
   o PDF existe e abre, e todo número citado no texto tem origem rastreável nos `tr_*_v8.md`.
 - **Depende de:** T014, T015, T016, T017
-- **Status:** TODO
+- **Status:** DONE — `RELATORIO_DIAGNOSTICO_v8.md` + PDF (556 KB) via `conteudo/md_para_pdf.js` (Chrome headless, sem dependencia nova)

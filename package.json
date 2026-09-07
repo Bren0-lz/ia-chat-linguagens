@@ -5,7 +5,7 @@
   "scripts": {
     "db:push": "dotenv -e .env -- node db/migrate.js",
     "db:new": "node db/new.js",
-    "gate": "node fluxos/_teststand/regressao_v7.4.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_cadastro_nome.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_nome_camada1.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_abre_alas_professor.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_explicacao_do_banco.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_decompoe_latencia.js && node fluxos/_teststand/testa_alvo_bateria_a.js && node conteudo/valida_track.js fluxos/IAChat_Telegram_v8.json && node conteudo/valida_explicacoes.js && node conteudo/testa_valida_explicacoes.js && node conteudo/simula_vazamento.js --resumo && node fluxos/_teststand/testa_idioma_professor.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_saida_fase_a.js && node fluxos/_teststand/testa_detector_controle.js && git diff --quiet v7.4-congelado -- fluxos/IAChat_Telegram_v7.4.json",
+    "gate": "node fluxos/_teststand/regressao_v7.4.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_cadastro_nome.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_nome_camada1.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_abre_alas_professor.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_explicacao_do_banco.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_decompoe_latencia.js && node fluxos/_teststand/testa_alvo_bateria_a.js && node fluxos/_teststand/testa_alvo_jornada.js && node conteudo/valida_track.js fluxos/IAChat_Telegram_v8.json && node conteudo/valida_explicacoes.js && node conteudo/testa_valida_explicacoes.js && node conteudo/simula_vazamento.js --resumo && node fluxos/_teststand/testa_idioma_professor.js fluxos/IAChat_Telegram_v8.json && node fluxos/_teststand/testa_saida_fase_a.js && node fluxos/_teststand/testa_detector_controle.js && git diff --quiet v7.4-congelado -- fluxos/IAChat_Telegram_v7.4.json",
     "gate:regressao": "node fluxos/_teststand/regressao_v7.4.js fluxos/IAChat_Telegram_v8.json",
     "gate:cadastro": "node fluxos/_teststand/testa_cadastro_nome.js fluxos/IAChat_Telegram_v8.json",
     "gate:nome": "node fluxos/_teststand/testa_nome_camada1.js fluxos/IAChat_Telegram_v8.json",
@@ -19,7 +19,7 @@
     "gate:idioma": "node fluxos/_teststand/testa_idioma_professor.js fluxos/IAChat_Telegram_v8.json",
     "gate:saidafasea": "node fluxos/_teststand/testa_saida_fase_a.js",
     "gate:controle": "node fluxos/_teststand/testa_detector_controle.js",
-    "gate:alvo": "node fluxos/_teststand/testa_alvo_bateria_a.js"
+    "gate:alvo": "node fluxos/_teststand/testa_alvo_bateria_a.js && node fluxos/_teststand/testa_alvo_jornada.js"
   },
   "devDependencies": {
     "dotenv-cli": "^7.4.4"

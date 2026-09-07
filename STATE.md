@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T015 medido (falta verificar) · T016-T018 pendentes por limite de gasto
-- **Última concluída:** T013 — instrumentos consertados antes de medir
+- **Tarefa atual:** nenhuma — Bloco 2 concluido. Aguarda decisoes do Breno (ver diario 07/09)
+- **Última concluída:** T018 — relatorio diagnostico comparativo v7.4 x v8, em .md e PDF
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** T010 aguarda decisao do Breno (credencial da camada 2). Nao bloqueia T011/T012. Ambiente: n8n e Postgres no ar, os dois workflows ativos, webhook do v8 conferido em 06/09.
 
@@ -128,3 +128,12 @@
 - 2026-09-06 O T3 so achou isso porque o T013 o consertou para derivar do fluxo. O instrumento antigo reprovava B2 pelo motivo ERRADO (exigia explicacao em EN) e teria dado falso vermelho mascarando o defeito real.
 - 2026-09-06 C15 segue FALHOU 3/3 no v8: interesses no A1 nao se movem. Consistente com o T012 (0/9). Sem hipotese candidata.
 - 2026-09-06 BLOQUEIO EXTERNO: limite de gasto mensal da conta atingido as ~23:39 (429). Reseta 23:50 America/Sao_Paulo. Nao e defeito do projeto. T016/T017/T018 ficam pendentes.
+- 2026-09-07 T016/T017/T018 DONE. Bloco 2 fechado: bateria diagnostica repetida no v8 e documentada em `RELATORIO_DIAGNOSTICO_v8.md` (+ PDF).
+- 2026-09-07 JORNADA v8: percorreu tudo (C1, persona Coach). Vazios caíram de 4 para 2, mas `/menu` e `[botao] ✅ Pronto` seguem MUDOS nas duas versoes — defeito pre-existente, nao regressao. Anti-spoiler segurou o "qual e a resposta?".
+- 2026-09-07 SINAL A INVESTIGAR (N=1, nao e conclusao): na jornada o v8 NAO corrigiu "i like play video games" em C1, e o v7.4 corrigiu a mesma entrada no mesmo nivel e mesma persona. O T012 so tocou o Prompt Conversa A1, entao a explicacao provavel e variancia. MAS expoe uma lacuna real: nenhum teste mede correcao de erro FORA DA LISTA em nivel alto (o C3, que passa, usa `people are`, que ESTA na lista). Medir com N>=6 em B2/C1.
+- 2026-09-07 ACHADO T17: servir a explicacao do banco (T008) MATOU a persona no Professor — DEBATER e BUDDY dao texto byte a byte identico no v8; no v7.4 diferiam claramente. Trade-off: -88% de latencia x perda da voz. Caminho do meio: corpo do banco + abertura/fecho gerados na persona. DECISAO DE PRODUTO do Breno.
+- 2026-09-07 ACHADO R4: o bot REPETIU o palavrao do aluno entre aspas. Publico comeca aos 16 anos. O contrato de nao-repreensao deveria incluir "nao reproduzir o palavrao".
+- 2026-09-07 ACHADO C10: zero reciprocidade e DUAS perguntas com a aluna monossilabica — virou interrogatorio, o oposto do que o teste mede. O `reciprocityLine` existe e preve o caso (short_streak>=2): investigar se chegou ao prompt.
+- 2026-09-07 ACHADO T9: a resposta de duvida usa MARKDOWN (`*`) numa saida HTML — aparece literal no Telegram. Mesmo defeito das crases nos 60 .md, agora na geracao ao vivo.
+- 2026-09-07 `conteudo/md_para_pdf.js`: md -> HTML -> Chrome headless --print-to-pdf. Sem pandoc/puppeteer e sem instalar nada. Sai 1 se o PDF nao existir ou vier vazio.
+- 2026-09-07 PLACAR v8 (com as propostas da rubrica): 22 PASSOU, 4 ressalva, 5 FALHOU. Faltam 5 defeitos para "todos positivos": T3, T17, R4, C10, C15. TRES sao achados desta rodada.

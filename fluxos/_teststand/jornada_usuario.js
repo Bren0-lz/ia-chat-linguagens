@@ -16,7 +16,11 @@ const fs = require('fs');
 const { msg, cb, digest, nodeOut } = require('./harness');
 const { matchQuestion } = require('./seed');
 
-const TR = './tr_jornada.md';
+const { rotuloDe, transcricaoDe } = require('./alvo');
+const ALVO = rotuloDe(process.env.IACHAT_TEST_PATH || 'iachat-test');
+// Deriva do ingress: o v7.4 mantem o nome historico, qualquer outro ganha sufixo.
+// Sem isso, rodar a jornada no v8 SOBRESCREVE a evidencia de 04/09 (writeFileSync).
+const TR = transcricaoDe('tr_jornada', process.env.IACHAT_TEST_PATH || 'iachat-test');
 const arg = (k, d) => { const a = process.argv.find(x => x.startsWith('--' + k + '=')); return a ? a.split('=')[1] : d; };
 const UID = Number(arg('uid', 0)) || (990000000 + (Date.now() % 9000000));
 
