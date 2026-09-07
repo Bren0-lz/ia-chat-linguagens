@@ -8,11 +8,17 @@
 // TRÊS DECISÕES DE DESENHO, e o porquê de cada uma
 // ---------------------------------------------------------------------------
 //
-// 1) N=1, MARCADO COMO INDICATIVO.
-//    Com N=3 seriam centenas de chamadas, o que não cabe no plano gratuito da
-//    Groq (a cota estourou duas vezes em 19/08 com um único usuário). N=1 acha
-//    quebra grosseira -- foi assim que o X4 apareceu quebrado em producao --
-//    sem fingir rigor que a amostra nao tem. Todo veredito daqui e INDICATIVO.
+// 1) N POR TESTE: 3 NOS QUALITATIVOS, 1 NOS DETERMINISTICOS.
+//    ATE 06/09 esta bateria rodava N=1 em tudo, "marcado como indicativo", porque
+//    N=3 nao cabia na cota gratuita da Groq. Desde 03/09 os modelos sao Vertex/Gemini
+//    e a cota deixou de ser o gargalo; em 06/09 o Breno decidiu N=3 nos qualitativos.
+//    A regra e simples e esta em `DETERMINISTICOS`: se o veredito sai de ESTADO NO
+//    BANCO (idade gravada, streak, idx do topico, q_answered), uma rodada basta -- o
+//    resultado nao depende do texto que o modelo escreveu. Se o veredito JULGA A SAIDA
+//    do LLM, N=1 mede sorte, e a rodada isolada ja produziu falso resultado neste
+//    projeto. Todo veredito carrega o N com que foi medido, e um teste que passa em
+//    2 de 3 NAO e PASSOU: e INSTAVEL, e a instabilidade e o achado.
+//    Rodadas: `--rodadas=3` (default 3). Use `--rodadas=1` para uma passada rapida.
 //
 // 2) NEM TUDO E VERIFICAVEL POR CODIGO.
 //    Boa parte destes testes e qualidade pedagogica e tom ("a explicacao torna
@@ -35,7 +41,13 @@
 //   N8N_API_KEY=... node bateria_completa_b.js
 //   node bateria_completa_b.js --only=C1,C3,T12    (subconjunto)
 //   node bateria_completa_b.js --from=T1           (retoma de um ponto)
-//   PACE=4000 node bateria_completa_b.js           (mais devagar, poupa cota)
+//   node bateria_completa_b.js --rodadas=3         (N dos qualitativos; default 3)
+//   node bateria_completa_b.js --continuar         (nao reescreve a transcricao)
+//   PACE=12000 node bateria_completa_b.js          (mais devagar; o n8n cai sob carga)
+//
+// O ALVO vem do ingress (IACHAT_TEST_PATH) e o nome da transcricao TAMBEM: o v7.4 grava
+// em `tr_bateria_b.md` (a evidencia de 04/09) e o v8 em `tr_bateria_b_v8.md`. Ate 06/09 o
+// nome era CRAVADO -- rodar a Fase B no v8 destruiria a base da comparacao (handoff §11).
 //
 // O estado do aluno e semeado DIRETO NO BANCO. Passar por onboarding +
 // nivelamento gastaria ~13 chamadas por teste so para chegar ao ponto de
@@ -44,14 +56,16 @@
 require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.env') });
 const fs = require('fs');
 const { Client } = require('pg');
-const { msg, cb, digest } = require('./harness');
+const { msg, cb, digest, WEBHOOK, TEST_PATH } = require('./harness');
+const { rotuloDe, transcricaoDe } = require('./alvo');
 const { contratoIdioma, vereditoT3 } = require('./idioma_professor');
 
 // Contrato de idioma da TRILHA, derivado do fluxo (T013). Se o LANG mudar de forma, isto
 // estoura aqui, no comeco, em vez de virar veredito errado la na frente.
 const CONTRATO_TRILHA = contratoIdioma();
 
-const TR = './tr_bateria_b.md';
+const ALVO = rotuloDe(TEST_PATH);
+const TR = transcricaoDe('tr_bateria_b', TEST_PATH);
 const UID_BASE = 990000000 + (Date.now() % 9000000); // mesma faixa da limpeza (ver Fase A)
 let uidSeq = UID_BASE;
 const novoUid = () => ++uidSeq;
@@ -59,30 +73,80 @@ const novoUid = () => ++uidSeq;
 const arg = (n) => (process.argv.find((a) => a.startsWith('--' + n + '=')) || '').split('=')[1] || '';
 const SOMENTE = arg('only') ? arg('only').split(',').map((s) => s.trim().toUpperCase()) : null;
 const DESDE = arg('from').toUpperCase();
+const CONTINUAR = process.argv.includes('--continuar');
+const RODADAS = Math.max(1, Number(arg('rodadas') || process.env.RODADAS || 3));
 let comecou = !DESDE;
 
+// Os 7 testes cujo veredito sai de ESTADO NO BANCO, nao do texto do LLM: repetir nao
+// muda a resposta, so gasta chamada. Todos os outros julgam a saida do modelo e vao a N=3.
+const DETERMINISTICOS = ['A5', 'PS1', 'C16', 'C17', 'C12', 'T4', 'T14'];
+const N_POR_TESTE = (id) => (DETERMINISTICOS.includes(id) ? 1 : RODADAS);
+
+let RODADA = 1;
 let cotaEstourada = false;
 const resultados = [];
+// Contagem separada dos turnos que NAO produziram resposta. A armadilha n.1 do handoff e
+// exatamente isto: turno vazio passando por aprovacao em teste de negativa.
+const turnos = { vazios: 0, perdidos: 0 };
 
-function escrever(linha) { fs.appendFileSync(TR, linha + '\n'); }
+// So grava quando este arquivo E o script rodando. Requerido como modulo (pelo teste
+// offline do instrumento), nao toca a transcricao -- que e evidencia.
+const MODO_SCRIPT = require.main === module;
+function escrever(linha) { if (MODO_SCRIPT) fs.appendFileSync(TR, linha + '\n'); }
 
 function reg(id, ok, detalhe, saida) {
-  resultados.push({ id, ok });
+  resultados.push({ id, ok, rodada: RODADA });
   const tag = ok === true ? 'PASSOU  ' : ok === false ? 'FALHOU  ' : ok === 'revisar' ? 'REVISAR ' : 'INCONCL.';
-  console.log('  ' + tag + id + ' — ' + detalhe);
-  const rot = ok === true ? 'PASSOU (indicativo, N=1)'
-    : ok === false ? 'FALHOU (indicativo, N=1)'
+  const nDoTeste = N_POR_TESTE(id);
+  const selo = 'rodada ' + RODADA + '/' + nDoTeste;
+  console.log('  ' + tag + id + ' [' + selo + '] — ' + detalhe);
+  const rot = ok === true ? 'PASSOU'
+    : ok === false ? 'FALHOU'
     : ok === 'revisar' ? 'REVISAR — leitura humana'
     : 'INCONCLUSIVO';
-  escrever('- **' + id + '**: ' + rot + ' — ' + detalhe);
+  escrever('- **' + id + '** (' + selo + '): ' + rot + ' — ' + detalhe);
   if (saida) escrever('\n```\n' + String(saida).slice(0, 1800).trim() + '\n```\n');
 }
 
 function pular(id) {
   if (SOMENTE && !SOMENTE.includes(id)) return true;
   if (!comecou) { if (id === DESDE) comecou = true; else return true; }
-  if (cotaEstourada) { reg(id, null, 'NAO EXECUTADO — cota da Groq esgotada antes deste teste'); return true; }
+  if (RODADA > N_POR_TESTE(id)) return true; // deterministico: mede uma vez so
+  if (cotaEstourada) { reg(id, null, 'NAO EXECUTADO — cota esgotada antes deste teste'); return true; }
   return false;
+}
+
+// ---- AGREGACAO ---------------------------------------------------------------------
+// Um teste que passa em 2 de 3 nao e PASSOU. E INSTAVEL, e a instabilidade e o achado.
+function agregar(lista) {
+  const ordem = [];
+  const porId = new Map();
+  for (const r of lista) {
+    if (!porId.has(r.id)) { porId.set(r.id, []); ordem.push(r.id); }
+    porId.get(r.id).push(r.ok);
+  }
+  return ordem.map((id) => {
+    const v = porId.get(id);
+    const n = v.length;
+    const passou = v.filter((x) => x === true).length;
+    const falhou = v.filter((x) => x === false).length;
+    const revisar = v.filter((x) => x === 'revisar').length;
+    const incon = v.filter((x) => x === null || x === undefined).length;
+    const auto = passou + falhou > 0;
+    let veredito;
+    if (incon === n) veredito = 'INCONCLUSIVO';
+    else if (revisar === n) veredito = 'REVISAR';
+    else if (passou === n) veredito = 'PASSOU';
+    else if (falhou === n) veredito = 'FALHOU';
+    else if (passou > 0 && falhou > 0) veredito = 'INSTAVEL';
+    else veredito = 'PARCIAL';
+    // Media e desvio (populacional) do resultado binario das rodadas AUTO. Rodada
+    // inconclusiva nao entra na media: nao e 0 nem 1, e ausencia de medida.
+    const bin = v.filter((x) => x === true || x === false).map((x) => (x ? 1 : 0));
+    const media = bin.length ? bin.reduce((a, b) => a + b, 0) / bin.length : null;
+    const dp = bin.length ? Math.sqrt(bin.reduce((a, b) => a + (b - media) ** 2, 0) / bin.length) : null;
+    return { id, n, nDeclarado: N_POR_TESTE(id), passou, falhou, revisar, incon, auto, veredito, media, dp };
+  });
 }
 
 async function db(fn) {
@@ -127,7 +191,20 @@ async function semear(uid, perfil, extra) {
 //   (a) o LLM respondeu e a resposta e ruim  -> FALHOU, veredito legitimo
 //   (b) o LLM nao respondeu                  -> INCONCLUSIVO, nunca PASSOU
 //   (c) a cota acabou                        -> para a rodada
+//   (d) o turno se PERDEU (o harness nao achou a execucao) -> INCONCLUSIVO
+//
+// O caso (d) foi acrescentado no T015 e e o mais traicoeiro. Quando `postUpdate` desiste,
+// devolve `null`; `digest(null)` devolve `reply = '(no runData)'`, que e uma string NAO
+// VAZIA. A guarda antiga so olhava `!d.reply.trim()`, entao deixava passar -- e os testes
+// de NEGATIVA (C4 "nao inventou correcao", R5 "nao vazou o system prompt") davam PASSOU
+// julgando a string '(no runData)'. Turno perdido virando aprovacao e a armadilha n.1 do
+// handoff em forma nova: o bot nao respondeu, e o instrumento aplaudiu.
 function llmRespondeu(d, id) {
+  if (!d || !Array.isArray(d.ran) || d.ran.length === 0 || String(d.reply || '') === '(no runData)') {
+    turnos.perdidos++;
+    reg(id, null, 'INCONCLUSIVO — turno PERDIDO: o harness nao achou a execucao (nao e aprovacao)');
+    return false;
+  }
   const errs = (d && d.errs) || [];
   const cota = errs.find((e) => /429|rate.?limit|too many requests|quota/i.test(e));
   if (cota) {
@@ -140,7 +217,8 @@ function llmRespondeu(d, id) {
     reg(id, null, 'INCONCLUSIVO — o no de IA falhou: ' + erroModelo.slice(0, 90));
     return false;
   }
-  if (!d || !d.reply || !d.reply.trim()) {
+  if (!d.reply || !d.reply.trim()) {
+    turnos.vazios++;
     reg(id, null, 'INCONCLUSIVO — resposta VAZIA (nao confundir com aprovacao; ver armadilha 1)');
     return false;
   }
@@ -168,15 +246,7 @@ const RUBRICA = {
   R4: 'Nao repreendeu? Redirecionou com leveza?',
 };
 
-(async () => {
-  fs.writeFileSync(TR,
-    '# Bateria completa — Fase B (dependentes do LLM) — v7.4\n\n'
-    + '> **Todos os vereditos aqui sao INDICATIVOS (N=1).** Detectam quebra grosseira;\n'
-    + '> nao sustentam afirmacao estatistica. Ver o cabecalho do script.\n\n'
-    + '> Rodada: ' + new Date().toISOString() + ' — faixa de user_id: ' + (UID_BASE + 1) + '+\n\n');
-  console.log('BATERIA COMPLETA — Fase B (LLM, N=1 indicativo)');
-  console.log('faixa de user_id desta rodada: ' + (UID_BASE + 1) + '+\n');
-
+async function umaRodada() {
   // ===================== SEM LLM (baratos, rodam sempre) =====================
   console.log('== Sem consumo de cota ==');
   escrever('\n## Sem consumo de cota\n');
@@ -553,21 +623,69 @@ const RUBRICA = {
     }
   }
 
-  // ===================== RESUMO =====================
-  const c = (v) => resultados.filter((r) => r.ok === v).length;
-  const linha = 'FASE B (indicativo, N=1): ' + c(true) + ' passaram, ' + c(false) + ' falharam, '
-    + c('revisar') + ' para revisar, ' + c(null) + ' inconclusivos/nao executados';
-  console.log('\n===== ' + linha + ' =====');
-  escrever('\n**Resumo:** ' + linha);
+}
+
+// ===================== ORQUESTRACAO E RESUMO =====================
+async function principal() {
+  if (!CONTINUAR) {
+    fs.writeFileSync(TR,
+      '# Bateria completa — Fase B (dependentes do LLM) — ' + ALVO + '\n\n'
+      + '> **N=' + RODADAS + ' nos qualitativos, N=1 nos deterministicos** (decisao do Breno, 06/09).\n'
+      + '> Deterministico = o veredito sai de estado no banco e nao do texto do LLM:\n'
+      + '> ' + DETERMINISTICOS.join(', ') + '. Todos os demais julgam a saida do modelo e\n'
+      + '> foram medidos ' + RODADAS + ' vezes. Cada linha carrega a rodada em que foi medida;\n'
+      + '> o agregado esta no fim. **Passar em 2 de 3 nao e PASSOU: e INSTAVEL.**\n\n'
+      + '> Alvo: ' + ALVO + ' — ' + WEBHOOK + '\n'
+      + '> Inicio: ' + new Date().toISOString() + ' — faixa de user_id: ' + (UID_BASE + 1) + '+\n');
+  }
+  console.log('BATERIA COMPLETA — Fase B (LLM) — alvo ' + ALVO + ' -> ' + WEBHOOK);
+  console.log('N=' + RODADAS + ' nos qualitativos, N=1 nos deterministicos (' + DETERMINISTICOS.join(',') + ')');
+  console.log('faixa de user_id desta rodada: ' + (UID_BASE + 1) + '+\n');
+
+  for (RODADA = 1; RODADA <= RODADAS; RODADA++) {
+    comecou = !DESDE;
+    console.log('\n########## RODADA ' + RODADA + '/' + RODADAS + ' ##########');
+    escrever('\n---\n\n## Rodada ' + RODADA + '/' + RODADAS + ' — ' + new Date().toISOString() + '\n');
+    await umaRodada();
+    if (cotaEstourada) break;
+  }
+
+  const linhas = agregar(resultados);
+  escrever('\n---\n\n## Agregado — ' + linhas.length + ' testes\n');
+  escrever('| teste | N | veredito | passou/falhou/revisar/inconcl. | media | desvio |');
+  escrever('|---|---|---|---|---|---|');
+  for (const a of linhas) {
+    const m = a.media === null ? '—' : a.media.toFixed(2);
+    const s = a.dp === null ? '—' : a.dp.toFixed(2);
+    escrever('| ' + a.id + ' | ' + a.n + (a.n === a.nDeclarado ? '' : ' (de ' + a.nDeclarado + ')')
+      + ' | ' + a.veredito + ' | ' + a.passou + '/' + a.falhou + '/' + a.revisar + '/' + a.incon
+      + ' | ' + m + ' | ' + s + ' |');
+  }
+  const conta = (v) => linhas.filter((a) => a.veredito === v).length;
+  const resumo = 'FASE B (' + ALVO + '): ' + conta('PASSOU') + ' PASSOU, ' + conta('FALHOU') + ' FALHOU, '
+    + conta('INSTAVEL') + ' INSTAVEL, ' + conta('REVISAR') + ' REVISAR, '
+    + (conta('INCONCLUSIVO') + conta('PARCIAL')) + ' inconclusivos/parciais — ' + linhas.length + ' testes';
+  const contagemTurnos = 'Turnos sem resposta: ' + turnos.vazios + ' vazios, ' + turnos.perdidos
+    + ' perdidos. Nenhum deles conta como aprovacao (viram INCONCLUSIVO).';
+  escrever('\n**Resumo:** ' + resumo);
+  escrever('\n**' + contagemTurnos + '**');
+  console.log('\n===== ' + resumo + ' =====');
+  console.log('  ' + contagemTurnos);
   if (cotaEstourada) {
-    const aviso = 'A rodada PAROU por esgotamento de cota da Groq. Os testes marcados como NAO '
-      + 'EXECUTADO nao tem veredito -- retome com --from=<id>.';
+    const aviso = 'A rodada PAROU por esgotamento de cota. Os testes marcados como NAO '
+      + 'EXECUTADO nao tem veredito -- retome com --from=<id> --continuar.';
     console.log('  ATENCAO: ' + aviso);
     escrever('\n> ⚠️ ' + aviso);
   }
-  const falhas = resultados.filter((r) => r.ok === false).map((r) => r.id);
-  if (falhas.length) console.log('  FALHARAM: ' + falhas.join(', '));
-  const revisar = resultados.filter((r) => r.ok === 'revisar').map((r) => r.id);
-  if (revisar.length) console.log('  PARA LER NA TRANSCRICAO: ' + revisar.join(', '));
+  const cita = (v) => linhas.filter((a) => a.veredito === v).map((a) => a.id).join(', ');
+  if (conta('FALHOU')) console.log('  FALHARAM: ' + cita('FALHOU'));
+  if (conta('INSTAVEL')) console.log('  INSTAVEIS: ' + cita('INSTAVEL'));
+  if (conta('REVISAR')) console.log('  PARA LER NA TRANSCRICAO: ' + cita('REVISAR'));
   console.log('\ntranscricao: ' + TR);
-})().catch((e) => { console.error('FATAL', e); process.exit(1); });
+}
+
+module.exports = { llmRespondeu, agregar, DETERMINISTICOS, N_POR_TESTE, TR, ALVO, turnos };
+
+if (require.main === module) {
+  principal().catch((e) => { console.error('FATAL', e); process.exit(1); });
+}

@@ -246,7 +246,7 @@ que foi medido** — comparar status entre versões sem dizer qual engana (§9).
 - **Gate:** os 29 testes com veredito, N declarado por teste, e as três rodadas presentes na
   evidência dos qualitativos. Nenhum turno vazio contado como aprovação (armadilha nº 1).
 - **Depende de:** T013
-- **Status:** TODO
+- **Status:** MEDIDO, verificacao pendente — 29 testes com N=3 nos qualitativos: 16 PASSOU, 2 FALHOU (C15, T3), 11 REVISAR, 0 vazios. C1 VIROU (FALHOU no v7.4 -> PASSOU 3/3 no v8). T3 e REGRESSAO NOVA: enunciado de B2 em portugues
 
 ### T016 — jornada contínua no v8
 - **Escopo:** `jornada_usuario.js` contra o v8, **sem semear estado**, gravando `tr_jornada_v8.md`.

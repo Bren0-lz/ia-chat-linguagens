@@ -1,6 +1,6 @@
 # Estado do loop
 
-- **Tarefa atual:** T014, T015, T016 em paralelo (medicoes)
+- **Tarefa atual:** T015 medido (falta verificar) · T016-T018 pendentes por limite de gasto
 - **Última concluída:** T013 — instrumentos consertados antes de medir
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** T010 aguarda decisao do Breno (credencial da camada 2). Nao bloqueia T011/T012. Ambiente: n8n e Postgres no ar, os dois workflows ativos, webhook do v8 conferido em 06/09.
@@ -122,3 +122,9 @@
 - 2026-09-06 PADRAO NOVO: `fluxos/_teststand/alvo.js` deriva rotulo e nome de transcricao do ingress (v7.4 -> tr_X.md, v8 -> tr_X_v8.md). Evidencia antiga deixou de poder ser sobrescrita por acidente. `registra_urls.js` e o preload que prova para onde o fetch foi. REUSAR nos proximos.
 - 2026-09-06 `testa_alvo_bateria_a.js` ligado ao `npm run gate` (script `gate:alvo`) — o guarda existia mas ninguem o rodava; regressao que voltasse a cravar URL passaria com gate verde.
 - 2026-09-06 Nenhum dos 17 vereditos mudou entre v7.4 e v8, e isso e esperado: os 17 leem estado no Postgres, codigo HTTP ou erro de no — nenhum assere texto de LLM, idioma, rota Professor ou abre-alas.
+- 2026-09-06 T015 MEDIDO (verificacao PENDENTE — o subagente caiu por LIMITE DE GASTO da conta, HTTP 429, depois de gravar o resumo final; a medicao esta inteira). Fase B no v8, N=3 nos qualitativos: 16 PASSOU, 2 FALHOU, 0 INSTAVEL, 11 REVISAR, 29 testes, 0 turnos vazios. `tr_bateria_b.md` do v7.4 INTOCADO.
+- 2026-09-06 C1 VIROU: FALHOU no v7.4 (04/09) -> PASSOU 3/3 no v8. Confirma o T012 por uma SEGUNDA regua independente (o detector da bateria nao e o do experimento_a1). Duas reguas concordando vale mais que uma medida tres vezes.
+- 2026-09-06 REGRESSAO NOVA ACHADA (T3, 3/3 consistente): o ENUNCIADO de B2 sai em PORTUGUES; o contrato manda EN de B1 pra cima. A explicacao esta certa (PT). O diario do T005b ja previa esse mecanismo — "o qSys injeta o LANG INTEIRO e a clausula de explicacao em PT contaminou a geracao da questao" — foi consertado para B1 e B2 FICOU PARA TRAS. Vira tarefa propria; NAO consertar dentro da bateria.
+- 2026-09-06 O T3 so achou isso porque o T013 o consertou para derivar do fluxo. O instrumento antigo reprovava B2 pelo motivo ERRADO (exigia explicacao em EN) e teria dado falso vermelho mascarando o defeito real.
+- 2026-09-06 C15 segue FALHOU 3/3 no v8: interesses no A1 nao se movem. Consistente com o T012 (0/9). Sem hipotese candidata.
+- 2026-09-06 BLOQUEIO EXTERNO: limite de gasto mensal da conta atingido as ~23:39 (429). Reseta 23:50 America/Sao_Paulo. Nao e defeito do projeto. T016/T017/T018 ficam pendentes.
