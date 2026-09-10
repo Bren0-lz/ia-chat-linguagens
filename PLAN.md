@@ -345,7 +345,7 @@ a versão anterior.
   corpo **idêntico**; e o **p90 medido** fica abaixo de **3 s** (contra 0,98 s de hoje e 8,00 s
   da geração ao vivo). Se estourar, reverter — o ganho de latência é o que justificou o T008.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** OFFLINE OK, gate ao vivo PENDENTE (Postgres fora) — moldura DETERMINISTICA (sem chamada de modelo): preserva os 0,98 s em vez de gastar 1-2 s. 5 personas com aberturas distintas, corpo do banco intacto, teto do Telegram respeitado. Teste reprova a versao anterior acusando o T17
 
 ### T022 — C10: reciprocidade que o modelo de fato obedece
 - **Escopo:** investigado — **não é instrumento**. O teste semeia `short_streak:2` e envia `ok`
