@@ -1,6 +1,8 @@
 # Relatório diagnóstico — IAChat v8
 
-> **Rodada de 06–07/09/2026, sobre o `IAChat_Telegram_v8` (106 nós, n8n `PbwEf7L9xEXhJaCg`).**
+> **Duas rodadas neste documento.** A principal é a de **06–07/09/2026** sobre o
+> `IAChat_Telegram_v8` (106 nós, n8n `PbwEf7L9xEXhJaCg`); a **§12 traz a rodada v8.1, de
+> 10/09**, depois das correções T019–T023, T025 e T027.
 > Compara com a rodada de **04/09/2026** sobre o **v7.4** (101 nós, `9MA0o1XJjD33BnKc`), que é
 > o fluxo **em produção** atendendo o Telegram.
 >
@@ -378,3 +380,138 @@ node conteudo/md_para_pdf.js RELATORIO_DIAGNOSTICO_v8.md
 - **IDs de teste** na faixa `990000000–999999999`, derivados do relógio; base limpa ao fim
   (restam as 2 contas reais).
 - **Sem a env `IACHAT_TEST_PATH`, tudo aponta para o v7.4 — que é o bot no ar.**
+
+---
+
+## 12. Rodada v8.1 — 10/09/2026
+
+Depois de T019–T023, T025 e T027, a bateria foi repetida no mesmo v8 publicado.
+
+> ⚠️ **Leia o N antes de comparar.** A Fase B foi **interrompida duas vezes por falta de memória
+> do sistema** (o processo foi morto, não houve falha de teste) e retomada em blocos. Resultado:
+> **só 5 testes chegaram a N=3** (T12, T13, T15, T16, T17). Os demais ficaram em **N=1** — sete
+> deles são N=1 por desenho (determinísticos), os outros **por limitação de ambiente**. Onde está
+> N=1 sem ser por desenho, o veredito é **indicativo**: detecta quebra grosseira, não sustenta
+> comparação fina com a rodada de 06/09, que teve N=3.
+
+### 12.1 Placar
+
+| | v7.4 (04/09) | v8 (06/09) | **v8.1 (10/09)** |
+|---|---|---|---|
+| **Fase A** | 17 PASSOU | 17 PASSOU | **17 PASSOU** |
+| **Fase B — PASSOU** | 16 | 16 | **17** |
+| **Fase B — FALHOU** | 2 (C1, C15) | 2 (C15, T3) | **1 (C15)** |
+| **Fase B — REVISAR** | 11 | 11 | **11** |
+
+### 12.2 O que mudou de veredito
+
+| teste | v8 (06/09) | v8.1 | |
+|---|---|---|---|
+| **T3** — idioma da trilha | FALHOU 3/3 | **PASSOU** | ✅ conserto de **instrumento** (§4.3), não de produto |
+| **T17** — persona no Professor | FALHOU (rubrica) | **resolvido** | ✅ conserto de **produto** (T021) — ver 12.3 |
+| **C15** — interesses no A1 | FALHOU | FALHOU | ⚠️ o probe mede o pior caso (T028) |
+
+### 12.3 T17: as personas voltaram a se distinguir
+
+Medido nesta rodada, mesmo tópico, mesmo nível:
+
+```
+DEBATER: "Vamos ao ponto, Yuki: esse assunto costuma ser mal explicado por aí"
+BUDDY:   "Que bom te ver, Yuki! Hoje o assunto e legal 🙂"
+```
+
+Corpo da aula idêntico (é o texto revisado do banco), moldura distinta. Sem custo de latência: a
+moldura é determinística, não passa pelo modelo.
+
+### 12.4 O que a v8.1 mexeu no produto
+
+| tarefa | efeito medido |
+|---|---|
+| **T021** — moldura de persona | T17 resolvido, 0 s de custo |
+| **T022** — precedência da reciprocidade | C10 de **0/6 → 3/6**; "divide algo próprio" 0/6 → 4/6 |
+| **T023** — gancho de interesses por código | turno neutro **2/4** (era 0/4); no probe de cortesia segue 0 |
+| **T020** — civilidade | publicado; **falta o detector automático** — R4 ainda é leitura humana |
+| **T019** — `LANG` separado | higiene de prompt; T12/T13 seguem 3/3, nada regrediu |
+| ~~T027~~ — exemplo em B1..C2 | **refutado e revertido**: gerúndio 0/12 antes e depois |
+
+### 12.5 O achado que continua aberto
+
+O **T024** mediu correção de erro **fora da lista** em nível alto: **12/36 (33%)**, e o padrão
+importa mais que a taxa:
+
+| probe | B2 | C1 |
+|---|---|---|
+| `gerundio-apos-like` | 0/6 | 0/6 |
+| `artigo-com-incontavel` | 0/6 | 2/6 |
+| `plural-irregular` | 4/6 | 6/6 |
+
+**Não é o nível** (B2 e C1 iguais) e **não é a lista** (`childrens` não está nela e é o mais
+corrigido). O que se vê é o bot **absorvendo** o erro sintático numa reformulação natural —
+`"Oh, that's awesome! I love playing video games too."` — em vez de corrigir, que é o que o
+prompt proíbe explicitamente.
+
+A hipótese do exemplo (T027) foi **refutada**. A que sobra, não testada: o **aperto do formato do
+A1** (bilíngue obrigatório + teto de 18 palavras) não deixa espaço para absorver o erro, e força o
+reparo explícito. Testá-la mexe em C8 e no contrato de naturalidade — é mais de uma variável se
+feito de uma vez.
+
+### 12.5b A jornada contínua NÃO foi executada nesta rodada
+
+Tentada e **interrompida pelo sistema por falta de memória**, aos 36 turnos, ainda no
+nivelamento. O processo foi morto — não houve falha de teste, e a jornada grava a transcrição
+só no fim, então a evidência de 07/09 (`tr_jornada_v8.md`) permaneceu intacta.
+
+**Não conte a jornada como aprovada nesta rodada.** "Não executado" não é "passou" — é a mesma
+regra que a armadilha nº 1 aplica a resposta vazia. O que ela verificou em 07/09 (transições reais
+do fluxo, sem semear estado) continua valendo para o v8, mas **não cobre** as mudanças de
+T019–T023.
+
+Fica pendente: rodar a jornada no v8.1 quando a máquina tiver folga de memória.
+
+### 12.6 Distância até "todos positivos"
+
+| # | item | estado |
+|---|---|---|
+| 1 | **Correção de erro sintático em nível alto** | 🔴 aberto · 0/12 no gerúndio (T024) |
+| 2 | **C15 / probe de interesses** | ⚠️ o gancho funciona em turno neutro; **o probe** é que precisa mudar (T028) |
+| 3 | **C10 em 3/6** | ⚠️ melhorou de 0, não está resolvido |
+| 4 | **R4 sem detector automático** | ⚠️ cláusula publicada, obediência não provada |
+
+Fora da bateria e dependendo do Breno: **credencial do Vertex** (lixo digitado ainda vira nome de
+aluno), **`DEV_COMMANDS = true`**, e a **revisão humana dos 60 `.md`**.
+
+### 12.7 Vereditos, teste a teste
+
+| teste | v8.1 | N |
+|---|---|---|
+| C1 | PASSOU | 1 ⚠️ |
+| C2 | REVISAR | 1 ⚠️ |
+| C3 | PASSOU | 1 ⚠️ |
+| C4 | PASSOU | 1 ⚠️ |
+| C7 | PASSOU | 1 ⚠️ |
+| C9 | REVISAR | 1 ⚠️ |
+| C10 | REVISAR | 1 ⚠️ |
+| C14 | REVISAR | 1 ⚠️ |
+| C15 | FALHOU | 1 ⚠️ |
+| R4 | REVISAR | 1 ⚠️ |
+| R5 | PASSOU | 1 ⚠️ |
+| T1 | REVISAR | 1 ⚠️ |
+| T2 | REVISAR | 1 ⚠️ |
+| T3 | PASSOU | 1 ⚠️ |
+| T6 | PASSOU | 1 ⚠️ |
+| T8 | REVISAR | 1 ⚠️ |
+| T9 | REVISAR | 1 ⚠️ |
+| T12 | PASSOU | 3 |
+| T13 | PASSOU | 3 |
+| T15 | REVISAR | 3 |
+| T16 | PASSOU | 3 |
+| T17 | REVISAR | 3 |
+| A5 | PASSOU | 1 (por desenho) |
+| PS1 | PASSOU | 1 (por desenho) |
+| C16 | PASSOU | 1 (por desenho) |
+| C17 | PASSOU | 1 (por desenho) |
+| C12 | PASSOU | 1 (por desenho) |
+| T4 | PASSOU | 1 (por desenho) |
+| T14 | PASSOU | 1 (por desenho) |
+
+⚠️ = N=1 por interrupção do ambiente, não por desenho: veredito **indicativo**.

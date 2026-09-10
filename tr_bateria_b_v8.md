@@ -7,11 +7,11 @@
 > o agregado esta no fim. **Passar em 2 de 3 nao e PASSOU: e INSTAVEL.**
 
 > Alvo: v8 — http://localhost:5678/webhook/iachat-test-v8
-> Inicio: 2026-09-10T13:22:32.430Z — faixa de user_id: 998552430+
+> Inicio: 2026-09-10T17:29:04.063Z — faixa de user_id: 995344063+
 
 ---
 
-## Rodada 1/3 — 2026-09-10T13:22:32.433Z
+## Rodada 1/3 — 2026-09-10T17:29:04.073Z
 
 
 ## Sem consumo de cota
@@ -25,61 +25,20 @@
 
 ## Modo Professor
 
-- **T3** (rodada 1/3): PASSOU — nivel B2 | explicacao esperada em PT: portugues detectado=true -> ok | enunciado esperado em EN: portugues detectado=false -> ok
+- **T14** (rodada 1/1): PASSOU — q_answered=true (true libera usar o gabarito) — REVISAR se aprofundou
 
 ```
---- explicacao ---
-[PROFESSOR] 📚 Modo Professor — nível B2. Vamos começar a trilha! Tópico 1/10: “Present perfect continuous”.
+[DUVIDA] Bora lá, Ana! 💪 Foca aqui: a resposta "was watching" está certíssima porque você estava no meio de uma ação (watching TV) quando outra ação mais curta aconteceu (my friend called). É exatamente para isso que usamos o Past Continuous! ⚡
 
-Vamos ao ponto, Yuki: esse assunto costuma ser mal explicado por ai
-
-<b>O QUE É E QUANDO USAR</b>
-Usamos o <i>Present Perfect Continuous</i> para falar de uma ação que começou no passado e continua até o presente. O foco principal é na <b>duração</b> da ação, no tempo que ela vem acontecendo, e não se ela já terminou ou não.
-
-<b>AS FORMAS</b>
-A estrutura é sempre <i>sujeito + have/has + been + verbo-ING</i>.
-
-- <b>Afirmativa:</b>
-<i>I/You/We/They have been working</i>
-<i>He/She/It has been working</i>
-
-- <b>Negativa:</b>
-<i>I/You/We/They have not (haven't) been working</i>
-<i>He/She/It has not (hasn't) been working</i>
-
-- <b>Interrogativa:</b>
-<i>Have you been working?</i>
-<i>Has she been working?</i>
-
-- <b>Palavras-chave (duração):</b>
-<i>for</i> + período de tempo: <i>for two hours, for ten years, for a long time.</i>
-<i>since</i> + ponto de início no tempo: <i>since 2020, since last week, since I arrived.</i>
-
-<b>EXEMPLOS</b>
-- <i>I have been studying English for three years.</i>
-(Eu estudo inglês há três anos.)
-
-- <i>She has been working at this company since January.</i>
-(Ela está trabalhando nesta empresa desde janeiro.)
-
-- <i>They are tired because they have been playing soccer all afternoon.</i>
-(Eles estão cansados porque estiveram jogando futebol a tarde toda.)
-
-- <i>How long have you been waiting for me?</i>
-(Há quanto tempo você está me esperando?)
-
-<b>ERROS COMUNS</b>
-O erro mais comum é esquecer a palavra <i>been</i>. A estrutura precisa de todos os seus componentes.
-errado: <i>I have studying for hours.</i>
-o certo é: <i>I have <b>been</b> studying for hours.</i>
-
-Outro ponto é a diferença para o <i>Present Perfect Simple</i>. O
+Você mandou bem em identificar a ação contínua no passado. Agora, para o próximo nível: me diz, qual seria a resposta se a frase fosse "I (watch) TV every day last week."? Manda ver! 🔥
 ```
 
+- **T15** (rodada 1/3): REVISAR — leitura humana — quase-acerto (sufixo -s): gabarito="studying" enviado="studyings" aceitou=false
+- **T16** (rodada 1/3): PASSOU — maiusculas/pontuacao/espacos: gabarito="for" enviado="  FOR.  " aceitou=true
 
 ---
 
-## Rodada 2/3 — 2026-09-10T13:23:18.031Z
+## Rodada 2/3 — 2026-09-10T17:33:49.208Z
 
 
 ## Sem consumo de cota
@@ -93,61 +52,12 @@ Outro ponto é a diferença para o <i>Present Perfect Simple</i>. O
 
 ## Modo Professor
 
-- **T3** (rodada 2/3): PASSOU — nivel B2 | explicacao esperada em PT: portugues detectado=true -> ok | enunciado esperado em EN: portugues detectado=false -> ok
-
-```
---- explicacao ---
-[PROFESSOR] 📚 Modo Professor — nível B2. Vamos começar a trilha! Tópico 1/10: “Present perfect continuous”.
-
-Vamos ao ponto, Yuki: esse assunto costuma ser mal explicado por ai
-
-<b>O QUE É E QUANDO USAR</b>
-Usamos o <i>Present Perfect Continuous</i> para falar de uma ação que começou no passado e continua até o presente. O foco principal é na <b>duração</b> da ação, no tempo que ela vem acontecendo, e não se ela já terminou ou não.
-
-<b>AS FORMAS</b>
-A estrutura é sempre <i>sujeito + have/has + been + verbo-ING</i>.
-
-- <b>Afirmativa:</b>
-<i>I/You/We/They have been working</i>
-<i>He/She/It has been working</i>
-
-- <b>Negativa:</b>
-<i>I/You/We/They have not (haven't) been working</i>
-<i>He/She/It has not (hasn't) been working</i>
-
-- <b>Interrogativa:</b>
-<i>Have you been working?</i>
-<i>Has she been working?</i>
-
-- <b>Palavras-chave (duração):</b>
-<i>for</i> + período de tempo: <i>for two hours, for ten years, for a long time.</i>
-<i>since</i> + ponto de início no tempo: <i>since 2020, since last week, since I arrived.</i>
-
-<b>EXEMPLOS</b>
-- <i>I have been studying English for three years.</i>
-(Eu estudo inglês há três anos.)
-
-- <i>She has been working at this company since January.</i>
-(Ela está trabalhando nesta empresa desde janeiro.)
-
-- <i>They are tired because they have been playing soccer all afternoon.</i>
-(Eles estão cansados porque estiveram jogando futebol a tarde toda.)
-
-- <i>How long have you been waiting for me?</i>
-(Há quanto tempo você está me esperando?)
-
-<b>ERROS COMUNS</b>
-O erro mais comum é esquecer a palavra <i>been</i>. A estrutura precisa de todos os seus componentes.
-errado: <i>I have studying for hours.</i>
-o certo é: <i>I have <b>been</b> studying for hours.</i>
-
-Outro ponto é a diferença para o <i>Present Perfect Simple</i>. O
-```
-
+- **T15** (rodada 2/3): REVISAR — leitura humana — quase-acerto (sufixo -s): gabarito="been" enviado="beens" aceitou=false
+- **T16** (rodada 2/3): PASSOU — maiusculas/pontuacao/espacos: gabarito="for" enviado="  FOR.  " aceitou=true
 
 ---
 
-## Rodada 3/3 — 2026-09-10T13:24:02.475Z
+## Rodada 3/3 — 2026-09-10T17:35:04.541Z
 
 
 ## Sem consumo de cota
@@ -161,66 +71,19 @@ Outro ponto é a diferença para o <i>Present Perfect Simple</i>. O
 
 ## Modo Professor
 
-- **T3** (rodada 3/3): PASSOU — nivel B2 | explicacao esperada em PT: portugues detectado=true -> ok | enunciado esperado em EN: portugues detectado=false -> ok
-
-```
---- explicacao ---
-[PROFESSOR] 📚 Modo Professor — nível B2. Vamos começar a trilha! Tópico 1/10: “Present perfect continuous”.
-
-Vamos ao ponto, Yuki: esse assunto costuma ser mal explicado por ai
-
-<b>O QUE É E QUANDO USAR</b>
-Usamos o <i>Present Perfect Continuous</i> para falar de uma ação que começou no passado e continua até o presente. O foco principal é na <b>duração</b> da ação, no tempo que ela vem acontecendo, e não se ela já terminou ou não.
-
-<b>AS FORMAS</b>
-A estrutura é sempre <i>sujeito + have/has + been + verbo-ING</i>.
-
-- <b>Afirmativa:</b>
-<i>I/You/We/They have been working</i>
-<i>He/She/It has been working</i>
-
-- <b>Negativa:</b>
-<i>I/You/We/They have not (haven't) been working</i>
-<i>He/She/It has not (hasn't) been working</i>
-
-- <b>Interrogativa:</b>
-<i>Have you been working?</i>
-<i>Has she been working?</i>
-
-- <b>Palavras-chave (duração):</b>
-<i>for</i> + período de tempo: <i>for two hours, for ten years, for a long time.</i>
-<i>since</i> + ponto de início no tempo: <i>since 2020, since last week, since I arrived.</i>
-
-<b>EXEMPLOS</b>
-- <i>I have been studying English for three years.</i>
-(Eu estudo inglês há três anos.)
-
-- <i>She has been working at this company since January.</i>
-(Ela está trabalhando nesta empresa desde janeiro.)
-
-- <i>They are tired because they have been playing soccer all afternoon.</i>
-(Eles estão cansados porque estiveram jogando futebol a tarde toda.)
-
-- <i>How long have you been waiting for me?</i>
-(Há quanto tempo você está me esperando?)
-
-<b>ERROS COMUNS</b>
-O erro mais comum é esquecer a palavra <i>been</i>. A estrutura precisa de todos os seus componentes.
-errado: <i>I have studying for hours.</i>
-o certo é: <i>I have <b>been</b> studying for hours.</i>
-
-Outro ponto é a diferença para o <i>Present Perfect Simple</i>. O
-```
-
+- **T15** (rodada 3/3): REVISAR — leitura humana — quase-acerto (sufixo -s): gabarito="for" enviado="fors" aceitou=false
+- **T16** (rodada 3/3): PASSOU — maiusculas/pontuacao/espacos: gabarito="studying" enviado="  STUDYING.  " aceitou=true
 
 ---
 
-## Agregado — 1 testes
+## Agregado — 3 testes
 
 | teste | N | veredito | passou/falhou/revisar/inconcl. | media | desvio |
 |---|---|---|---|---|---|
-| T3 | 3 | PASSOU | 3/0/0/0 | 1.00 | 0.00 |
+| T14 | 1 | PASSOU | 1/0/0/0 | 1.00 | 0.00 |
+| T15 | 3 | REVISAR | 0/0/3/0 | — | — |
+| T16 | 3 | PASSOU | 3/0/0/0 | 1.00 | 0.00 |
 
-**Resumo:** FASE B (v8): 1 PASSOU, 0 FALHOU, 0 INSTAVEL, 0 REVISAR, 0 inconclusivos/parciais — 1 testes
+**Resumo:** FASE B (v8): 2 PASSOU, 0 FALHOU, 0 INSTAVEL, 1 REVISAR, 0 inconclusivos/parciais — 3 testes
 
 **Turnos sem resposta: 0 vazios, 0 perdidos. Nenhum deles conta como aprovacao (viram INCONCLUSIVO).**

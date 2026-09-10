@@ -401,7 +401,7 @@ a versão anterior.
 - **Gate:** relatório atualizado com as três colunas (v7.4 · v8 · v8.1) e **zero `FALHOU`** — ou
   a lista explícita do que restou e por quê.
 - **Depende de:** T019, T020, T021, T022, T023, T024, T025
-- **Status:** TODO
+- **Status:** DONE com ressalva de ambiente — Fase A 17/17; Fase B 17 PASSOU / 11 REVISAR / 1 FALHOU (C15); relatorio §12 e PDF prontos. RESSALVAS DECLARADAS: (a) so 5 testes chegaram a N=3, o resto ficou em N=1 porque o sistema matou o processo DUAS vezes por falta de memoria; (b) a JORNADA nao foi executada — morta aos 36 turnos, e "nao executado" nao vira "passou"
 
 ### Fora deste bloco, mas ainda bloqueiam o lançamento
 Não viraram tarefa aqui porque **dependem do Breno**, não de código:
