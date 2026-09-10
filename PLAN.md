@@ -279,3 +279,133 @@ que foi medido** — comparar status entre versões sem dizer qual engana (§9).
   o PDF existe e abre, e todo número citado no texto tem origem rastreável nos `tr_*_v8.md`.
 - **Depende de:** T014, T015, T016, T017
 - **Status:** DONE — `RELATORIO_DIAGNOSTICO_v8.md` + PDF (556 KB) via `conteudo/md_para_pdf.js` (Chrome headless, sem dependencia nova)
+
+---
+
+## Bloco 3 — v8.1: fechar a bateria em "todos positivos"
+
+**Origem:** `RELATORIO_DIAGNOSTICO_v8.md` §9. A meta declarada é abrir para usuários reais só
+com a bateria limpa; hoje faltam **5 defeitos** e **2 lacunas de cobertura**.
+
+**Convenção de versão (decidida em 10/09):** "v8.1" é **marco, não arquivo**. Todo trabalho
+segue em `fluxos/IAChat_Telegram_v8.json`; a tag `v8.1` nasce quando a bateria fechar. O
+projeto já pagou o preço de multiplicar arquivos de fluxo que dividem o mesmo `webhookId`.
+
+**Decisões do Breno (10/09):**
+- **T17:** corpo da aula continua vindo do banco; **abertura e fecho** ganham a voz da persona.
+- **Escopo:** os 5 defeitos + as 2 lacunas.
+- **C15:** atacar **deterministicamente** — o código escolhe o gancho, o LLM só escreve.
+
+**Pré-requisito de execução:** T019–T023 alteram o fluxo e **exigem republicar** o v8
+(`node fluxos/_teststand/publica_v8.js`, único caminho autorizado). Isso precisa de autorização
+explícita do Breno — a do bloco anterior valia para aquele loop.
+
+**Protocolo obrigatório em toda tarefa deste bloco** (handoff §8): baseline → **uma variável** →
+medir → reverter se não melhorar. E o teste vai **junto** com a correção, provando que reprova
+a versão anterior.
+
+### T019 — T3: separar o LANG de explicação do LANG de pergunta
+- **Escopo:** a causa não é o texto do `LANG` — é a injeção. Hoje `expSys()` e `qSys()` recebem
+  **`LANG[lvl]` inteiro**, então a cláusula "Escreva a EXPLICAÇÃO em português" entra no prompt
+  que gera a **questão** e contamina o enunciado. Prova de que reforço textual não resolve: B1 e
+  B2 têm a cláusula de perguntas **idêntica** ("INTEIRAMENTE em inglês, enunciado e resposta") e
+  o B2 falha 3/3 mesmo assim — foi exatamente o conserto tentado no T005b.
+  Separar em `LANG_EXPL[lvl]` e `LANG_PERG[lvl]`; `expSys` recebe **só** a de explicação, `qSys`
+  **só** a de perguntas. Nenhum prompt vê instrução que não lhe diz respeito.
+- **Gate offline:** teste que extrai o `Professor Engine` e prova, para os **6 níveis**, que o
+  `expSys` não contém a cláusula de perguntas e o `qSys` não contém a de explicação. **Reprova a
+  versão anterior**, onde os dois contêm tudo.
+- **Gate ao vivo:** T3 em **B2 com N=3** (o defeito é 3/3 hoje), mais B1 e C1 para provar que
+  não regrediram. Republicar antes de medir.
+- **Depende de:** —
+- **Status:** TODO
+
+### T020 — R4: o bot não reproduz o palavrão do aluno
+- **Escopo:** medido — o bot devolveu o palavrão do aluno entre aspas, para um aluno de 19 anos,
+  num produto cujo cadastro começa aos **16**. O contrato de não-repreensão não diz nada sobre
+  reproduzir a ofensa. Acrescentar a cláusula nos **6 níveis** do modo Conversa: não repetir o
+  palavrão nem citá-lo entre aspas; redirecionar sem nomear.
+- **Gate offline:** os 6 prompts contêm a cláusula; reprova a versão anterior.
+- **Gate ao vivo:** R4 com **N=3** e **detector automático** — a resposta não pode conter nenhum
+  item da lista de palavrões enviados. Hoje o R4 é `REVISAR` (leitura humana); automatizá-lo
+  tira um teste da dívida de "sem automação".
+- **Depende de:** —
+- **Status:** TODO
+
+### T021 — T17: abertura e fecho na voz da persona
+- **Escopo:** servir a explicação do banco (T008) trouxe **−88% de p90** e, no mesmo movimento,
+  fez `DEBATER` e `BUDDY` produzirem texto **byte a byte idêntico**. Decisão do Breno: manter o
+  corpo do banco e gerar **apenas** saudação e frase final na persona, concatenando. Custo
+  esperado: uma chamada curta de LLM (1–2 s), não a aula inteira (8 s).
+  **O corpo do banco é revisado e não pode ser alterado pelo modelo** — a persona envolve, não
+  reescreve. Manter o fallback: sem banco, cai na geração ao vivo de hoje.
+- **Gate offline:** teste dos dois caminhos (com e sem banco) provando que o corpo servido é
+  **idêntico** ao `.md` de origem e que só abertura/fecho variam.
+- **Gate ao vivo:** `DEBATER` e `BUDDY` no **mesmo tópico** produzem aberturas **diferentes** e
+  corpo **idêntico**; e o **p90 medido** fica abaixo de **3 s** (contra 0,98 s de hoje e 8,00 s
+  da geração ao vivo). Se estourar, reverter — o ganho de latência é o que justificou o T008.
+- **Depende de:** —
+- **Status:** TODO
+
+### T022 — C10: reciprocidade que o modelo de fato obedece
+- **Escopo:** investigado — **não é instrumento**. O teste semeia `short_streak:2` e envia `ok`
+  (1 palavra), então `_monos` é verdadeiro e a diretiva de reciprocidade **chega ao prompt**. O
+  modelo simplesmente a ignora: respondeu com **duas perguntas** e nada de si, justamente com a
+  aluna monossilábica.
+  **Hipótese a testar (uma variável), herdada do T012:** instrução perde para exemplo. O
+  `reciprocityLine` é instrução pura; dar um **exemplo curto** do formato desejado deve mover o
+  comportamento, como moveu no A1.
+- **Gate:** baseline (0/3 hoje) contra variante com **N≥6**, e **detector objetivo**: a resposta
+  divide algo próprio **e** faz no máximo **uma** pergunta. Reverter se não melhorar.
+- **Depende de:** —
+- **Status:** TODO
+
+### T023 — C15: interesses no A1, por código
+- **Escopo:** três hipóteses de prompt já foram refutadas (0/9 no T012, 0/3 na bateria). Decisão
+  do Breno: parar de pedir ao modelo e **decidir no código** — o `Contexto Conversa` escolhe um
+  interesse do aluno e monta o gancho concreto que vai ao prompt, em vez de mandar "use os
+  interesses". É a espinha dorsal do projeto: decisão pedagógica é código, o LLM escreve o texto.
+- **Gate:** C15 com **N≥6** passa a mencionar o interesse; **e não quebra** o C1 (correção, hoje
+  9/9) nem o **C8** (teto de 18 palavras do A1) — os dois medidos na mesma rodada.
+- **Depende de:** —
+- **Status:** TODO
+
+### T024 — a lacuna: correção de erro FORA da lista, em nível alto
+- **Escopo:** a jornada mostrou o v8 **não corrigindo** um erro fora da lista em **C1**, onde o
+  v7.4 corrigiu a mesma entrada no mesmo nível e persona. É **N=1** e o T012 só tocou o prompt
+  do A1, então a leitura provável é variância — **mas não existe teste que meça isso**: o C1/C15
+  medem o A1, e o C3 (que passa) usa um erro que **está** na lista de ERROS QUE CONTAM.
+  Criar o teste que faltava: correção de erro **fora da lista** em **B2 e C1**, N≥6.
+- **Gate:** o teste existe, roda contra o v8 e **reporta uma taxa**. Se reprovar, **registrar
+  como defeito novo** — e não consertar dentro desta tarefa.
+- **Depende de:** —
+- **Status:** TODO
+
+### T025 — `/menu` e o botão de concluir: defeito de produto ou cegueira do instrumento?
+- **Escopo:** o relatório os registrou como "não enviam nada ao aluno" (§6.2), **e isso pode
+  estar errado**. O nó `Enviar Menu` é um nó **Telegram com o texto na própria expressão do nó**,
+  e a **armadilha nº 14** do handoff diz que texto de nó Telegram estático é **invisível ao
+  digest por construção**. Ou seja: o aluno provavelmente **recebe** a mensagem, e o instrumento
+  é que não a vê.
+  Decidir com evidência: ler o `runData` do nó de envio, não o digest. Se for cegueira, **fazer
+  o digest enxergar** texto estático de nó Telegram e **corrigir o §6.2 do relatório**.
+- **Gate:** a evidência que decide, e o `tr_jornada_v8.md` reinterpretado — ou o defeito
+  confirmado, com o nó que falha nomeado.
+- **Depende de:** —
+- **Status:** TODO
+
+### T026 — revalidar: a bateria fecha em "todos positivos"?
+- **Escopo:** com T019–T025 fechadas, repetir Fase A + Fase B (N=3) + jornada no v8 e atualizar
+  o `RELATORIO_DIAGNOSTICO_v8.md` com a coluna **v8.1**, no mesmo formato. Só então avaliar se a
+  meta foi atingida.
+- **Gate:** relatório atualizado com as três colunas (v7.4 · v8 · v8.1) e **zero `FALHOU`** — ou
+  a lista explícita do que restou e por quê.
+- **Depende de:** T019, T020, T021, T022, T023, T024, T025
+- **Status:** TODO
+
+### Fora deste bloco, mas ainda bloqueiam o lançamento
+Não viraram tarefa aqui porque **dependem do Breno**, não de código:
+- **T010** — camada 2 da validação de nome não autentica (lixo digitado vira nome de aluno)
+- **`DEV_COMMANDS = true`** — `/reset` e `/resetfull` abertos a qualquer usuário
+- **Revisão humana dos 60 `.md`** — o gate confere forma, não se o texto ensina
+- **6 testes ainda sem automação** — `A7 B2 C8 L2 S2 S3` (o R7 sai com o T020)

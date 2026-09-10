@@ -1,6 +1,6 @@
 # Estado do loop
 
-- **Tarefa atual:** nenhuma — Bloco 2 concluido. Aguarda decisoes do Breno (ver diario 07/09)
+- **Tarefa atual:** T019 (abre o Bloco 3 — v8.1). Aguarda autorizacao para republicar o v8
 - **Última concluída:** T018 — relatorio diagnostico comparativo v7.4 x v8, em .md e PDF
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** T010 aguarda decisao do Breno (credencial da camada 2). Nao bloqueia T011/T012. Ambiente: n8n e Postgres no ar, os dois workflows ativos, webhook do v8 conferido em 06/09.
@@ -137,3 +137,9 @@
 - 2026-09-07 ACHADO T9: a resposta de duvida usa MARKDOWN (`*`) numa saida HTML — aparece literal no Telegram. Mesmo defeito das crases nos 60 .md, agora na geracao ao vivo.
 - 2026-09-07 `conteudo/md_para_pdf.js`: md -> HTML -> Chrome headless --print-to-pdf. Sem pandoc/puppeteer e sem instalar nada. Sai 1 se o PDF nao existir ou vier vazio.
 - 2026-09-07 PLACAR v8 (com as propostas da rubrica): 22 PASSOU, 4 ressalva, 5 FALHOU. Faltam 5 defeitos para "todos positivos": T3, T17, R4, C10, C15. TRES sao achados desta rodada.
+- 2026-09-10 BLOCO 3 PLANEJADO (v8.1, T019-T026): fechar a bateria em "todos positivos". Decisoes do Breno: T17 = corpo do banco + abertura/fecho na persona; escopo = 5 defeitos + 2 lacunas; C15 = ataque DETERMINISTICO (codigo escolhe o gancho, LLM so escreve).
+- 2026-09-10 CONVENCAO: "v8.1" e MARCO, nao arquivo. Trabalho segue em IAChat_Telegram_v8.json; a tag v8.1 nasce quando a bateria fechar. Nao criar json novo — o projeto ja pagou por multiplicar fluxos que dividem o mesmo webhookId.
+- 2026-09-10 CAUSA DO T3 LOCALIZADA (investigacao, ainda nao corrigida): nao e o texto do LANG. `expSys()` e `qSys()` recebem LANG[lvl] INTEIRO, entao a clausula "Escreva a EXPLICACAO em portugues" entra no prompt que gera a QUESTAO. Prova de que reforco textual nao resolve: B1 e B2 tem a clausula de perguntas IDENTICA e o B2 falha 3/3. Conserto no T019: separar LANG_EXPL de LANG_PERG.
+- 2026-09-10 C10 CONFIRMADO COMO DEFEITO DE PRODUTO (nao de instrumento): o teste semeia short_streak:2 e envia 'ok' (1 palavra), entao _monos e true e a diretiva de reciprocidade CHEGA ao prompt. O modelo ignora. Hipotese do T022, herdada do T012: instrucao perde para exemplo.
+- 2026-09-10 CORRECAO AO RELATORIO: o "/menu mudo" registrado no §6.2 provavelmente NAO e defeito de produto. `Enviar Menu` e no Telegram com o texto na expressao do proprio no, e a armadilha nº 14 diz que isso e invisivel ao digest. O aluno provavelmente RECEBE. Sob investigacao na T025; §6.2 e §9 ja marcados com a ressalva.
+- 2026-09-10 PRE-REQUISITO do bloco 3: T019-T023 alteram o fluxo e exigem republicar (publica_v8.js). A autorizacao do Breno de 06/09 valia para AQUELE loop — pedir de novo antes de executar.

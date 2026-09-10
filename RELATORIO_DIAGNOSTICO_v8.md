@@ -166,11 +166,20 @@ persona (Coach)**.
 O bot respondeu ao pedido de gabarito ensinando a estrutura da Third Conditional e devolvendo
 a pergunta, sem entregar a resposta — que é o comportamento desejado.
 
-### 6.2 Dois turnos ainda somem, e são os mesmos de 04/09
+### 6.2 Dois turnos aparecem vazios, e são os mesmos de 04/09
 
-`[botão] ✅ Pronto` (fim do menu de interesses) e **`/menu`** não enviam **nada** ao aluno.
-Não é regressão — o v7.4 tem os dois — mas `/menu` silencioso é defeito de produto num bot
-cujo `/help` lista 11 comandos.
+`[botão] ✅ Pronto` (fim do menu de interesses) e **`/menu`** aparecem sem nada enviado ao
+aluno. Não é regressão — o v7.4 tem os dois.
+
+> ⚠️ **Correção, feita em 10/09:** a primeira redação desta seção chamou isso de **defeito de
+> produto**, e provavelmente está errado. O nó `Enviar Menu` é um **nó Telegram com o texto na
+> própria expressão do nó**, e a **armadilha nº 14** do handoff registra que texto de nó
+> Telegram estático é **invisível ao digest por construção**. Ou seja: o aluno provavelmente
+> **recebe** a mensagem, e é o instrumento que não a enxerga.
+>
+> Isso está sob investigação na **T025**, que decide pelo `runData` do nó de envio em vez do
+> digest. Até lá, **não conte estes dois como defeito** — foi exatamente o erro que a armadilha
+> nº 1 adverte, na direção contrária: tratar silêncio do instrumento como fato sobre o produto.
 
 ### 6.3 O sinal mais incômodo desta rodada
 
@@ -261,7 +270,7 @@ Meta declarada: abrir para usuários reais só quando a bateria estiver limpa. *
 | 3 | **Bot repete o palavrão do aluno** | R4 | 🔴 achado novo · risco para público de 16 anos |
 | 4 | **Sem reciprocidade com aluno monossilábico** | C10 | 🔴 achado novo · o `reciprocityLine` existe e prevê o caso — investigar se chegou ao prompt |
 | 5 | **Interesses mortos no A1** | C15 | ⚠️ conhecido · 0/9 no T012, 0/3 aqui, **sem hipótese candidata** |
-| 6 | **`/menu` e `✅ Pronto` não enviam nada** | jornada §6.2 | ⚠️ pré-existente (v7.4 tem os dois) · `/menu` mudo num bot cujo `/help` lista 11 comandos |
+| 6 | **`/menu` e `✅ Pronto` aparecem vazios** | jornada §6.2 | ⚠️ **provável cegueira do instrumento, não defeito** — o texto mora na expressão de um nó Telegram, que o digest não lê (armadilha nº 14). Sob investigação na **T025** |
 
 **E um sinal a investigar antes de virar item:** a jornada mostrou o v8 **não corrigindo** um
 erro fora da lista em C1, onde o v7.4 corrigiu (§6.3). É N=1 e provavelmente variância — mas
