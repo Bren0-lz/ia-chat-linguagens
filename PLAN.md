@@ -358,7 +358,7 @@ a versão anterior.
 - **Gate:** baseline (0/3 hoje) contra variante com **N≥6**, e **detector objetivo**: a resposta
   divide algo próprio **e** faz no máximo **uma** pergunta. Reverter se não melhorar.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE — MANTIDA. Hipotese 1 (exemplo) deu 1/6 e foi REVERTIDA; hipotese 2 (precedencia sobre o gesto de assinatura da persona) levou a reciprocidade de **0/6 a 3/6** e "divide algo proprio" de 0/6 a 4/6, verificado transcricao a transcricao
 
 ### T023 — C15: interesses no A1, por código
 - **Escopo:** três hipóteses de prompt já foram refutadas (0/9 no T012, 0/3 na bateria). Decisão
@@ -368,7 +368,7 @@ a versão anterior.
 - **Gate:** C15 com **N≥6** passa a mencionar o interesse; **e não quebra** o C1 (correção, hoje
   9/9) nem o **C8** (teto de 18 palavras do A1) — os dois medidos na mesma rodada.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE com ressalva — gancho deterministico aplicado e CONFIRMADO no prompt. Probe do C15 (cortesia) segue 0/6, mas em cenario NEUTRO da 2/4 contra 0/4 do baseline. O gancho funciona; o que o vence e a obrigacao social de espelhar "how are you". O PROBE precisa ser revisto (nova tarefa), nao o gancho
 
 ### T024 — a lacuna: correção de erro FORA da lista, em nível alto
 - **Escopo:** a jornada mostrou o v8 **não corrigindo** um erro fora da lista em **C1**, onde o

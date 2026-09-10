@@ -1017,3 +1017,243 @@ passa a corrigir.
 
 **C15 continua morto** (0/9, sem qualquer movimento). Interesses no A1 são um problema separado do
 exemplo de formato — o exemplo novo cita um interesse e ainda assim não induz uso. Fica aberto.
+
+## baseline-T023-v8 — 2026-09-10T13:38:28.401Z (N=6)
+
+- **correcao** (C1: "i like play games" -> corrige?): **6/6** | palavras em ingles (media): 16.8 | respostas vazias: 0
+- **interesses** (C15: cita games/basketball?): **0/6** | palavras em ingles (media): 10.5 | respostas vazias: 0
+- **controle: erro DA lista** ("video games is fun" -> corrige? regua estrita: reparo explicito, nao basta usar a forma certa): **1/6** | palavras em ingles (media): 13.2 | respostas vazias: 0
+
+<details><summary>saidas cruas</summary>
+
+
+correcao 1 (ok=true, 15 palavras):
+```
+Oh, cool! We say 'I like to play games'. What games do you like? 🙂
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+correcao 2 (ok=true, 20 palavras):
+```
+Oh, nice! We say 'I like to play games' or 'I like playing games'. What games do you like? 😊
+🇧🇷 Ah, que legal! A gente diz 'I like to play games' ou 'I like playing games'. Que jogos você gosta?
+```
+
+correcao 3 (ok=true, 15 palavras):
+```
+Oh, cool! We say 'I like to play games'. What games do you like? 🙂
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+correcao 4 (ok=true, 15 palavras):
+```
+Oh, cool! We say 'I like to play games'. What games do you like? 🙂
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+correcao 5 (ok=true, 20 palavras):
+```
+Oh, nice! We say 'I like to play games' or 'I like playing games'. What games do you like? 😊
+🇧🇷 Ah, legal! A gente diz 'I like to play games' ou 'I like playing games'. Que jogos você gosta?
+```
+
+correcao 6 (ok=true, 16 palavras):
+```
+Oh, that's cool! We say 'I like to play games'. What games do you like? 😊
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Quais jogos você gosta?
+```
+
+controle-lista 1 (ok=true, 14 palavras):
+```
+Oh, that's cool! We say 'video games are fun'. What games do you play?
+🇧🇷 Ah, que legal! A gente diz 'video games are fun'. Que jogos você joga?
+```
+
+controle-lista 2 (ok=false, 15 palavras):
+```
+Oh, that's so true! Video games are really fun. What games do you like? 😊
+🇧🇷 Ah, isso é muito verdade! Videogames são muito divertidos. Quais jogos você gosta?
+```
+
+controle-lista 3 (ok=false, 12 palavras):
+```
+Oh, I agree! Video games are fun. What game do you play?
+🇧🇷 Ah, eu concordo! Jogos de vídeo são divertidos. Que jogo você joga?
+```
+
+controle-lista 4 (ok=false, 12 palavras):
+```
+Oh, nice! Video games are really fun. What game do you play?
+🇧🇷 Ah, legal! Video games são muito divertidos. Qual jogo você joga?
+```
+
+controle-lista 5 (ok=false, 13 palavras):
+```
+Oh, I totally agree! Video games are fun. What game do you like?
+🇧🇷 Ah, eu concordo totalmente! Videogames são divertidos. Qual jogo você gosta?
+```
+
+controle-lista 6 (ok=false, 13 palavras):
+```
+Oh, that's cool! Video games 'are' fun. What games do you like? 😊
+🇧🇷 Ah, que legal! Video games 'are' fun. Quais jogos você gosta?
+```
+
+interesses 1 (ok=false, 11 palavras):
+```
+Hey there! I am good, thanks! How are you today? 😊
+🇧🇷 E aí! Eu estou bem, obrigado! Como você está hoje?
+```
+
+interesses 2 (ok=false, 11 palavras):
+```
+Hey Lucas! I am great, thanks! How are you today? 😊
+🇧🇷 Ei Lucas! Estou ótima, obrigado! Como você está hoje?
+```
+
+interesses 3 (ok=false, 10 palavras):
+```
+Hey there! I am good, thanks! How are you? 😊
+🇧🇷 E aí! Eu estou bem, obrigado! Como você está?
+```
+
+interesses 4 (ok=false, 10 palavras):
+```
+Hey Lucas! I am great, thanks! How about you? 😊
+🇧🇷 E aí, Lucas! Eu estou ótima, obrigado! E você?
+```
+
+interesses 5 (ok=false, 11 palavras):
+```
+Hey Lucas! I am great, thanks! How are you today? 😊
+🇧🇷 Ei Lucas! Eu estou ótima, obrigada! Como você está hoje?
+```
+
+interesses 6 (ok=false, 10 palavras):
+```
+Hey Lucas! I am great, thanks! 😊 What about you?
+🇧🇷 Oi Lucas! Eu estou ótima, obrigada! 😊 E você?
+```
+
+</details>
+
+
+## variante-gancho-T023 — 2026-09-10T13:46:37.956Z (N=6)
+
+- **correcao** (C1: "i like play games" -> corrige?): **6/6** | palavras em ingles (media): 14.8 | respostas vazias: 0
+- **interesses** (C15: cita games/basketball?): **0/6** | palavras em ingles (media): 10.0 | respostas vazias: 0
+- **controle: erro DA lista** ("video games is fun" -> corrige? regua estrita: reparo explicito, nao basta usar a forma certa): **4/6** | palavras em ingles (media): 14.7 | respostas vazias: 0
+
+<details><summary>saidas cruas</summary>
+
+
+correcao 1 (ok=true, 16 palavras):
+```
+Nice! We say 'I like to play games'. Do you like big games or small games?
+🇧🇷 Que legal! A gente diz 'I like to play games'. Você gosta de jogos grandes ou jogos pequenos?
+```
+
+correcao 2 (ok=true, 14 palavras):
+```
+That's cool! We say 'I like to play games'. What games do you play?
+🇧🇷 Que legal! A gente diz 'I like to play games'. Quais jogos você joga?
+```
+
+correcao 3 (ok=true, 15 palavras):
+```
+Oh, cool! We say 'I like to play games'. What games do you like? 🙂
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+correcao 4 (ok=true, 15 palavras):
+```
+Oh, nice! We say 'I like to play games'. What games do you like? 🙂
+🇧🇷 Ah, legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+correcao 5 (ok=true, 14 palavras):
+```
+Oh, nice! We say 'I like to play games'. What games do you like?
+🇧🇷 Ah, que legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+correcao 6 (ok=true, 15 palavras):
+```
+Oh, cool! We say 'I like to play games'. What games do you like? 🙂
+🇧🇷 Ah, legal! A gente diz 'I like to play games'. Que jogos você gosta?
+```
+
+controle-lista 1 (ok=true, 22 palavras):
+```
+Ah, nice! Video games are fun. We say 'video games are fun', not 'video games is fun'. What games do you play?
+🇧🇷 Ah, que legal! Video games são divertidos. A gente diz 'video games are fun', não 'video games is fun'. Que jogos você joga?
+```
+
+controle-lista 2 (ok=true, 14 palavras):
+```
+Oh, nice! We say 'video games ARE fun'. What game do you play? 🙂
+🇧🇷 Ah, que legal! A gente diz 'video games ARE fun'. Que jogo você joga?
+```
+
+controle-lista 3 (ok=false, 12 palavras):
+```
+Oh, I agree! Video games 'are' fun. What game do you like?
+🇧🇷 Ah, eu concordo! Videogames 'são' divertidos. Que jogo você gosta?
+```
+
+controle-lista 4 (ok=false, 12 palavras):
+```
+Oh, I agree! Video games 'are' fun. What game do you like?
+🇧🇷 Ah, eu concordo! Video games 'são' divertidos. Que jogo você gosta?
+```
+
+controle-lista 5 (ok=true, 14 palavras):
+```
+Oh, nice! We say 'video games ARE fun'. What game do you play? 🙂
+🇧🇷 Ah, legal! A gente diz 'video games ARE fun'. Qual jogo você joga?
+```
+
+controle-lista 6 (ok=true, 14 palavras):
+```
+Oh, I understand! We say 'video games ARE fun'. What game do you play?
+🇧🇷 Ah, eu entendo! A gente diz 'video games ARE fun'. Que jogo você joga?
+```
+
+interesses 1 (ok=false, 11 palavras):
+```
+Hi Lucas! I am good, thanks! How are you today? 🙂
+🇧🇷 Oi Lucas! Eu estou bem, obrigado! Como você está hoje?
+```
+
+interesses 2 (ok=false, 9 palavras):
+```
+Hey! I am good, thanks! How are you? 😊
+🇧🇷 Ei! Estou bem, obrigado! Como você está?
+```
+
+interesses 3 (ok=false, 12 palavras):
+```
+I am very good, Lucas! Thanks for asking. What about you? 😊
+🇧🇷 Eu estou muito bem, Lucas! Obrigado por perguntar. E você?
+```
+
+interesses 4 (ok=false, 10 palavras):
+```
+Hey! I am good, thanks! How are you today? 😊
+🇧🇷 Ei! Eu estou bem, obrigada! Como você está hoje?
+```
+
+interesses 5 (ok=false, 9 palavras):
+```
+Hey! I am good, thanks! How are you? 😊
+🇧🇷 Ei! Estou bem, obrigado! Como você está?
+```
+
+interesses 6 (ok=false, 9 palavras):
+```
+Hey! I am good, thanks! How are you? 😊
+🇧🇷 Ei! Eu estou bem, obrigado! Como você está?
+```
+
+</details>
+
