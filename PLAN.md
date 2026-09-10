@@ -424,7 +424,7 @@ Não viraram tarefa aqui porque **dependem do Breno**, não de código:
 - **Gate:** `mede_correcao_nivel_alto.js` com N>=6 antes e depois; o `gerundio-apos-like` tem de
   sair de 0/12. Reverter se nao melhorar. E o C1/C8 do A1 nao podem regredir na mesma rodada.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE — HIPOTESE REFUTADA e REVERTIDA. Com exemplo em B1..C2: gerundio segue **0/12** (identico ao baseline), taxa 12/36 -> 13/36 (ruido). O que MATA a hipotese: o exemplo do A1 (T012) e de CONCORDANCIA (`I likes music`), nao de gerundio, e mesmo assim o A1 corrige gerundio 6/6; e o exemplo que pus no B2 era JUSTAMENTE sobre gerundio (`used to waking up`) e nao moveu nada. Logo, "ter exemplo" nao explica a diferenca A1 x B1+
 
 ### T028 — revisar o probe do C15
 - **Origem:** achado do T023. O probe manda `hello, how are you today`, uma pergunta social direta,
