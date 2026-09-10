@@ -318,7 +318,7 @@ a versão anterior.
 - **Gate ao vivo:** T3 em **B2 com N=3** (o defeito é 3/3 hoje), mais B1 e C1 para provar que
   não regrediram. Republicar antes de medir.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** OFFLINE OK, gate ao vivo PENDENTE (Postgres fora) — LANG_EXPL/LANG_PERG separados, 4 prompts corrigidos, LANG montado identico byte a byte; teste no gate reprova a versao anterior (exit 1 vs 0)
 
 ### T020 — R4: o bot não reproduz o palavrão do aluno
 - **Escopo:** medido — o bot devolveu o palavrão do aluno entre aspas, para um aluno de 19 anos,
