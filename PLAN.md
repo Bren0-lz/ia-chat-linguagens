@@ -318,7 +318,7 @@ a versão anterior.
 - **Gate ao vivo:** T3 em **B2 com N=3** (o defeito é 3/3 hoje), mais B1 e C1 para provar que
   não regrediram. Republicar antes de medir.
 - **Depende de:** —
-- **Status:** OFFLINE OK, gate ao vivo PENDENTE (Postgres fora) — LANG_EXPL/LANG_PERG separados, 4 prompts corrigidos, LANG montado identico byte a byte; teste no gate reprova a versao anterior (exit 1 vs 0)
+- **Status:** DONE, com ressalva honesta — a separacao do LANG esta feita e verificada, MAS o T3 nao estava quebrado: o detector julgava o cabecalho de interface junto do enunciado. T3 ao vivo PASSOU 3/3 depois de consertar o INSTRUMENTO (soEnunciado). O merito do T019 e higiene de prompt, nao conserto de regressao
 
 ### T020 — R4: o bot não reproduz o palavrão do aluno
 - **Escopo:** medido — o bot devolveu o palavrão do aluno entre aspas, para um aluno de 19 anos,
@@ -330,7 +330,7 @@ a versão anterior.
   item da lista de palavrões enviados. Hoje o R4 é `REVISAR` (leitura humana); automatizá-lo
   tira um teste da dívida de "sem automação".
 - **Depende de:** —
-- **Status:** OFFLINE OK, gate ao vivo PENDENTE (Postgres fora) — `civilidadeLine` definida no Contexto Conversa e consumida pelos 6 prompts; teste no gate reprova a versao anterior (12 assercoes, exit 1 vs 0)
+- **Status:** OFFLINE OK + publicado; R4 ao vivo saiu REVISAR (leitura humana), detector automatico ainda PENDENTE
 
 ### T021 — T17: abertura e fecho na voz da persona
 - **Escopo:** servir a explicação do banco (T008) trouxe **−88% de p90** e, no mesmo movimento,
@@ -345,7 +345,7 @@ a versão anterior.
   corpo **idêntico**; e o **p90 medido** fica abaixo de **3 s** (contra 0,98 s de hoje e 8,00 s
   da geração ao vivo). Se estourar, reverter — o ganho de latência é o que justificou o T008.
 - **Depende de:** —
-- **Status:** OFFLINE OK, gate ao vivo PENDENTE (Postgres fora) — moldura DETERMINISTICA (sem chamada de modelo): preserva os 0,98 s em vez de gastar 1-2 s. 5 personas com aberturas distintas, corpo do banco intacto, teto do Telegram respeitado. Teste reprova a versao anterior acusando o T17
+- **Status:** VIVO OK — a abertura do DEBATER apareceu na explicacao servida do banco (exec da rodada de 10/09: "Vamos ao ponto, Yuki: esse assunto costuma ser mal explicado por ai"). Moldura DETERMINISTICA (sem chamada de modelo): preserva os 0,98 s em vez de gastar 1-2 s. 5 personas com aberturas distintas, corpo do banco intacto, teto do Telegram respeitado. Teste reprova a versao anterior acusando o T17
 
 ### T022 — C10: reciprocidade que o modelo de fato obedece
 - **Escopo:** investigado — **não é instrumento**. O teste semeia `short_streak:2` e envia `ok`

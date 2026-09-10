@@ -31,8 +31,10 @@ mudado — e este relatório separa as duas coisas em toda tabela.
 O placar agregado é quase idêntico, e isso **esconde as duas mudanças que importam**:
 
 1. ✅ **C1 virou** — a correção no A1 saiu de `FALHOU` para `PASSOU 3/3`.
-2. 🔴 **T3 caiu** — o enunciado das questões de B2 passou a sair em **português**. É regressão
-   introduzida pelo próprio v8.
+2. ⚠️ ~~**T3 caiu**~~ — **corrigido em 10/09: o T3 nunca esteve quebrado.** O detector julgava o
+   texto inteiro, e o `Parse Professor` concatena ao enunciado um cabeçalho de interface
+   (`▶️ Questões de "…". Acerte 5 seguidas…`) que é **português por desenho**. Com o detector
+   julgando só o enunciado, o T3 dá **PASSOU 3/3** ao vivo. Detalhe na §4.3.
 
 Aplicando a rubrica aos 11 `REVISAR` (§5), o placar real do v8 fica **22 PASSOU · 4 com
 ressalva · 5 FALHOU**, e a distância até a meta "todos os diagnósticos positivos" é de
@@ -111,7 +113,7 @@ Teste a teste. **Só duas linhas mudaram.**
 | teste | v7.4 (04/09, N=1) | v8 (06/09, N=3) | |
 |---|---|---|---|
 | **C1** — corrige `i like play games` (A1) | **FALHOU** | **PASSOU 3/3** | ✅ **melhorou** |
-| **T3** — idioma da trilha (B2) | PASSOU | **FALHOU 3/3** | 🔴 **regrediu** |
+| **T3** — idioma da trilha (B2) | PASSOU | ~~FALHOU 3/3~~ → **PASSOU 3/3** | ⚠️ **era falso vermelho** — ver abaixo |
 | A5, PS1, C16, C17, C12, T4, T14 | PASSOU | PASSOU | = |
 | C3, C4, C7, R5, T6, T12, T13, T16 | PASSOU | PASSOU 3/3 | = |
 | **C15** — usa interesses (A1) | FALHOU | **FALHOU 3/3** | = (segue aberto) |
@@ -122,6 +124,43 @@ desenho). Todos os qualitativos deram o mesmo veredito nas três rodadas — inc
 `FALHOU`, o que os torna reprodutíveis, não ruído.
 
 **Turnos vazios: 0.** Nenhum veredito foi obtido por ausência de resposta (armadilha nº 1).
+
+### 4.3 O T3 não era regressão — era o detector julgando a string errada
+
+Publiquei na primeira versão deste relatório que o **enunciado de B2 saía em português** e chamei
+isso de regressão do v8. **Estava errado.** O enunciado real, lido do `runData` (exec 3930):
+
+```
+❓ Complete the sentence: I have been studying ___ two hours.
+```
+
+Inglês impecável. O que o detector via era o `finalText`, onde o `Parse Professor` **concatena o
+cabeçalho da interface** ao enunciado:
+
+```
+▶️ Questões de "Present perfect continuous". Acerte 5 seguidas para liberar o próximo
+tópico! (sequência atual: 0/5)
+
+❓ Complete the sentence: I have been studying ___ two hours.
+```
+
+O cabeçalho é português **por desenho** — é interface, vale em todos os níveis, e nada tem a ver
+com o contrato de idioma da trilha. O filtro do T3 removia as linhas rotuladas `[prof.feedback]`,
+mas o mesmo texto reaparece sob `[PROFESSOR]`, e essa passava.
+
+**É a armadilha nº 13 pela quarta vez neste projeto:** o instrumento julgando a string errada. E
+foi introduzida pelo próprio conserto do T013 — antes dele o T3 nem olhava o enunciado.
+
+Com `soEnunciado()` separando interface de conteúdo, o **T3 dá PASSOU 3/3 ao vivo**. As duas
+direções estão no gate: enunciado em inglês com cabeçalho em português **aprova**; enunciado
+realmente em português **reprova**; só cabeçalho, sem enunciado, dá **inconclusivo** — nunca
+aprovação.
+
+> **Consequência para o T019.** A separação do `LANG` (`LANG_EXPL` / `LANG_PERG`) foi feita para
+> consertar um defeito que **não existia**. Ela continua sendo melhoria legítima — nenhum prompt
+> deve receber instrução que não lhe diz respeito, e o `qSys` recebia a cláusula de explicação —
+> mas seu mérito é higiene de prompt, **não** o conserto de uma regressão. Registrado aqui para
+> não virar crédito falso.
 
 ---
 
@@ -272,11 +311,11 @@ motivação original do bloco estava inflada em ~1,9×: **o "17,8 s" nunca exist
 
 ## 9. O que falta para "todos os diagnósticos positivos"
 
-Meta declarada: abrir para usuários reais só quando a bateria estiver limpa. **Faltam 5** (o item 6 caiu na T025 — não era defeito).
+Meta declarada: abrir para usuários reais só quando a bateria estiver limpa. **Faltam 4** — dos 6 itens originais, **dois caíram por serem defeito de instrumento, não de produto** (T3 na §4.3, `/menu` na T025).
 
 | # | defeito | teste | estado |
 |---|---|---|---|
-| 1 | **Enunciado de B2 em português** | T3 | 🔴 regressão nova · o `qSys` injeta o `LANG` inteiro e a cláusula de explicação em PT contamina a questão. Consertado para B1 no T005b; **B2 ficou para trás** |
+| ~~1~~ | ~~Enunciado de B2 em português~~ | T3 | ✅ **NÃO era defeito** — detector julgava o cabeçalho de interface junto do enunciado (§4.3). PASSOU 3/3 ao vivo com o detector corrigido |
 | 2 | **Persona sumiu da explicação** | T17 | 🔴 achado novo · decisão de produto (§7) |
 | 3 | **Bot repete o palavrão do aluno** | R4 | 🔴 achado novo · risco para público de 16 anos |
 | 4 | **Sem reciprocidade com aluno monossilábico** | C10 | 🔴 achado novo · o `reciprocityLine` existe e prevê o caso — investigar se chegou ao prompt |

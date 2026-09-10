@@ -61,6 +61,42 @@ function temPortugues(t) {
   return pt.some((w) => s.includes(w));
 }
 
+// Separa o ENUNCIADO da questao do cabecalho de INTERFACE.
+//
+// POR QUE ISTO EXISTE (achado em 10/09, e custou uma correcao no fluxo):
+// o `Parse Professor` publica em `finalText` o feedback do engine CONCATENADO a questao:
+//
+//   ▶️ Questões de “Present perfect continuous”. Acerte 5 seguidas para liberar o
+//   próximo tópico! (sequência atual: 0/5)
+//
+//   ❓ Complete the sentence: I have been studying ___ two hours.
+//
+// O cabecalho e portugues POR DESENHO -- e interface, nao enunciado, e vale em todos os
+// niveis. Julgando o texto inteiro, o T3 acusava "enunciado em portugues" em B2 mesmo com
+// o enunciado impecavel em ingles: FALSO VERMELHO 3/3, que chegou a ser publicado no
+// relatorio do v8 como "regressao do proprio v8".
+//
+// E a armadilha nº 13 do handoff outra vez: o instrumento julgando a string errada.
+function soEnunciado(texto) {
+  const linhas = String(texto || '').split('\n');
+  const util = linhas.filter(l => {
+    const s = l.trim();
+    if (!s) return false;
+    if (/^\[[a-zA-Z.]+\]/.test(s)) {                    // rotulos do digest
+      if (!/❓/.test(s)) return false;
+    }
+    if (/^▶️\s*Quest[oõ]es de/.test(s)) return false;    // cabecalho do quiz
+    if (/^📚\s*Modo Professor/.test(s)) return false;    // abre-alas do topico
+    if (/Acerte \d+ seguidas/.test(s)) return false;     // regra do quiz, sempre em PT
+    if (/sequ[eê]ncia atual/i.test(s)) return false;
+    return true;
+  });
+  // Se houver linha com o marcador de questao, ela (e o que vem depois) e o enunciado.
+  const iq = util.findIndex(l => /❓/.test(l));
+  const alvo = iq >= 0 ? util.slice(iq) : util;
+  return alvo.join('\n').replace(/^\[[a-zA-Z.]+\]\s*/gm, '').trim();
+}
+
 // Veredito do T3: a explicacao e o enunciado da questao estao no idioma que o fluxo manda?
 // `pergunta` pode vir null quando a rodada nao chegou a pedir a questao — nesse caso o veredito
 // e null (INCONCLUSIVO), nunca aprovacao (armadilha n.1).
@@ -80,7 +116,13 @@ function vereditoT3(nivel, explicacao, pergunta, contrato) {
     return { ok: null, contrato: c, detalhe: partes.join(' | ') };
   }
 
-  const ptPerg = temPortugues(pergunta);
+  const pergLimpa = soEnunciado(pergunta);
+  if (!pergLimpa.trim()) {
+    partes.push('enunciado esperado em ' + c.pergunta.toUpperCase() + ': NAO CAPTURADO (so cabecalho)');
+    return { ok: null, contrato: c, detalhe: partes.join(' | ') };
+  }
+
+  const ptPerg = temPortugues(pergLimpa);
   const pergOk = c.pergunta === 'pt' ? ptPerg : !ptPerg;
   partes.push('enunciado esperado em ' + c.pergunta.toUpperCase() + ': portugues detectado=' + ptPerg
     + ' -> ' + (pergOk ? 'ok' : 'FORA DO CONTRATO'));
@@ -88,4 +130,4 @@ function vereditoT3(nivel, explicacao, pergunta, contrato) {
   return { ok: explOk && pergOk, contrato: c, detalhe: partes.join(' | ') };
 }
 
-module.exports = { contratoIdioma, classificaDiretivaPergunta, temPortugues, vereditoT3 };
+module.exports = { contratoIdioma, classificaDiretivaPergunta, temPortugues, vereditoT3, soEnunciado };

@@ -89,5 +89,42 @@ try { classificaDiretivaPergunta('X', 'Escreva a EXPLICAÇÃO em português e pr
 catch (e) { estourou = true; }
 ok('LANG sem diretiva de PERGUNTAS -> estoura, nao chuta', estourou);
 
+// ---------------------------------------------------------------------------
+// O CABECALHO DE INTERFACE NAO E ENUNCIADO (achado em 10/09)
+//
+// O `Parse Professor` concatena o feedback do engine a questao. Esse feedback e
+// portugues POR DESENHO, em todos os niveis -- e interface, nao enunciado.
+// Julgando o texto inteiro, o T3 acusava "enunciado em portugues" em B2 com o
+// enunciado impecavel em ingles: falso vermelho 3/3, publicado no relatorio do v8
+// como se fosse regressao do produto. Armadilha nº 13: julgar a string errada.
+const { soEnunciado } = require('./idioma_professor.js');
+
+// texto REAL capturado da exec 3930 (v8, B2)
+const REAL_B2 = '▶️ Questões de “Present perfect continuous”. Acerte 5 seguidas para liberar'
+  + ' o próximo tópico! (sequência atual: 0/5)\n\n❓ Complete the sentence: I have been studying ___ two hours.';
+
+ok('soEnunciado descarta o cabecalho do quiz',
+  !/Acerte 5 seguidas/.test(soEnunciado(REAL_B2)));
+ok('soEnunciado preserva o enunciado',
+  /Complete the sentence/.test(soEnunciado(REAL_B2)));
+ok('B2 com enunciado EN + cabecalho PT -> APROVA (era o falso vermelho)',
+  vereditoT3('B2', 'Explicação em português, com você e não para acionar o detector.', REAL_B2, contrato).ok === true);
+
+// A contraprova: enunciado REALMENTE em portugues continua reprovando. Sem isto o
+// conserto viraria carimbo -- que foi o erro cometido na tentativa 2 do T005c.
+const RUIM_B2 = '▶️ Questões de “X”. Acerte 5 seguidas para liberar o próximo tópico!'
+  + '\n\n❓ Complete a frase: eu tenho estudado ___ duas horas, e você não parou.';
+ok('B2 com enunciado em PT -> REPROVA (o conserto nao virou carimbo)',
+  vereditoT3('B2', 'Explicação em português com você e não.', RUIM_B2, contrato).ok === false);
+
+// A1 manda enunciado em PT: o mesmo cabecalho nao pode fazer o A1 reprovar nem aprovar por engano
+ok('A1 com enunciado em PT -> APROVA',
+  vereditoT3('A1', 'Explicação em português com você e não.',
+    '▶️ Questões de “Cumprimentos”. Acerte 5 seguidas!\n\n❓ Como você diz "oi" em inglês?', contrato).ok === true);
+
+ok('so cabecalho, sem enunciado -> INCONCLUSIVO, nunca aprovacao',
+  vereditoT3('B2', 'Explicação em português com você e não.',
+    '▶️ Questões de “X”. Acerte 5 seguidas para liberar o próximo tópico!', contrato).ok === null);
+
 console.log(fails ? '\nREPROVOU: ' + fails + ' asserção(oes)' : '\nPASSOU: contrato de idioma da trilha');
 process.exit(fails ? 1 : 0);
