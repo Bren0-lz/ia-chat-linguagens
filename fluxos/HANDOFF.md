@@ -1,14 +1,17 @@
 # HANDOFF — IAChat
 
-> **Estado em 05/09/2026.** Este é o **único** handoff do projeto: em vez de criar um arquivo
+> **Estado em 10/09/2026.** Este é o **único** handoff do projeto: em vez de criar um arquivo
 > datado por sessão, atualize este. A proliferação de handoffs datados foi justamente o que
 > gerou documentos contraditórios em julho e agosto.
 >
-> Ele agora contém as três coisas: **o que o projeto é e aonde deve chegar** (§1), **onde
-> estamos** (§2–§4) e **o plano da v8** (§5). O `PLANO_v8_2026-09-04.md` deixou de ser o plano
-> e passou a ser o **registro de evidência** da bateria de 04/09 — as medições longas ficam lá.
+> Ele contém: **o que o projeto é e aonde deve chegar** (§1), **onde estamos** (§2), **o que se
+> aprendeu sobre o produto** (§3–§5), **as armadilhas já pagas** (§6) e o ferramental (§7–§11).
 >
-> Roteiro completo dos testes: `TESTES_DIAGNOSTICOS.md`.
+> **§5 é a seção mais importante para quem chega agora.** Ela explica *por que* certas coisas
+> melhoraram e outras regrediram — e o padrão que se repetiu tantas vezes que virou método.
+>
+> Roteiro dos testes: `TESTES_DIAGNOSTICOS.md`. Última medição completa:
+> `RELATORIO_DIAGNOSTICO_v8.md` (+ PDF), com as três colunas v7.4 · v8 · v8.1.
 
 ---
 
@@ -29,33 +32,15 @@ Não é um chatbot com um prompt. O estado do aluno — nível, personalidade, i
 na trilha, sequência de dias — vive no Postgres e sobrevive a tudo. As decisões pedagógicas
 (subir de nível, avançar tópico, aceitar uma resposta) são **código determinístico**; o LLM
 escreve o texto, não decide o currículo. Essa separação é a espinha dorsal do projeto e não
-deve ser diluída.
+deve ser diluída — e em 10/09 ela ganhou duas confirmações práticas (§5.4).
 
 ### A régua de qualidade
 
-O objetivo declarado é ter o agente **no mais alto nível possível, o quanto antes**. Na prática
-isso quer dizer três coisas mensuráveis:
-
 | | |
 |---|---|
-| **Ensina de verdade** | a explicação de um tópico tem de bastar para o aluno acertar as questões dele sozinho, sem buscar fora |
-| **Corrige de verdade** | erro do aluno vira reparo explícito, em todos os níveis — hoje isso falha no A1 (§4) |
-| **Não parece um robô** | personalidade reconhecível, usa os interesses do aluno, e não trava por 18 segundos esperando o modelo |
-
-### Onde ele ainda não chega
-
-Três lacunas conhecidas, em ordem de impacto:
-
-1. **O A1 não corrige e não usa interesses.** Medido, reproduzido, e com duas hipóteses já
-   refutadas (§4). É o nível de entrada — ou seja, o pior lugar possível para falhar.
-2. ~~**O modo Professor é lento e a explicação é gerada na hora.**~~ **Resolvido no v8, ainda não
-   no bot.** As 60 explicações vêm do banco: p90 de 0,98 s contra 8,00 s da geração ao vivo
-   (`MEDICOES_professor_v8.md`). O 17,8 s que motivou isto era o instrumento com viés — o real
-   era 9,0 s (§6 nº 16). **Falta a sua revisão dos 60 textos**, que é a única coisa que garante
-   qualidade: o gate confere forma e cobertura, não se o texto ensina. E falta o v8 virar o bot.
-3. **O material de referência ainda não existe.** Os livros WAYS 6º–9º ano estão sendo
-   convertidos em `.md` para o agente usar como fonte. Isso muda o teto de qualidade do
-   Professor, e ainda não começou.
+| **Ensina de verdade** | a explicação de um tópico tem de bastar para o aluno acertar as questões dele sozinho |
+| **Corrige de verdade** | erro do aluno vira reparo explícito — hoje isso falha em **nível alto** (§4.1) |
+| **Não parece um robô** | personalidade reconhecível, usa os interesses do aluno, e não trava esperando o modelo |
 
 ### Estágio
 
@@ -69,326 +54,272 @@ prompt e de comportamento são baratas **agora** e ficam caras depois.
 | | |
 |---|---|
 | **Fluxo do bot** | `IAChat_Telegram_v7.4` — n8n id `9MA0o1XJjD33BnKc`, **101 nós**, `active=true`. **CONGELADO** na tag git `v7.4-congelado`; é ele que atende o Telegram |
-| **Fluxo de trabalho** | `IAChat_Telegram_v8` — n8n id `PbwEf7L9xEXhJaCg`, **106 nós**, `active=true` **em paralelo**. Só recebe tráfego de teste: ingress em `iachat-test-v8` e `Gatilho Telegram` desabilitado |
+| **Fluxo de trabalho** | `IAChat_Telegram_v8` — n8n id `PbwEf7L9xEXhJaCg`, **106 nós**, `active=true` **em paralelo**. Só tráfego de teste: ingress `iachat-test-v8` e `Gatilho Telegram` desabilitado |
 | **Arquivo de edição** | `fluxos/IAChat_Telegram_v8.json` — **nunca** o v7.4 |
-| **Publicar o v8** | `node fluxos/_teststand/publica_v8.js` (único caminho autorizado; alvo cravado, aborta se o arquivo puder roubar o bot) |
-| **Loop de desenvolvimento** | `PLAN.md` + `STATE.md` + `/next`; agentes em `.claude/agents/`. Gate: `npm run gate` (~7 s, offline) |
-| **Nudge** | `IAChat_Nudge_Retencao_v1` — id `DBF6NoEXRXrHAy85`, **DESATIVADO** de propósito |
-| **Modelos** | Vertex/Gemini desde 03/09: `gemini-2.5-flash` (Conversa, Professor, Dúvida), `gemini-2.5-flash-lite` (Extrator, Validar Nome). Áudio na Groq: `whisper-large-v3` |
-| **Banco** | Postgres `127.0.0.1:5433` (Docker, `iachat-pg`), **14 migrations** (a 013 criou `topic_explanations`, 60 linhas) |
-| **Regressão offline** | `npm run gate` — regressão dos nós de código, cadastro de nome, camada 1, abre-alas, explicação do banco, TRACK, conteúdo, vazamento, latência, e a prova de que o v7.4 não foi tocado |
-| **Fase A** (determinísticos) | **17/17** |
-| **Fase B** (LLM) | **16 passaram · 2 falharam (C1, C15) · 11 revisar · 0 inconclusivos** |
-| **Latência (L1)** | **recalculado em 06/09** sobre os mesmos 80 turnos (execs 3099–3178): média **2,55 s**, p90 **6,16 s**, 4/80 acima de 8 s; infra ≤0,40 s. Os valores antigos (4,83 s / 11,59 s / 18 acima de 8 s) vinham do `decompoe()` que somava nó aninhado — ver §6 nº 16. `professor:intro`: p90 **9,01 s**, não 17,81 s |
+| **Publicar** | `node fluxos/_teststand/publica_v8.js` (único caminho autorizado; alvo cravado, aborta se o arquivo puder roubar o bot) |
+| **Loop** | `PLAN.md` + `STATE.md` + `/next`; agentes em `.claude/agents/`. Gate: `npm run gate` (~6 s, offline, 17 comandos) |
+| **Modelos** | `gemini-2.5-flash` (Conversa, Professor, Dúvida), `gemini-2.5-flash-lite` (Extrator, Validar Nome), `whisper-large-v3` na Groq (áudio) |
+| **Banco** | Postgres `127.0.0.1:5433` (Docker `iachat-pg`), 14 migrations |
 
-**Nunca deixe duas versões ativas no mesmo webhook** — v7.2, v7.3 e v7.4 usam o mesmo
-`webhookId` (`telegram-iachat-webhook`). O v8 convive com o v7.4 **porque tem ingress próprio e o
-`Gatilho Telegram` desabilitado**; publicá-lo sem isso derruba o bot. O `publica_v8.js` aborta
-antes de publicar se essas duas condições não estiverem no arquivo.
+### "v8.1" é marco, não arquivo
 
-### Como retomar numa sessão nova do Claude Code
+Decidido em 10/09: **não criar `v8.1.json`**. O trabalho segue no `v8.json` e a tag `v8.1` nasce
+quando a bateria fechar. O repositório já tem v7.0–v7.4 dividindo o mesmo `webhookId`, com o
+aviso de que ativar uma derruba a outra; multiplicar arquivos recria esse problema.
 
-Todo o estado do loop está em arquivo — a conversa não é necessária.
+### Placar da última bateria (10/09)
 
-1. Leia `CLAUDE.md` (convenções, gates, zonas proibidas) e este documento.
-2. Leia `STATE.md` (tarefa atual, ambiente, diário de descobertas) e `PLAN.md` (T001–T012).
-3. Confira o ambiente **de verdade**, não pela nota: portas 5433 e 5678 abertas, e
-   `node fluxos/_teststand/gate_vivo_v8.js` respondendo — `active: true` não prova que o webhook
-   registrou.
-4. Rode `npm run gate`. Se estiver vermelho num repositório limpo, pare e descubra por quê antes
-   de qualquer coisa.
-5. `/next` executa uma tarefa: escolhe a próxima `TODO` com dependências satisfeitas, delega ao
-   `implementer`, verifica com o `verifier` (que não vê o raciocínio do implementer e roda os
-   gates do zero), commita e atualiza o estado. Três reprovações na mesma tarefa param o loop.
+| | v7.4 (04/09) | v8 (06/09) | **v8.1 (10/09)** |
+|---|---|---|---|
+| **Fase A** (determinísticos) | 17 PASSOU | 17 PASSOU | **17 PASSOU** |
+| **Fase B — PASSOU** | 16 | 16 | **17** |
+| **Fase B — FALHOU** | 2 | 2 | **1** (C15) |
+| **Fase B — REVISAR** | 11 | 11 | **11** |
 
-Se o n8n estiver fora, suba-o **na mesma janela** com o bloco `WEBHOOK_URL` do §7 — é a armadilha
-mais cara do projeto.
+> ⚠️ **A rodada v8.1 tem N=1 na maioria dos testes.** O sistema matou o processo **três vezes por
+> falta de memória**; só T12/T13/T15/T16/T17 chegaram a N=3, e a **jornada não foi executada**.
+> Vereditos N=1 são indicativos. Refazer com a máquina folgada antes de comparar com rigor.
 
 ### Estado que exige atenção agora
 
 | | |
 |---|---|
-| ⚠ **`DEV_COMMANDS = true`** | ligado a pedido em 04/09. `/reset` e `/resetfull` funcionam **para qualquer usuário** e não checam quem digitou. Fica ligado até haver pedido explícito em contrário. **DESLIGAR ANTES DO LANÇAMENTO** — a regressão avisa a cada rodada |
-| ⚠ **`Validar Nome (IA)` reapontado ao Vertex** | commitado em 05/09 (`929f5d4`) e presente nos dois fluxos, mas **ainda NÃO validado ao vivo** — é a tarefa **T010** do `PLAN.md`. Se a Service Account não autenticar nesse caminho, o `Veredito IA` cai no fail-open: nada quebra, mas nada melhora, e o `asdfgh` continua virando nome |
-| ✅ ~~Docker/Postgres fora~~ | **resolvido em 05/09** — `iachat-pg` no ar, 5433 aberta. A nota antiga sobreviveu ao conserto e induziu um agente a declarar bloqueio falso: **confira a porta antes de acreditar em nota de ambiente** |
+| 🔴 **Camada 2 da validação de nome não autentica** | `Validar Nome (IA)` recebe `Authorization failed` da Vertex, o `Veredito IA` cai no **fail-open** e **`asdfgh` vira nome de aluno, sem nada no log**. Provado em 4 execuções (`testa_nome_camada2_vivo.js`). Hipótese: a credencial `mKfC2ANkOKHfbKal` não tem `scopes` preenchido — os nós LangChain montam `cloud-platform` sozinhos, o `httpRequest` genérico usa o campo da credencial. **Decisão do Breno:** corrigir os scopes ou criar `googlePalmApi` com API key do AI Studio |
+| ⚠️ **`DEV_COMMANDS = true`** | `/reset` e `/resetfull` funcionam **para qualquer usuário**. **DESLIGAR ANTES DO LANÇAMENTO** |
+| ⚠️ **60 `.md` sem revisão humana** | o gate confere forma, cobertura e idioma — **não se o texto ensina**. Está medido: um arquivo que nunca enuncia a regra **passa** |
 
-### O que foi feito em 04–05/09
+### Como retomar numa sessão nova
 
-- Dois defeitos **P0** de produto corrigidos e publicados (§3).
-- Quatro defeitos de **instrumento** corrigidos — um deles fazia o teste de vazamento de
-  gabarito julgar a string errada.
-- Bateria completa ao vivo, jornada de usuário ponta a ponta, L1 fechado com n=80.
-- Experimento do A1: duas hipóteses refutadas com medição.
-- Higiene: 296 → 161 arquivos rastreados.
+Todo o estado está em arquivo — a conversa não é necessária.
 
-### O que foi feito em 05–06/09 — o bloco do Professor
-
-Nove tarefas do `PLAN.md`, cada uma com implementação e **verificação independente** (o verificador
-não vê o raciocínio de quem implementou e roda os gates do zero). Três foram reprovadas e refeitas.
-
-- **v8 isolado e publicado como workflow separado**, ativo em paralelo ao bot, com ingress próprio.
-- **Abre-alas do Professor**: o aluno recebe `📚 Tópico N/10` 1,16 s antes de o modelo ser chamado.
-- **60 explicações pré-geradas** (Gemini 2.5 Pro), validadas, versionadas em `conteudo/explicacoes/`
-  e servidas do Postgres, com fallback para a geração ao vivo — provado inclusive com o banco
-  inacessível.
-- **Política de idioma**: B1–C2 passaram a explicar em português; enunciado em português em A1/A2 e
-  em inglês de B1 para cima; resposta sempre em inglês.
-- **O medidor de latência mentia** (§6 nº 16) e foi consertado; o L1 inteiro foi recalculado.
+1. Leia `CLAUDE.md` e este documento (especialmente **§5** e **§6**).
+2. Leia `STATE.md` (tarefa atual, ambiente, diário) e `PLAN.md`.
+3. **Confira o ambiente de verdade**, não pela nota: portas 5433 e 5678 abertas e
+   `node fluxos/_teststand/gate_vivo_v8.js` respondendo. `active: true` não prova que o webhook
+   registrou, e nota de ambiente desatualizada já induziu bloqueio falso neste projeto.
+4. Rode `npm run gate`. Vermelho em repositório limpo: pare e descubra por quê.
+5. `/next` executa uma tarefa; três reprovações na mesma param o loop.
 
 ---
 
-## 3. Os dois defeitos P0 — corrigidos, e por que a bateria não os viu
+## 3. O que o produto ganhou (e o que custou)
 
-Ambos no onboarding. Ambos com 45 testes verdes ao lado. **O padrão importa mais que os
-defeitos:** as duas fases semeiam estado direto no banco para poupar chamadas de LLM, e com isso
-**pulam as transições do fluxo** — que é exatamente onde os dois estavam.
+Ordem cronológica, com o efeito **medido** de cada mudança.
 
-### 3.1 Interesse personalizado não funcionava
-
-Tocar em "✍️ Outro" não devolvia nada, e o tema digitado era descartado.
-
-```
-jsonb_set(…, '{int_await_ts}', 1788531542825::jsonb)
-ERROR: cannot cast type bigint to jsonb
-```
-
-O `UPDATE` inteiro falhava, então nem `int_await` era gravado; `Salvar Interesses` abortava e
-`Enviar Pedir Outro` nunca rodava — silêncio para o aluno. Corrigido com `to_jsonb`.
-
-**Cobertura zero:** C16 e C17 semeiam `interests` no banco e só chamam `int_open`. Ninguém
-percorria *other → digitar → salvar*.
-
-### 3.2 Validação de nome estava escrita, fiada e ignorada
-
-O bot aceitava `oi`, `bom dia`, `teste`, `kkkk`, `admin` e palavrões como nome, e gravava para
-sempre. Os nós `Triagem de Nome` / `Veredito IA` já calculavam `nameCheck`, mas a
-`Etapa de Cadastro` **nunca lia esse campo**.
-
-Agora consome o veredito, com mensagem **por motivo**, e liga o **escape do loop** que a Triagem
-já previa: na 3ª recusa aceita o `first_name` do Telegram em vez de perguntar para sempre.
-
-**Um limite que ficou:** a camada 1 pega `asdf`, `qwerty`, `zxcvbn` — mas **não** `asdfgh`, que
-cai em `ask_ai`. Sem a camada 2 funcionando, tudo que escapa das listas entra como nome. É por
-isso que o item 1 do plano existe.
-
----
-
-## 4. C1 e C15 — o problema de qualidade que resta
-
-Os dois únicos `FALHOU` da Fase B, ambos em **A1**, reproduzidos em três rodadas.
-
-- **C1** — `"i like play games"` não é corrigido.
-- **C15** — os interesses do aluno não são usados.
-
-### O que o experimento de 04/09 decidiu
-
-Protocolo do §8: baseline → uma linha → medir → reverter → conferir nas duas pontas.
-
-| condição | correção | interesses | controle (erro **da** lista) |
+| bloco | o que mudou | ganho medido | custo medido |
 |---|---|---|---|
-| baseline | **0/9** | 0/9 | ~2/3 |
-| A — lista fechada → regra com exemplos | 1/6 | 0/6 | 3/6 |
-| B — linha de PRIORIDADE explícita | 0/6 | 0/6 | 3/6 |
+| **Professor servido do banco** (T006–T008) | 60 explicações pré-geradas, servidas do Postgres com fallback | p90 **8,00 s → 0,98 s** (−88%) | **matou a persona na explicação** (§5.2) — corrigido depois |
+| **Abre-alas** (T002) | `📚 Tópico N/10` chega 1,16 s antes do modelo | mata a sensação de travamento | — |
+| **Política de idioma** (T005b) | B1..C2 explicam em português; enunciado EN de B1 pra cima | contrato claro | contaminou a geração de questão em B1 (consertado lá) |
+| **Exemplo de formato no A1** (T012) | uma linha no `Prompt Conversa A1` | correção **0/9 → 9/9** | variedade caiu: 7 das 9 correções eram a mesma frase |
+| **Moldura de persona** (T021) | abertura/fecho por persona, determinístico | **T17 resolvido**, 0 s de custo | — |
+| **Precedência da reciprocidade** (T022) | declarar que vence o gesto da persona | C10 **0/6 → 3/6** | — |
+| **Gancho de interesses por código** (T023) | o código escolhe o tema da pergunta final | turno neutro **0/4 → 2/4** | nenhum no probe de cortesia |
 
-**As duas caem.** A dá sinal fraco demais; B não move nada — e era a mais promissora, porque foi
-esse mesmo desenho que levou o contrato de idioma de 3/12 a 12/12 em 03/09.
-
-### O diagnóstico ficou mais afiado, e mais incômodo
-
-O **controle deu 3/6**. O erro que *está* na lista também não é corrigido de forma confiável no
-A1. Isso derruba a explicação que se vinha sustentando: **a questão não é quais erros estão na
-lista — é que o A1 corrige mal, ponto.** E o C15 deu zero em todas as condições: interesses não
-estão fracos no A1, estão **mortos**.
-
-### A hipótese que sobra, ainda não testada
-
-A linha de IDIOMA do A1 traz um **exemplo de formato** (`Nice! Do you play on your phone?` +
-tradução) que não contém correção nem interesse. O modelo pode estar imitando a **forma** do
-exemplo em vez de seguir as diretivas — few-shot vencendo instrução. É uma linha, e é a próxima
-variável a mexer.
-
-### E um erro de medição que contaminava o número
-
-O detector do C1 testava `/playing/i`, mas depois de `like` **as duas formas são corretas**. Ele
-marcou `ok=false` numa resposta que corrigia certinho (`We say 'I like TO play games'`). A Fase B
-usava o mesmo teste. Corrigido nos dois lugares: aceita as duas formas e exige o **reparo
-explícito**, não apenas o bot usando a forma certa na própria frase.
+**Revertidos por medição** (o protocolo funcionou): dar exemplo ao `reciprocityLine` (1/6, fraco)
+e dar exemplo de formato a B1..C2 (gerúndio 0/12 antes e depois).
 
 ---
 
-## 5. Plano da v8
+## 4. O que ainda não funciona
 
-> Ordem por retorno, não por facilidade. Os itens 1–4 são o caminho para "agente no mais alto
-> nível"; 5–7 são infraestrutura e decisões já tomadas.
+### 4.1 Correção de erro sintático em nível alto — **o mais importante**
 
-### Concluído em 04–06/09
+Medido no T024, N=6 por célula:
 
-| | Item | Estado |
+| probe | B2 | C1 |
 |---|---|---|
-| ✅ | Cast do `int_await_ts` | publicado, verificado ao vivo |
-| ✅ | `Etapa de Cadastro` consumir o `nameCheck` | publicado, verificado ao vivo |
-| ✅ | Testes que teriam pego os dois | A2 com entradas reais + A2b; reprovam a versão anterior |
-| ✅ | Higiene do repositório | 296 → 161 arquivos rastreados |
-| ✅ | Experimento do A1 | duas hipóteses refutadas, detector corrigido |
-| ✅ | **Item 2 inteiro — modo Professor** | abre-alas + 60 explicações servidas do banco (T002–T009) |
-| ✅ | **Loop de desenvolvimento** | `PLAN.md`/`STATE.md`/`/next` + implementer e verifier |
-| ✅ | **Medidor de latência** | defeito de nó aninhado corrigido, L1 recalculado (§6 nº 16) |
+| `gerundio-apos-like` (`i like play video games`) | **0/6** | **0/6** |
+| `artigo-com-incontavel` (`a advice`) | 0/6 | 2/6 |
+| `plural-irregular` (`childrens`) | 4/6 | 6/6 |
 
-### 1 — Fechar a camada 2 da validação de nome · **próxima tarefa (T010)**
+**Duas explicações caíram de uma vez:**
+- **Não é o nível** — B2 e C1 têm o mesmo padrão.
+- **Não é a lista de ERROS QUE CONTAM** — `childrens` não está nela e é o mais corrigido.
 
-Reapontado para o Vertex, reusando a `Google Service Account` (id `mKfC2ANkOKHfbKal`) que os 4
-nós de modelo já usam — assim não é preciso criar conta no Google AI Studio.
+O que a evidência mostra:
 
-**Commitado (`929f5d4`) e presente nos dois fluxos, ainda não validado ao vivo.** Falta mandar
-`asdfgh` (deve recusar) e `Kaique` (deve aceitar) pelo ingress do v8 e conferir se o nó autentica.
-Se não autenticar, a alternativa é criar a credencial `googlePalmApi` com uma API key do AI Studio.
-**Enquanto isso não fecha, `asdfgh` vira nome de aluno** — a camada 1 pega `asdf` e `qwerty`, mas
-não sequências de 6 letras.
+```
+gerúndio (0/12):  "Oh, that's awesome! I love playing video games too."
+plural (10/12):   "✔️ 'many children', not 'many childrens'"
+```
 
-### 2 — Modo Professor · **CONCLUÍDO em 05–06/09**
+No gerúndio o bot **usa a forma certa na própria frase sem corrigir o aluno** — literalmente o
+que o prompt proíbe (*"não basta usar a forma certa na sua própria frase"*). Ele **absorve** o
+erro na reformulação, e o aluno nunca fica sabendo que errou.
 
-Decisão de 04/09: quanto mais determinismo, melhor, e a explicação tem de ser "bem mastigada".
+**Hipótese do exemplo: REFUTADA** (T027). O que a mata não é o número, é isto: o exemplo que o A1
+ganhou no T012 é de **concordância** (`I likes music`), não de gerúndio — e o A1 corrige gerúndio
+6/6; e o exemplo que se pôs no B2 era **justamente sobre gerúndio** e não moveu nada.
 
-**(a) Abre-alas determinístico** — o aluno recebe `📚 Tópico N/10: <título>` **antes** da chamada
-ao modelo. Medido ao vivo: cabeçalho aos 521 ms, modelo aos 1681 ms, explicação aos 7827 ms. Só na
-rota de explicação; em questão, correção e dúvida o nó roda e devolve `[]`.
+**A hipótese que sobra, não testada:** o **aperto do formato do A1** (bilíngue obrigatório com
+tradução linha a linha + teto de 18 palavras) não deixa espaço para absorver o erro numa
+reformulação fluida, e força o reparo explícito. Em B1+ há espaço para reformular natural.
+**Cuidado:** testar isso mexe em C8 (teto de palavras) e no contrato de naturalidade — é mais de
+uma variável se feito de uma vez.
 
-**(b) 60 explicações pré-geradas** — geradas com Gemini 2.5 Pro, validadas, versionadas em
-`conteudo/explicacoes/<NIVEL>/<NN>-<slug>.md` e servidas da tabela `topic_explanations` pelo nó
-`Buscar Explicação`. Fallback para a geração ao vivo, provado nas duas formas de falha: linha
-ausente **e** banco inacessível.
+### 4.2 Interesses no A1 (C15) — e o probe que mede o pior caso
 
-Resultado medido, n=12 por condição no mesmo v8:
+O gancho determinístico do T023 **está no `systemMessage`** (confirmado no `runData`, exec 3992).
+Mesmo assim o C15 dá 0/6. A sonda explicou:
 
-| | mediana | p90 |
-|---|---|---|
-| servida do banco | 0,25 s | **0,98 s** |
-| gerada ao vivo | 5,82 s | **8,00 s** |
+| entrada | interesses citados |
+|---|---|
+| `"hello, how are you today"` (probe atual) | **0/4** |
+| `"i went to the park yesterday"` | **2/4** |
 
-Ganho de **7,02 s (88%)** no p90. Todo ele vem do LLM: na condição servida o `Agente Professor`
-não roda.
+O probe manda uma **pergunta social direta**, e o bot responde *"I am good, thanks! How are you?"*
+— o que qualquer interlocutor faria. Em turno neutro o gancho funciona, chegando a puxar o
+interesse **inferido** (`Did you play sports there? 🏀`).
 
-> **O 17,8 s nunca existiu.** Era 9,01 s — o medidor somava nós aninhados (§6 nº 16). O ganho é
-> real e medido, mas a motivação original deste bloco estava inflada em ~1,9×.
+**O que precisa mudar é o probe** (tarefa T028), não o gancho. E ao mudá-lo: publicar os dois
+números lado a lado, **nunca substituir o histórico** — trocar régua no meio da comparação foi o
+que saturou o controle no T011.
 
-**O que o gate NÃO garante, e por isso a revisão humana continua devendo:** o validador confere
-forma, cobertura de vocabulário, idioma, HTML e vazamento de gabarito — **não se o texto ensina**.
-Está medido: um arquivo gramaticalmente correto, sem repetição, cobrindo os termos e com as cinco
-seções, que nunca enuncia a regra, **passa**. Ler os 60 no diff é a única rede contra isso.
-
-### 3 — Material de referência: livros → `.md`
-
-Os quatro PDFs WAYS 6º–9º ano viram `.md` para o agente usar como fonte. Isso é **conteúdo de
-produto**, não material de consulta: os `.md` entram versionados, os PDFs ficam fora do git.
-
-Conecta com o item 2: explicação pré-gerada **a partir do material real** é outro patamar de
-qualidade em relação a explicação gerada do nada.
-
-> **Decisão de escopo pendente:** os livros são de 6º–9º ano (11–14 anos), mas o cadastro
-> rejeita idade abaixo de 16. Ou o material não é para os alunos, ou a faixa etária muda.
-
-### 4 — C1 e C15 no A1
-
-Testar a hipótese do exemplo de formato (§4). Uma linha, protocolo de sempre.
-
-### 5 — Menu de comandos do Telegram · **adiado por decisão**
-
-Roteador trata 19 comandos, `/help` lista 11, o Telegram mostra **0**. O
-`IAChat_SetCommands_oneshot.json` está pronto e nunca foi importado; usa
-`$env.TELEGRAM_BOT_TOKEN`, que basta exportar no mesmo bloco de startup do `WEBHOOK_URL`.
-**Decisão de 05/09: fica como está, discutir depois.**
-
-### 6 — Hospedagem
-
-O ngrok gratuito troca de URL a cada restart e derruba a ativação inteira. Recomendação:
-
-- **agora:** ngrok pago com domínio fixo (~US$ 8/mês) — mata a causa raiz sem tocar em nada
-- **no lançamento:** **VPS** (2 vCPU / 4 GB) com n8n + Postgres em Docker Compose. **Não** n8n
-  Cloud: todo o estado do aluno vive no Postgres, e o Cloud não o hospeda
-
-### 7 — Painel web · **secundário por decisão**
-
-`web/` **não compila**: importa `./pages/Landing` e `./pages/Test`, que não existem, e
-`react-router-dom`, que não está no `package.json`. O `main.tsx` nem usa o `App.tsx` — são duas
-tentativas sobrepostas. O backend (`api/`, 9 handlers) é a parte decente.
-
-**Decisão de 05/09: quer o painel, mas o agente vem primeiro.** Fica quebrado e registrado.
-
-### Dívida com prazo
+### 4.3 Outros, menores
 
 | | |
 |---|---|
-| `DEV_COMMANDS` de volta a `false` | antes do lançamento |
-| Ligar `jornada_usuario.js` e `mede_c8_teto_a1.js` à suíte | hoje rodam só à mão |
-| 7 testes sem automação: `A7 B2 C8 L2 R7 S2 S3` | **teste descartado é dívida** |
-| **Revisar os 60 `.md` de explicação** | antes de o v8 virar o bot — o gate não julga se o texto ensina |
-| **`bateria_completa_b.js` T3 contradiz o produto** | assere "sem português na explicação de B2"; com o T005b isso é o comportamento correto. Vai dar **falso vermelho** na próxima bateria. Conferir junto a linha 257 e o cabeçalho do `revalida_niveis.js` |
-| **`gate_vivo_v8.js` só percorre o onboarding** | qualquer tarefa que mexa em outra rota passa sem tocar no que mudou. Hoje se compensa com verificação manual por rota |
-| **`postUpdate` do harness não tem teto** | com o n8n fora, cada turno leva ~100 min em vez de falhar. Bateria longa trava em silêncio |
-| **`bateria_completa_a.js` sai 0 mesmo reprovando** | só sai ≠0 em erro fatal. Não serve como gate enquanto isso não mudar |
-| **`COBERTURA` quase cega em `C2/4` e `C2/7`** | 1 e 2 termos exigíveis; a `descricao` desses tópicos no TRACK quase não tem matéria fora dos exemplos |
-| **Corpo do banco não é escapado** | hoje é seguro (varri os 60), mas se a fonte do corpo mudar vira HTML quebrado no Telegram |
+| **C10 em 3/6** | melhorou de 0, não está resolvido |
+| **R4 sem detector automático** | a cláusula de civilidade está publicada; a obediência **não foi provada** — ao vivo o teste ainda é leitura humana |
+| **T9: markdown na dúvida** | a resposta usa `*` numa saída HTML; aparece literal no Telegram |
+
+---
+
+## 5. O que se aprendeu sobre método — leia antes de mexer
+
+Esta seção existe porque o padrão abaixo se repetiu tantas vezes que deixou de ser coincidência.
+
+### 5.1 Metade dos "defeitos" eram do instrumento
+
+Na rodada de 06–10/09, **de seis defeitos reportados, quatro não eram do produto**:
+
+| reportado como | era |
+|---|---|
+| T3 — "enunciado de B2 em português" | o detector julgava o **cabeçalho da interface** junto do enunciado |
+| `/menu` e `✅ Pronto` — "não enviam nada" | o texto mora na expressão de um nó Telegram, **invisível ao digest** |
+| C15 — "interesses mortos" | o probe mede uma **abertura de cortesia**, o pior cenário possível |
+| controle do A1 — "~2/3" | detector saturado: contava o bot que só **usa** a forma certa |
+
+**Consequência prática:** antes de escrever "o produto está quebrado", leia o `runData` do nó, não
+o agregado do instrumento. Custa minutos; publicar um defeito falso custa dias e envenena quem
+ler depois.
+
+### 5.2 Toda otimização tem um custo — procure por ele
+
+Servir a explicação do banco trouxe **−88% de latência** e, no mesmo movimento, fez `DEBATER` e
+`BUDDY` produzirem texto **byte a byte idêntico**. O ganho foi celebrado no handoff; o custo só
+apareceu **duas semanas depois**, num teste de persona.
+
+Quando uma mudança tira o LLM do caminho, pergunte **o que mais ele estava fazendo ali**.
+
+### 5.3 Diretiva solta perde para diretiva marcada como obrigatória
+
+O `reciprocityLine` chegava ao prompt e era ignorado. A causa: o gesto de assinatura da persona é
+marcado `obrigatório em TODA resposta`, dentro de um bloco que diz que a persona é *"a coisa MAIS
+visível da sua resposta"*. Uma linha solta competindo com isso perde — em silêncio.
+
+**Declarar a precedência levou C10 de 0/6 a 3/6.** Vale para qualquer regra nova de comportamento.
+
+### 5.4 Determinismo ganhou duas vezes seguidas
+
+- **Moldura de persona (T021):** tabela em vez de chamada de modelo — mesmo resultado visual,
+  **zero** custo de latência, corpo revisado fora do alcance do modelo, e testável offline.
+- **Gancho de interesses (T023):** o código escolhe o tema; o LLM só escreve.
+
+É a espinha dorsal do §1 aplicada. Quando a decisão couber no código, **não peça ao modelo**.
+
+### 5.5 Few-shot vence instrução — mas não é universal
+
+O T012 provou: trocar o **exemplo de formato** do A1 levou a correção de 0/9 a 9/9, sem tocar em
+diretiva nenhuma. **Suspeite de qualquer prompt com "Formato EXATO".**
+
+Mas o T027 mostrou o limite: o mesmo truque em B1..C2 **não moveu nada**. Não generalize sem
+medir.
+
+### 5.6 Teste detector nas duas direções ANTES de medir
+
+Os detectores do T024 tinham dois erros, pegos antes de gastar a rodada:
+- aceitavam `"an advice"` — que é **errado** (incontável): contaria como acerto o bot ensinando errado;
+- exigiam a **ausência** de `childrens`, rejeitando a correção bem-feita, que **cita** a forma
+  errada (`"we say X, not Y"`) — o mesmo falso negativo que contaminou o C1 até 04/09.
+
+Um detector que não reprova o comportamento errado **e** aprova o certo não mede nada.
+
+### 5.7 Duas réguas independentes valem mais que uma medida três vezes
+
+O C1 foi confirmado pelo detector do `experimento_a1` **e** pelo detector da bateria, que são
+independentes. Isso é evidência muito mais forte que N=3 numa régua só.
+
+### 5.8 O ceticismo que salvou o T012
+
+Um salto de 0/9 para 9/9 numa linha é extraordinário e merecia suspeita: o exemplo novo contém
+`We say 'I like music'`, e o detector procura reparo aceitando a palavra `say`. Se o bot decorasse
+a frase, o detector marcaria acerto **sem correção real**.
+
+**O teste que resolveu:** o probe do C15 **não tem erro**, e nenhuma das 9 saídas dali contém
+`We say`. Se fosse imitação cega, a moldura apareceria onde não há o que corrigir. Reuse esse
+desenho — procurar o comportamento onde ele **não deveria** aparecer.
 
 ---
 
 ## 6. Armadilhas já pagas — NÃO repetir
 
-As dez primeiras vêm de julho/agosto; as demais de 24/08, 04/09 e 06/09.
-
 1. **Resposta vazia não é aprovação.** Testes de negativa passam trivialmente quando o bot não
-   responde. Gerou dois falsos PASSOU enquanto a Groq dava 404.
-2. **Duração total não mede latência.** O `chat_id` sintético faz o envio falhar e o retry
-   injeta 7–27 s. Meça `executionTime` por nó e descarte os nós de envio.
-3. **Não rotule o turno pela ordem de envio.** Classifique pelo que o `Roteador Mestre`
-   registrou.
-4. **Perda determinística não é corrida.** Sempre o mesmo item se perdendo indica outra causa.
+   responde.
+2. **Duração total não mede latência.** O `chat_id` sintético faz o envio falhar e o retry injeta
+   7–27 s. Meça `executionTime` por nó e descarte os nós de envio.
+3. **Não rotule o turno pela ordem de envio.** Classifique pelo que o `Roteador Mestre` registrou.
+4. **Perda determinística não é corrida.**
 5. **Detector de correção precisa cobrir a forma curta.** O teto de 18 palavras do A1 força
    `"We say 'are', not 'is'"`.
 6. **`msg_count` não detecta corrida** — o incremento é atômico no SQL.
 7. **Controle sequencial precisa de ≥12 s de espaçamento.**
 8. **Localizar a repetição não é localizar a causa.**
-9. **Sempre abrir a transcrição antes de reportar.** Todo falso resultado sobreviveu ao agregado
-   e morreu na evidência bruta.
+9. **Sempre abrir a transcrição antes de reportar.** Todo falso resultado sobreviveu ao agregado e
+   morreu na evidência bruta.
 10. **ID alto não significa usuário de teste.** IDs reais do Telegram têm 10 dígitos.
-11. **Base suja faz o teste medir resíduo.** Derive o ID do relógio, na faixa
-    `990000000–999999999`, que é a que o `cleanup_test_users.js` apaga.
-12. **Teste que sorteia a própria condição mede sorte.** O B6 reprovava em ~40% das rodadas.
-    Em 04/09 a mesma armadilha voltou em forma nova: o A2 mandava 10 nomes inválidos ao **mesmo**
-    aluno e batia no escape do loop, medindo a própria feature.
-13. **O instrumento pode julgar a string errada.** O `digest()` montava a dúvida a partir do
-    `Agente Dúvida`, que roda **antes** do `Filtro Anti-Spoiler`. `smoke.js`,
-    `bateria_critica.js` (T7 e R6), `teste_gate_frase.js`, `teste_gate_nova_questao.js` e
-    `tick.js` consomem esse campo — a proteção que chega ao aluno **nunca foi validada ao vivo**.
-    Corrigido.
-14. **Resposta "vazia" pode ser cegueira do digest.** `Etapa de Modo` publica em `confirm`, e
-    `Mensagem Sistema` e `Interests Engine` não eram lidos. Corrigido — mas texto de nó Telegram
-    estático continua invisível por construção.
-15. **Turno iniciado por CALLBACK precisa de ~35 s**, não os 12 s da nº 7: `Responder Callback`
-    também entra em retry. Confira o relógio do campo gravado contra o `startedAt` da execução
-    antes de culpar o produto.
-16. **Nó aninhado contado duas vezes.** O `decompoe()` do `analisa_latencia.js` **somava**
-    `executionTime`, mas o `Modelo Vertex X` roda **dentro** da janela do `Agente X` (e o
-    `Memória Dúvida`, que é infra, roda dentro do agente também). Na exec 3538 do T009, 4,89 s
-    viraram 9,60 s — número **maior que o relógio de parede da execução**, que é impossível. O
-    viés atingia só os turnos com nó de modelo — ou seja, exatamente o braço de comparação. Toda
-    medição de LLM feita antes de 06/09 saiu deste instrumento e está inflada. **Não reuse número
-    antigo sem recalcular.** Recalculados: L1 4,83 → **2,55 s** de média e 11,59 →
-    **6,16 s** de p90; `professor:intro` 17,81 → **9,01 s** de p90. Fator ~1,9× nos turnos com
-    nó de modelo; turnos sem LLM ficam idênticos, e é por isso que ninguém viu.
-    **Duas lições de método, além do conserto:** (a) *a API do n8n pagina* — a primeira tentativa
-    de recálculo declarou o L1 perdido porque leu só a primeira página e tomou o fim dela pelo
-    fim do histórico; há 1201 execuções gravadas, desde 24/08, e os 80 turnos do L1 estavam lá;
-    (b) *conferência de sanidade tem de conferir o que é publicado* — a primeira versão do alarme
-    recalculava o total a partir dos intervalos, isto é, conferia o instrumento contra ele mesmo,
-    e acusava em 0 de 59 execuções com o defeito reintroduzido. Conferindo os escalares
-    publicados contra o relógio de parede, acusa em 29 de 59.
-    Corrigido em 06/09: soma por **união de intervalos**, baldes **disjuntos** (infra que roda
-    dentro de um agente pertence a um balde só), `estouroDe()` e a regressão offline
-    `_teststand/testa_decompoe_latencia.js`, no `npm run gate`. Detalhes em
-    `MEDICOES_professor_v8.md` §0.
-17. **Mudança de produto quebra fixture de teste.** A validação de nome passou a recusar
-    `'Teste'`, que o `jornadaPlacement` digitava — B1, B3, B5 e A8 reprovaram de uma vez, por
-    causa do fixture. Extraído para `NOME_VALIDO`.
+11. **Base suja faz o teste medir resíduo.** Derive o ID do relógio, faixa `990000000–999999999`.
+12. **Teste que sorteia a própria condição mede sorte.**
+13. **O instrumento pode julgar a string errada.** ⚠️ **Já aconteceu QUATRO vezes** — ver nº 18.
+14. **Resposta "vazia" pode ser cegueira do digest.** Texto de nó Telegram **estático** é invisível
+    por construção — ver nº 19.
+15. **Turno iniciado por CALLBACK precisa de ~35 s**, não os 12 s da nº 7.
+16. **Nó aninhado contado duas vezes.** O `decompoe()` somava `executionTime` de sub-nós que rodam
+    **dentro** da janela do agente. Inflava ~1,9× **só** os turnos com LLM — o braço de comparação.
+    Corrigido por união de intervalos e baldes disjuntos, com regressão no gate. **Não reuse número
+    de LLM anterior a 06/09 sem recalcular.** Duas lições de método vieram junto: *a API do n8n
+    pagina* (não paginar produziu um "fato" errado publicado no handoff), e *conferência de sanidade
+    tem de conferir o que é publicado*, não recalcular pelo mesmo caminho que produziu o número.
+17. **Mudança de produto quebra fixture de teste.** A validação de nome passou a recusar `'Teste'`,
+    e quatro testes reprovaram por causa do fixture.
+18. **A nº 13 pela quarta vez — e introduzida por um CONSERTO.** O T013 fez o T3 passar a julgar o
+    enunciado da questão; junto entrou o **cabeçalho de interface** que o `Parse Professor`
+    concatena (`▶️ Questões de "…". Acerte 5 seguidas…`), português **por desenho**. Resultado:
+    falso vermelho 3/3, publicado como "regressão do v8". **Quem amplia o que um teste julga tem de
+    conferir o que entrou no escopo do julgamento.** Conserto: `soEnunciado()` no
+    `idioma_professor.js`, com as três direções no gate.
+19. **A nº 1 na direção contrária.** Ela adverte contra tratar resposta vazia como aprovação; o erro
+    cometido foi tratar **silêncio do instrumento como fato sobre o produto** (`/menu` "mudo").
+    Mesma confusão entre "não observei" e "não aconteceu". O `digest()` agora expõe
+    `enviosTentados`.
+20. **Erro de nó com `onError: continueRegularOutput` não fica em `runData[nó][0].error`** — viaja
+    no `json.error` do **item de saída**. Instrumento que só olha `.error` fica cego, inclusive o
+    `errs` do `digest()`.
+21. **URL cravada manda teste para PRODUÇÃO.** A Fase A montava `BASE + '/webhook/iachat-test'` em
+    três pontos, ignorando `IACHAT_TEST_PATH`: rodando "no v8", R3 e S1 batiam no **v7.4 que atende
+    usuários reais**, com o relatório dizendo v8. Em 04/09 passou despercebido porque o alvo
+    pretendido *era* o v7.4 — a coincidência escondeu o defeito. Guardado por
+    `testa_alvo_bateria_a.js` no gate.
+22. **Nome de transcrição cravado apaga evidência.** `bateria_completa_b.js` e `jornada_usuario.js`
+    gravavam em caminho fixo, e a jornada com `writeFileSync` (**sobrescreve**). Rodá-las no v8
+    teria destruído o lado esquerdo da comparação ao produzir o direito. Agora o nome **deriva do
+    ingress** (`alvo.js`). **Limite conhecido:** ele distingue por *versão*, não por *data* — duas
+    rodadas na mesma versão ainda colidem.
+23. **Rótulo errado em evidência envenena igual a número errado.** O `jornada_usuario.js` cravava
+    `"— v7.4"` no cabeçalho, e o `tr_jornada_v8.md` nasceu dizendo que media o v7.4.
+24. **"Não executado" não vira "passou".** A jornada do v8.1 morreu aos 36 turnos e **não** foi
+    contada como aprovada. É a nº 1 aplicada a processo interrompido.
 
 ---
 
@@ -396,9 +327,9 @@ As dez primeiras vêm de julho/agosto; as demais de 24/08, 04/09 e 06/09.
 
 ### `WEBHOOK_URL` (o mais caro de todos)
 
-Sem `WEBHOOK_URL` no ambiente do processo, o n8n oferece `http://localhost:5678/` ao Telegram,
-que **recusa não-HTTPS**. A falha derruba a **ativação inteira do workflow** e leva junto o
-`TEST Ingress` — o sintoma é 404 em *todos* os webhooks, com o workflow marcado `active: true`.
+Sem `WEBHOOK_URL` no ambiente do processo, o n8n oferece `http://localhost:5678/` ao Telegram, que
+**recusa não-HTTPS**. A falha derruba a **ativação inteira** e leva junto o `TEST Ingress` — o
+sintoma é 404 em *todos* os webhooks, com o workflow marcado `active: true`.
 
 Subir assim, tudo na **mesma** janela:
 
@@ -406,7 +337,6 @@ Subir assim, tudo na **mesma** janela:
 $env:WEBHOOK_URL="https://SUA-URL.ngrok-free.dev"
 $env:N8N_PROTOCOL="https"
 $env:N8N_HOST="SUA-URL.ngrok-free.dev"
-# $env:TELEGRAM_BOT_TOKEN="..."   # necessário só para o one-shot do menu de comandos
 npx n8n
 ```
 
@@ -414,71 +344,66 @@ URL corrente em `http://localhost:4040/api/tunnels`.
 
 ### Outros
 
-- **Docker/Postgres:** quando o engine trava (comum após suspensão no Windows), o processo do
-  Docker Desktop continua vivo, `docker ps` **pendura** e a porta 5433 fica fechada. O sintoma no
-  fluxo é `Connection refused` em `::1:5433` no `Carregar Aluno`. Reinicie o Docker Desktop.
-- ~~Cota da Groq~~ — não é mais gargalo desde 03/09; da Groq sobrou só o Whisper.
+- **Docker/Postgres:** quando o engine trava (comum após suspensão no Windows), o processo continua
+  vivo, `docker ps` **pendura** e a 5433 fica fechada. Sintoma no fluxo: `Connection refused` em
+  `::1:5433` no `Carregar Aluno`. Reinicie o Docker Desktop. **Não tente subir Docker sozinho** —
+  é regra do `CLAUDE.md`.
+- **Memória:** em 10/09 o sistema **matou o processo três vezes** durante baterias longas. Sintoma:
+  a tarefa some sem erro de teste. Rode a Fase B em blocos (`--only=...`) quando a máquina estiver
+  apertada, e **preserve o parcial** antes de retomar — o script sobrescreve a transcrição.
 - **Ativação via MCP que falha desativa o workflow.** Confira `active` depois de qualquer update.
-- **MCP do n8n:** precisa de `WEBHOOK_SECURITY_MODE=moderate` no env do servidor.
-- **Leitura de credenciais pela API pública está bloqueada** (405). Para achar o id de uma
-  credencial, abra na interface do n8n — o id está na URL.
+- **Leitura de credenciais pela API pública está bloqueada** (405). Para achar o id, abra na
+  interface do n8n — está na URL.
 
 ---
 
 ## 8. Convenções acertadas
 
-- **Commits COM atribuição** (`Co-Authored-By` + `Claude-Session`). A regra mudou no commit
-  `125fd88`; se voltar atrás, mude aqui **e** avise.
-- **Não publicar nem ativar sem pedido explícito.** Vale para ativar workflow, `git push` e
-  qualquer coisa que mande mensagem real no Telegram.
-- **Protocolo de experimento no fluxo ao vivo:** baseline com N=3 → alterar **uma** linha →
-  medir → **reverter** → conferir nas duas pontas com `git diff`. Nunca reverter com rodada em
-  voo.
-- **Nunca editar o fluxo com bateria rodando** — contamina a medição.
+- **Commits COM atribuição** (`Co-Authored-By`).
+- **Não publicar nem ativar sem pedido explícito.** Vale para workflow, `git push` e qualquer coisa
+  que mande mensagem real no Telegram. **A autorização vale para o bloco em que foi dada** — peça
+  de novo no bloco seguinte.
+- **Protocolo de experimento:** baseline com N≥6 → alterar **uma** linha → medir → **reverter** se
+  não melhorar → conferir nas duas pontas com `git diff`. Nunca reverter com rodada em voo.
+- **Nunca editar o fluxo com bateria rodando.**
 - **Escrever o teste JUNTO com a correção**, e conferir que ele **reprova a versão anterior**.
-  Teste que não reprova o código velho não prova nada.
-- **Validar sintaxe antes de publicar** (`node --check`) — uma edição já subiu quebrada por um
-  `}` removido sem querer.
-- **Fazer backup do live antes de publicar** (`_teststand/backup_live_*.json`).
+  Teste que não reprova o código velho não prova nada — e **prove rodando** (`git stash`), não
+  afirmando.
+- **Validar sintaxe antes de publicar** (`node --check` ou `new Function`).
+- **Editar o JSON por script Node**, nunca à mão. Nó novo precisa de entrada em `connections`.
 - **Limpar usuários de teste ao fim:** `node db/cleanup_test_users.js --apply`.
-- **`/reset` e `/resetfull` ficam no fluxo.** Hoje **LIGADOS** por `DEV_COMMANDS = true`, a
-  pedido — ver §2.
-- **Credenciais não passam pelo assistente.** O token do bot e as chaves ficam no `.env`
-  (ignorado pelo git) ou no store do n8n, que não deve ser decifrado.
+- **Credenciais não passam pelo assistente.**
+- **Ao commitar com medição em voo, commite arquivo por arquivo** — `git add -A` captura trabalho
+  pela metade e mistura duas tarefas num commit.
 
 ---
 
 ## 9. Ferramental (`fluxos/_teststand/`)
 
-Leem `N8N_API_KEY` e `IACHAT_TEST_SECRET` do ambiente ou do `.env` da raiz.
-
 | Script | Para quê |
 |---|---|
-| `harness.js` | base: POST no ingress + captura da execução + `digest()` |
-| `bateria_completa_a.js` | **Fase A** — 17 determinísticos |
-| `bateria_completa_b.js` | **Fase B** — 29 dependentes do LLM |
-| `jornada_usuario.js` | **jornada contínua**, sem semear estado — achou os dois P0 |
-| `testa_cadastro_nome.js` | validação de nome, encadeando Triagem → Etapa de Cadastro |
-| `experimento_a1.js` | C1/C15 com baseline e variantes |
-| `mede_c8_teto_a1.js` | C8 — teto de palavras do A1, por distribuição |
-| `regressao_v7.4.js` | regressão offline dos nós de código |
+| `harness.js` | base: POST no ingress + captura da execução + `digest()` (expõe `enviosTentados`) |
+| `alvo.js` | **rótulo e nome de transcrição derivados do ingress** — impede sobrescrever evidência |
+| `registra_urls.js` | preload que grava toda URL de `fetch`: prova para onde o teste foi |
 | `publica_v8.js` | **único** caminho autorizado de publicação; alvo cravado no v8 |
-| `gate_vivo_v8.js` | gate ao vivo — uma mensagem pelo ingress do v8 (**só cobre onboarding**) |
-| `vivo_explicacao_banco.js` | os dois caminhos da explicação, ao vivo |
-| `mede_professor_v8.js` | latência banco × modelo |
-| `testa_abre_alas_professor.js` · `testa_explicacao_do_banco.js` · `testa_decompoe_latencia.js` | offline, dentro do `npm run gate` |
-| `conteudo/extrai_track.js` · `valida_track.js` | TRACK do fluxo → `track.json`, e a prova de que são a mesma verdade |
-| `conteudo/gerar_explicacoes.js` | gera os 60 `.md` com Gemini 2.5 Pro (ADC, projeto `agent-hackton`) |
-| `conteudo/valida_explicacoes.js` · `simula_vazamento.js` | validação de conteúdo e a simulação do detector |
-| `conteudo/seed_explicacoes.js` · `confere_explicacoes_db.js` | `.md` → Postgres, e a conferência |
-| `conteudo/extrai_questoes.js` | retrato versionado das questões (`--conferir` bate contra o banco) |
-| `analisa_latencia.js` | L1 por rota, a partir das execuções gravadas |
-| `mede_latencia_real.js` | L1 com `chat_id` real (**envia mensagens de verdade**) |
-| `revalida_personas.js` / `revalida_niveis.js` | PS3/PS4 · C5/C6 |
-| `teste_concorrencia.js` / `teste_entrada_gigante.js` | X5 · R1 |
-| `dryrun_nudge.js` | C13 sem enviar mensagem |
-| `set_telegram_commands.js` | registra o menu (`setMyCommands`) |
-| `db/cleanup_test_users.js` | limpeza, dry-run por padrão |
+| `gate_vivo_v8.js` | gate ao vivo — uma mensagem pelo ingress (**só cobre onboarding**) |
+| `bateria_completa_a.js` | Fase A — 17 determinísticos (sai 1 em reprovação, 2 em inconclusivo) |
+| `bateria_completa_b.js` | Fase B — 29 dependentes do LLM (`--only=` para blocos) |
+| `jornada_usuario.js` | jornada contínua, sem semear estado — achou os dois P0 |
+| `idioma_professor.js` | contrato de idioma **derivado do `LANG` do fluxo** + `soEnunciado()` |
+| `experimento_a1.js` | C1/C15 com baseline e variantes |
+| `experimento_reciprocidade.js` | C10 com detector objetivo (divide algo próprio + ≤1 pergunta) |
+| `mede_correcao_nivel_alto.js` | **T024** — correção de erro fora da lista em B2/C1 |
+| `testa_nome_camada2_vivo.js` | camada 2 da validação de nome; distingue recusa de fail-open |
+| `analisa_latencia.js` | L1 por rota (union de intervalos, baldes disjuntos) |
+| `conteudo/md_para_pdf.js` | `.md` → HTML → Chrome headless. Sem pandoc, sem puppeteer, sem instalar nada |
+
+**No `npm run gate`** (offline, ~6 s): `regressao_v7.4` · `testa_cadastro_nome` ·
+`testa_nome_camada1` · `testa_abre_alas_professor` · `testa_explicacao_do_banco` ·
+`testa_decompoe_latencia` · `testa_alvo_bateria_a` · `testa_alvo_jornada` · `testa_lang_separado` ·
+`testa_civilidade` · `testa_moldura_persona` · `valida_track` · `valida_explicacoes` ·
+`testa_valida_explicacoes` · `simula_vazamento` · `testa_idioma_professor` · `testa_saida_fase_a` ·
+`testa_detector_controle` · e o `git diff --quiet` do congelado.
 
 ---
 
@@ -486,16 +411,14 @@ Leem `N8N_API_KEY` e `IACHAT_TEST_SECRET` do ambiente ou do `.env` da raiz.
 
 ### Testar sem Telegram real
 
-`POST http://localhost:5678/webhook/iachat-test` com um update do Telegram no corpo (o
-`TEST Shim` faz `item.json.body`). **Exige o header `x-iachat-test`** com o valor de
-`IACHAT_TEST_SECRET` — sem ele o n8n responde 403 (teste S1).
+`POST http://localhost:5678/webhook/iachat-test-v8` com um update do Telegram no corpo. **Exige o
+header `x-iachat-test`** com o valor de `IACHAT_TEST_SECRET` — sem ele o n8n responde 403 (teste S1).
 
-O fluxo processa e **tenta enviar ao Telegram**; com `chatId` sintético o envio falha (400), mas
-todos os nós a montante rodam. A resposta é lida de
-`GET /api/v1/executions/{id}?includeData=true`.
+**`IACHAT_TEST_PATH` tem de ser setado ANTES do `require('./harness')`** — o WEBHOOK é calculado
+em tempo de carga, e o default é `iachat-test`, que é **o bot no ar**.
 
-**Filtre a execução pelo `user_id` do corpo**, nunca pegue "a mais nova": há execuções
-concorrentes e órfãs. E não re-poste o mesmo webhook (processamento duplo → desync).
+O fluxo processa e tenta enviar ao Telegram; com `chatId` sintético o envio falha (400), mas todos
+os nós a montante rodam. **Filtre a execução pelo `user_id` do corpo**, nunca "a mais nova".
 
 ### Callbacks úteis
 
@@ -504,12 +427,8 @@ concorrentes e órfãs. E não re-poste o mesmo webhook (processamento duplo →
 `int_open` / `int_games` / `int_music` / `int_other` / `int_done` ·
 `mode_chat` / `mode_teacher` · `t_start` / `t_doubt` / `t_next` / `t_resume` · `cfg_open`
 
-### Chegar a um nível específico
-
-1. **Dirigindo o placement real** — adaptativo: 2 acertos seguidos sobem, 2 erros descem, clamp
-   A1–C2. Respostas do seed em `db/migrations/005_v6_seed_exam.sql`.
-2. **Semeando no banco** — é o que a Fase B faz (`semear()`), com as personas P1–P8. Muito mais
-   barato: passar por onboarding + nivelamento custa ~13 chamadas de LLM por teste.
+**`mode_teacher` NÃO dispara a explicação** — só confirma o modo. É a mensagem seguinte que cai no
+subroute intro. Todo teste da rota Professor precisa dos dois turnos.
 
 ---
 
@@ -517,24 +436,20 @@ concorrentes e órfãs. E não re-poste o mesmo webhook (processamento duplo →
 
 Não apague, não são regeneráveis:
 
-- `MEDICOES_*.md`, `INVESTIGACAO_PERSONA_A1_2026-08-19.md` — medições de agosto
-- `PLANO_v8_2026-09-04.md` — registro detalhado da bateria de 04/09
-- `documentos/transcricoes/` — transcrições brutas
-- `documentos/Resultado dos testes.txt` / `.pdf` — notas cruas do avaliador, fonte primária
-- `CHANGELOG_v7.*.md` — histórico das versões
-- `tr_bateria_a.md` / `tr_bateria_b.md` — vereditos das duas fases ao vivo
-- `tr_jornada.md` — a conversa da jornada de usuário, como o aluno a veria
-- `tr_experimento_a1.md` / `tr_experimento_persona.md` — experimentos com baseline e reversão
-- `_teststand/backup_live_v7.4_2026-09-04T14-47-04.json` — o live **antes** dos dois P0
+- `RELATORIO_DIAGNOSTICO_v8.md` (+ PDF) — comparativo v7.4 · v8 · v8.1
+- `tr_bateria_a.md` / `tr_bateria_b.md` / `tr_jornada.md` — **v7.4**
+- `tr_bateria_a_v8.md` / `tr_bateria_b_v8.md` / `tr_jornada_v8.md` — **v8**
+- `tr_bateria_a_v81.md` / `tr_bateria_b_v81.md` — **v8.1**
+- `tr_revisar_v8.md` — vereditos por rubrica, com nota por critério
+- `tr_experimento_a1.md` / `tr_experimento_reciprocidade.md` / `tr_correcao_nivel_alto_v8.md`
+- `MEDICOES_*.md`, `documentos/transcricoes/`, `CHANGELOG_v7.*.md`
 
 ### Descoberta metodológica que vale manter
 
-Em 13/07 três testes foram excluídos do roteiro por dificuldade de execução. Dois foram
-recuperados em 19/08 e **os dois acharam defeito na primeira execução**: o X5 expôs 50% de perda
-de escrita no menu de interesses; o R1 mostrou que nada truncava a entrada.
+Em 13/07 três testes foram excluídos por dificuldade de execução. Dois foram recuperados em 19/08 e
+**os dois acharam defeito na primeira execução**. Em 04/09 a lição voltou: **a bateria inteira
+estava verde e um usuário comum achou dois defeitos P0 em dez minutos**, porque nenhum teste
+percorria as transições do fluxo. E em 10/09 ela voltou de novo: **o T024 — um teste que não
+existia — achou 0/12 num erro que a bateria inteira dava por coberto.**
 
-Em 04/09 a mesma lição voltou de outro jeito: **a bateria inteira estava verde e um usuário
-comum achou dois defeitos P0 em dez minutos**, porque nenhum teste percorria as transições do
-fluxo.
-
-**Teste descartado é dívida, não escopo resolvido.**
+**Teste descartado é dívida, não escopo resolvido. E lacuna de cobertura é defeito invisível.**
