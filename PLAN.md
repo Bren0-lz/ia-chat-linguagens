@@ -379,7 +379,7 @@ a versão anterior.
 - **Gate:** o teste existe, roda contra o v8 e **reporta uma taxa**. Se reprovar, **registrar
   como defeito novo** — e não consertar dentro desta tarefa.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE — MEDIU e achou defeito real. Taxa geral 12/36 (33%), mas o padrao por probe e o achado: `gerundio-apos-like` da **0/6 em B2 e 0/6 em C1** enquanto `plural-irregular` da 4/6 e 6/6. NAO e sobre nivel nem sobre estar na lista. Vira o T027
 
 ### T025 — `/menu` e o botão de concluir: defeito de produto ou cegueira do instrumento?
 - **Escopo:** o relatório os registrou como "não enviam nada ao aluno" (§6.2), **e isso pode
@@ -409,3 +409,32 @@ Não viraram tarefa aqui porque **dependem do Breno**, não de código:
 - **`DEV_COMMANDS = true`** — `/reset` e `/resetfull` abertos a qualquer usuário
 - **Revisão humana dos 60 `.md`** — o gate confere forma, não se o texto ensina
 - **6 testes ainda sem automação** — `A7 B2 C8 L2 S2 S3` (o R7 sai com o T020)
+
+### T027 — levar a licao do T012 para B1..C2
+- **Origem:** achado do T024. O mesmo erro (`i like play video games`) e corrigido **6/6 no A1**
+  e **0/12 em B2+C1**. A diferenca conhecida entre os prompts: o A1 recebeu no T012 um exemplo de
+  formato que **contem uma correcao**; B1..C2 nao tem exemplo nenhum.
+  O `plural-irregular`, que NAO esta na lista de ERROS QUE CONTAM, e corrigido 4/6 e 6/6 — entao a
+  variavel **nao e estar na lista**, e **nao e o nivel**. A leitura que sobra: o bot corrige o erro
+  que produz palavra inexistente (`childrens`) e **absorve** o erro sintatico reformulando
+  naturalmente (`I love playing video games too`), que e exatamente o que o prompt proibe
+  ("nao basta usar a forma certa na sua propria frase").
+- **Escopo:** uma variavel — dar aos prompts de B1..C2 um exemplo de formato que contenha reparo
+  explicito, como o A1 tem desde o T012. **Nao** mexer na lista de ERROS QUE CONTAM.
+- **Gate:** `mede_correcao_nivel_alto.js` com N>=6 antes e depois; o `gerundio-apos-like` tem de
+  sair de 0/12. Reverter se nao melhorar. E o C1/C8 do A1 nao podem regredir na mesma rodada.
+- **Depende de:** —
+- **Status:** TODO
+
+### T028 — revisar o probe do C15
+- **Origem:** achado do T023. O probe manda `hello, how are you today`, uma pergunta social direta,
+  e mede se o bot puxa interesses. Sonda comparativa: cortesia **0/4** x turno neutro **2/4**, este
+  ultimo puxando ate o interesse inferido. O bot espelhar a cortesia e o comportamento correto —
+  o teste e que mede o pior cenario possivel.
+- **Escopo:** medir interesses em turno **neutro** (relato sem pergunta ao bot), mantendo o probe
+  de cortesia como caso separado e declarado. **Trocar regua e mudanca de instrumento:** publicar
+  os dois numeros lado a lado, nunca substituir o historico.
+- **Gate:** o novo probe roda com N>=6 e o relatorio mostra as duas medidas; o baseline antigo
+  continua legivel para comparacao.
+- **Depende de:** —
+- **Status:** TODO

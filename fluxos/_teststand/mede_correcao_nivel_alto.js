@@ -64,13 +64,25 @@ const PROBES = [
   {
     id: 'artigo-com-incontavel',
     entrada: 'i need a advice about my english',
-    formaCerta: s => /\ban\s+advice\b/i.test(s) || /\bsome\s+advice\b/i.test(s) || /\badvice\b(?!\s*s)/i.test(s) && /\ban?\b/i.test(s),
+    // CUIDADO: "an advice" tambem e ERRADO -- `advice` e incontavel e nao aceita artigo
+    // indefinido. As formas corretas sao "advice" cru, "some advice", "any advice" ou
+    // "a piece of advice". A primeira versao deste detector aceitava "an advice", ou
+    // seja, contaria como acerto o bot ENSINANDO ERRADO.
+    formaCerta: s => /\b(some|any)\s+advice\b/i.test(s)
+      || /\ba\s+piece\s+of\s+advice\b/i.test(s)
+      || /\bneed\s+advice\b/i.test(s)
+      || /\badvice\b/i.test(s) && !/\ban?\s+advice\b/i.test(s),
     porque: 'artigo indefinido com substantivo incontavel',
   },
   {
     id: 'plural-irregular',
     entrada: 'i saw many childrens at the park',
-    formaCerta: s => /\bchildren\b/i.test(s) && !/\bchildrens\b/i.test(s),
+    // NAO exigir a AUSENCIA de "childrens": uma correcao bem-feita CITA a forma errada
+    // ("We say 'children', not 'childrens'"), e proibi-la rejeitaria exatamente o
+    // comportamento desejado -- foi o falso negativo que contaminou o C1 ate 04/09.
+    // `\bchildren\b` ja nao casa com "childrens" (o 's' impede o limite de palavra),
+    // e quem exige o reparo explicito e o `corrigiu()`.
+    formaCerta: s => /\bchildren\b/i.test(s),
     porque: 'plural irregular, nada a ver com concordancia sujeito-verbo',
   },
 ];
