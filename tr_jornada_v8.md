@@ -1,4 +1,8 @@
-# Jornada de usuario real — v7.4 (fluxo ao vivo)
+# Jornada de usuario real — v8 (fluxo ao vivo)
+
+> Corrigido em 10/09: o cabecalho nasceu dizendo "v7.4" porque o rotulo estava cravado no
+> `jornada_usuario.js`. Esta rodada mediu o **v8** (ingress `iachat-test-v8`, execucoes no
+> workflow `PbwEf7L9xEXhJaCg`). O script passou a derivar o rotulo do ingress.
 
 > aluno sintetico `998651833`, rodada de 2026-09-07T02:54:11.835Z
 > Cada bloco e um turno: o que EU mandei e o que o BOT respondeu.

@@ -154,7 +154,19 @@ function digest(exec) {
   // com que frequencia o agente tenta vazar e o filtro segura). Nao use `duvidaCrua`
   // para julgar o que o aluno recebeu — para isso, `reply`.
   const duvidaCrua = duvAgente ? duvAgente.output : null;
-  return { id: exec.id, ran, reply: parts.join('\n'), student, errs, expectedAnswer, pkind, antispoiler, duvidaCrua };
+  // T025 — nos de ENVIO que rodaram neste turno.
+  //
+  // Existe para nao confundir "o bot ficou mudo" com "o instrumento nao le este no".
+  // Nos Telegram com o texto na PROPRIA expressao do no (ex.: `Enviar Menu`) nao
+  // publicam texto em lugar nenhum que o digest possa ler -- e com chat_id sintetico o
+  // envio ainda falha com "Bad request", entao nem o runData guarda a mensagem. O turno
+  // aparecia como VAZIO e isso foi publicado como defeito de produto no relatorio do v8;
+  // era falso (exec 3907: rota "menu" registrada e `Enviar Menu` executado).
+  //
+  // `enviosTentados` diz que houve tentativa de envio. Quem afirma "nada chegou ao
+  // aluno" precisa checar esta lista antes -- e o outro lado da armadilha nº 1.
+  const enviosTentados = ran.filter(n => /^(Enviar|Editar|Responder) /.test(n));
+  return { id: exec.id, ran, reply: parts.join('\n'), student, errs, expectedAnswer, pkind, antispoiler, duvidaCrua, enviosTentados };
 }
 
 async function msg(userId, text) {

@@ -26,8 +26,21 @@ const UID = Number(arg('uid', 0)) || (990000000 + (Date.now() % 9000000));
 
 const linhas = [];
 function log(s) { console.log(s); linhas.push(s); }
-function bot(txt) {
-  if (!txt || !String(txt).trim()) { log('   BOT: (VAZIO — nada foi enviado ao aluno)'); return; }
+// `envios` (opcional) = d.enviosTentados: nos de envio que RODARAM no turno.
+// Sem ele, um turno cujo texto mora na expressao de um no Telegram aparecia como
+// "nada foi enviado ao aluno" -- afirmacao sobre o PRODUTO tirada do silencio do
+// INSTRUMENTO. Foi assim que o `/menu` entrou no relatorio do v8 como defeito; a
+// exec 3907 mostra a rota "menu" registrada e o `Enviar Menu` executado.
+function bot(txt, envios) {
+  if (!txt || !String(txt).trim()) {
+    if (envios && envios.length) {
+      log('   BOT: (texto nao capturavel — o envio ROLOU em: ' + envios.join(', ') + ')');
+      log('        o texto mora na expressao do proprio no Telegram; num chat real ele chega.');
+    } else {
+      log('   BOT: (VAZIO — nenhum no de envio rodou neste turno)');
+    }
+    return;
+  }
   log(String(txt).split('\n').map(l => '   BOT| ' + l).join('\n'));
 }
 function aluno(txt) { log('\n   EU > ' + txt); }
@@ -79,7 +92,10 @@ function respostaPara(exec, modo) {
 }
 
 (async () => {
-  log('# Jornada de usuario real — v7.4 (fluxo ao vivo)\n');
+  // O rotulo vem do ingress. Estava cravado em "v7.4" e o tr_jornada_v8.md nasceu
+  // dizendo que media o v7.4 -- rotulo errado em evidencia e como numero errado:
+  // envenena quem ler depois.
+  log('# Jornada de usuario real — ' + ALVO + ' (fluxo ao vivo)\n');
   log('> aluno sintetico `' + UID + '`, rodada de ' + new Date().toISOString());
   log('> Cada bloco e um turno: o que EU mandei e o que o BOT respondeu.\n');
 
@@ -88,18 +104,18 @@ function respostaPara(exec, modo) {
   aluno('oi');
   let e = await msg(UID, 'oi');
   let d = digest(e);
-  bot(falaDoBot(e, d));
+  bot(falaDoBot(e, d), d.enviosTentados);
 
   aluno('Mariana');
-  e = await msg(UID, 'Mariana'); d = digest(e); bot(falaDoBot(e, d));
+  e = await msg(UID, 'Mariana'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
 
   aluno('17');
-  e = await msg(UID, '17'); d = digest(e); bot(falaDoBot(e, d));
+  e = await msg(UID, '17'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
 
   // ---------------- 2. Nivelamento ----------------
   log('\n## 2. Teste de nivel (escolhi "sei o basico")\n');
   aluno('[botao] 📖 Sei o básico, frases simples');
-  e = await cb(UID, 'pl_start_A2'); d = digest(e); bot(falaDoBot(e, d));
+  e = await cb(UID, 'pl_start_A2'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
 
   // Aluno mediano: acerta e erra alternado, para nao ancorar nas pontas.
   //
@@ -113,7 +129,7 @@ function respostaPara(exec, modo) {
     const r = respostaPara(e, modo);
     aluno(r + '   (' + modo + ')');
     e = await msg(UID, r); d = digest(e); turnosNivel++;
-    bot(falaDoBot(e, d));
+    bot(falaDoBot(e, d), d.enviosTentados);
     const st = d.student && d.student.placement_state;
     if (!st || st.status !== 'in_progress') { log('\n   [nivelamento concluido em ' + turnosNivel + ' turnos]'); break; }
     if (i === 15) log('\n   >>> ATENCAO: 16 turnos e o nivelamento NAO terminou (idx=' + (st && st.idx) + ') — o resto da jornada estaria contaminado');
@@ -128,23 +144,23 @@ function respostaPara(exec, modo) {
   // ---------------- 3. Persona ----------------
   log('\n## 3. Escolha de personalidade\n');
   aluno('[botao] Coach');
-  e = await cb(UID, 'persona_coach'); d = digest(e); bot(falaDoBot(e, d));
+  e = await cb(UID, 'persona_coach'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
 
   // ---------------- 4. Interesses ----------------
   log('\n## 4. Interesses\n');
   aluno('[botao] 🎮 Games');
-  e = await cb(UID, 'int_games'); d = digest(e); bot(falaDoBot(e, d));
+  e = await cb(UID, 'int_games'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
   aluno('[botao] ✍️ Outro');
-  e = await cb(UID, 'int_other'); d = digest(e); bot(falaDoBot(e, d));
+  e = await cb(UID, 'int_other'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
   aluno('skate');
-  e = await msg(UID, 'skate'); d = digest(e); bot(falaDoBot(e, d));
+  e = await msg(UID, 'skate'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
   aluno('[botao] ✅ Pronto');
-  e = await cb(UID, 'int_done'); d = digest(e); bot(falaDoBot(e, d));
+  e = await cb(UID, 'int_done'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
 
   // ---------------- 5. Conversa ----------------
   log('\n## 5. Modo Conversa\n');
   aluno('[botao] 💬 Conversa');
-  e = await cb(UID, 'mode_chat'); d = digest(e); bot(falaDoBot(e, d));
+  e = await cb(UID, 'mode_chat'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
 
   const turnos = [
     'hi! my name is Mariana',
@@ -153,16 +169,16 @@ function respostaPara(exec, modo) {
     'eu prefiro falar em portugues',      // deve seguir em ingles e convidar de volta (C2)
     'what do you like to do?',
   ];
-  for (const t of turnos) { aluno(t); e = await msg(UID, t); d = digest(e); bot(falaDoBot(e, d)); }
+  for (const t of turnos) { aluno(t); e = await msg(UID, t); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados); }
 
   // ---------------- 6. Professor ----------------
   log('\n## 6. Modo Professor\n');
   aluno('/menu');
-  e = await msg(UID, '/menu'); d = digest(e); bot(falaDoBot(e, d));
+  e = await msg(UID, '/menu'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
   aluno('[botao] 📚 Professor');
-  e = await cb(UID, 'mode_teacher'); d = digest(e); bot(falaDoBot(e, d));
+  e = await cb(UID, 'mode_teacher'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
   aluno('[botao] ▶️ Começar questões');
-  e = await cb(UID, 't_start'); d = digest(e); bot(falaDoBot(e, d));
+  e = await cb(UID, 't_start'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
 
   let gabarito = d.expectedAnswer;
   aluno('qual é a resposta?   (pedido de gabarito — NAO pode entregar)');
@@ -176,19 +192,19 @@ function respostaPara(exec, modo) {
   }
 
   aluno('zzz   (resposta errada de proposito)');
-  e = await msg(UID, 'zzz'); d = digest(e); bot(falaDoBot(e, d));
+  e = await msg(UID, 'zzz'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
 
   aluno('[botao] 💡 Tirar dúvida');
-  e = await cb(UID, 't_doubt'); d = digest(e); bot(falaDoBot(e, d));
+  e = await cb(UID, 't_doubt'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
   aluno('qual a diferença entre have e has?');
-  e = await msg(UID, 'qual a diferença entre have e has?'); d = digest(e); bot(falaDoBot(e, d));
+  e = await msg(UID, 'qual a diferença entre have e has?'); d = digest(e); bot(falaDoBot(e, d), d.enviosTentados);
 
   // ---------------- 7. Comandos ----------------
   log('\n## 7. Comandos do sistema\n');
   for (const c of ['/progresso', '/help', '/xyzabc']) {
     aluno(c); e = await msg(UID, c); d = digest(e);
     const sys = nodeOut(e.data.resultData.runData, 'Mensagem Sistema');
-    bot(falaDoBot(e, d));
+    bot(falaDoBot(e, d), d.enviosTentados);
   }
 
   log('\n---\n\n_aluno de teste `' + UID + '` — limpar com `node db/cleanup_test_users.js --apply`_');

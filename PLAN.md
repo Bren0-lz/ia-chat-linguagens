@@ -330,7 +330,7 @@ a versão anterior.
   item da lista de palavrões enviados. Hoje o R4 é `REVISAR` (leitura humana); automatizá-lo
   tira um teste da dívida de "sem automação".
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** OFFLINE OK, gate ao vivo PENDENTE (Postgres fora) — `civilidadeLine` definida no Contexto Conversa e consumida pelos 6 prompts; teste no gate reprova a versao anterior (12 assercoes, exit 1 vs 0)
 
 ### T021 — T17: abertura e fecho na voz da persona
 - **Escopo:** servir a explicação do banco (T008) trouxe **−88% de p90** e, no mesmo movimento,
@@ -392,7 +392,7 @@ a versão anterior.
 - **Gate:** a evidência que decide, e o `tr_jornada_v8.md` reinterpretado — ou o defeito
   confirmado, com o nó que falha nomeado.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE — NAO era defeito de produto. Exec 3907: rota "menu" registrada e `Enviar Menu` EXECUTADO (falhou so no envio, por chat_id sintetico). Era cegueira do digest; `enviosTentados` criado, jornada corrigida, relatorio e PDF atualizados
 
 ### T026 — revalidar: a bateria fecha em "todos positivos"?
 - **Escopo:** com T019–T025 fechadas, repetir Fase A + Fase B (N=3) + jornada no v8 e atualizar

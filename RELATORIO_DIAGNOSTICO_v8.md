@@ -26,7 +26,7 @@ mudado — e este relatório separa as duas coisas em toda tabela.
 | **Fase A** — determinísticos | 17 PASSOU | **17 PASSOU** |
 | **Fase B** — dependentes de LLM | 16 PASSOU · 2 FALHOU · 11 REVISAR | 16 PASSOU · **2 FALHOU** · 11 REVISAR |
 | N da Fase B | **1** (declarado "indicativo") | **3** nos qualitativos |
-| Turnos vazios | não contados | **0 na Fase B** · 2 na jornada (4 no v7.4) |
+| Turnos vazios | não contados | **0** — os 2 da jornada eram cegueira do instrumento (T025) |
 
 O placar agregado é quase idêntico, e isso **esconde as duas mudanças que importam**:
 
@@ -171,15 +171,26 @@ a pergunta, sem entregar a resposta — que é o comportamento desejado.
 `[botão] ✅ Pronto` (fim do menu de interesses) e **`/menu`** aparecem sem nada enviado ao
 aluno. Não é regressão — o v7.4 tem os dois.
 
-> ⚠️ **Correção, feita em 10/09:** a primeira redação desta seção chamou isso de **defeito de
-> produto**, e provavelmente está errado. O nó `Enviar Menu` é um **nó Telegram com o texto na
-> própria expressão do nó**, e a **armadilha nº 14** do handoff registra que texto de nó
-> Telegram estático é **invisível ao digest por construção**. Ou seja: o aluno provavelmente
-> **recebe** a mensagem, e é o instrumento que não a enxerga.
+> ✅ **CORRIGIDO em 10/09 — não era defeito de produto.** A primeira redação desta seção afirmou
+> que o bot ficava mudo, e estava **errada**.
 >
-> Isso está sob investigação na **T025**, que decide pelo `runData` do nó de envio em vez do
-> digest. Até lá, **não conte estes dois como defeito** — foi exatamente o erro que a armadilha
-> nº 1 adverte, na direção contrária: tratar silêncio do instrumento como fato sobre o produto.
+> **Evidência (T025):** na execução **3907**, o `Roteador Mestre` registrou `route: "menu"` e o
+> nó **`Enviar Menu` executou**, falhando com `Bad request - please check your parameters` — que
+> é o erro do `chat_id` sintético que **todo** nó de envio dá no teststand. O bot **tentou
+> enviar**; num chat real a mensagem chega.
+>
+> **Por que o instrumento não via:** o texto do menu mora na **expressão do próprio nó
+> Telegram**, então não é publicado em nó de código nenhum que o `digest()` leia — e, como o
+> envio falha com `chat_id` falso, nem o `runData` guarda a mensagem. Silêncio em todo lugar
+> onde o instrumento olha.
+>
+> **Foi a armadilha nº 1 na direção contrária:** ela adverte contra tratar resposta vazia como
+> aprovação; aqui eu tratei o silêncio do instrumento como **fato sobre o produto**. Ambas são a
+> mesma confusão entre "não observei" e "não aconteceu".
+>
+> **Conserto:** o `digest()` passou a expor `enviosTentados` (nós de envio que rodaram no turno),
+> e a jornada agora distingue *"nenhum nó de envio rodou"* de *"o envio rolou, o texto é que não
+> é capturável"*. **Turnos vazios reais nesta rodada: 0.**
 
 ### 6.3 O sinal mais incômodo desta rodada
 
@@ -261,7 +272,7 @@ motivação original do bloco estava inflada em ~1,9×: **o "17,8 s" nunca exist
 
 ## 9. O que falta para "todos os diagnósticos positivos"
 
-Meta declarada: abrir para usuários reais só quando a bateria estiver limpa. **Faltam 5.**
+Meta declarada: abrir para usuários reais só quando a bateria estiver limpa. **Faltam 5** (o item 6 caiu na T025 — não era defeito).
 
 | # | defeito | teste | estado |
 |---|---|---|---|
@@ -270,7 +281,7 @@ Meta declarada: abrir para usuários reais só quando a bateria estiver limpa. *
 | 3 | **Bot repete o palavrão do aluno** | R4 | 🔴 achado novo · risco para público de 16 anos |
 | 4 | **Sem reciprocidade com aluno monossilábico** | C10 | 🔴 achado novo · o `reciprocityLine` existe e prevê o caso — investigar se chegou ao prompt |
 | 5 | **Interesses mortos no A1** | C15 | ⚠️ conhecido · 0/9 no T012, 0/3 aqui, **sem hipótese candidata** |
-| 6 | **`/menu` e `✅ Pronto` aparecem vazios** | jornada §6.2 | ⚠️ **provável cegueira do instrumento, não defeito** — o texto mora na expressão de um nó Telegram, que o digest não lê (armadilha nº 14). Sob investigação na **T025** |
+| ~~6~~ | ~~`/menu` e `✅ Pronto` aparecem vazios~~ | jornada §6.2 | ✅ **NÃO era defeito** — resolvido na T025: exec 3907 mostra a rota registrada e o `Enviar Menu` executado. Era cegueira do instrumento, já consertada |
 
 **E um sinal a investigar antes de virar item:** a jornada mostrou o v8 **não corrigindo** um
 erro fora da lista em C1, onde o v7.4 corrigiu (§6.3). É N=1 e provavelmente variância — mas
