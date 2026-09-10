@@ -263,33 +263,29 @@ provavelmente se aplica aos outros níveis, que **não têm** exemplo de formato
 
 ---
 
-## 7. O achado mais caro: a persona morreu no Professor
+## 7. ~~O achado mais caro~~ — não era defeito
 
-Medido: no v8, as personas **`DEBATER` e `BUDDY` produzem a explicação byte a byte idêntica**.
+> ✅ **CORRIGIDO em 10/09, por decisão de produto do Breno: o modo Professor NÃO tem persona.**
+> Persona forte é do modo **Conversa**. A explicação da trilha é o texto revisado e ser igual para
+> todos os alunos é o comportamento **desejado**.
 
-```
-v7.4 DEBATER: Alright, Yuki. Let's tackle the Present Perfect Continuous. Many find it
-              tricky, but I argue it's quite straightforward...
-v7.4 BUDDY  : Hey Yuki! Que bom te ver por aqui! 😊 Hoje vamos falar de um tempo verbal
-              super legal...
-v8   ambas  : <b>O QUE É E QUANDO USAR</b> Usamos o <i>Present Perfect Continuous</i>...
-```
+Esta seção reportava, como o achado mais caro da bateria, que servir a explicação do banco havia
+"matado a persona" no Professor — `DEBATER` e `BUDDY` produzindo texto byte a byte idêntico. A
+observação era correta; **a classificação como defeito não era.**
 
-**Causa:** o T008 passou a servir a explicação pré-gerada do banco. O texto é o mesmo para
-todos, e o `Agente Professor` sequer roda nessa rota — então não há onde a persona se
-manifestar.
+Consequências:
 
-**É um trade-off, não um bug:**
+- **Servir do banco foi ganho puro:** p90 de **8,00 s → 0,98 s (−88%)**, **sem contrapartida**. A
+  tabela de trade-off que estava aqui não descreve nada real.
+- O **T17** deixa de ser defeito. O teste foi **invertido**: agora exige que a explicação seja
+  **igual** entre personas (`testa_explicacao_sem_persona.js`, no gate), protegendo o corpo
+  revisado de ser adulterado aluno a aluno — que é o risco de verdade.
+- A **moldura de persona** (T021), implementada para "consertar" isto, foi **revertida** e o v8
+  republicado sem ela.
 
-| | ganho | perda |
-|---|---|---|
-| explicação servida do banco | p90 **8,00 s → 0,98 s** (−88%) | a explicação perdeu a voz da persona |
-
-O handoff §5 registra o ganho e **não registra o custo**. Há caminho do meio: manter o corpo do
-banco e gerar **apenas a abertura e o fecho** na voz da persona — uma ou duas frases de LLM, não
-a aula inteira. **Decisão de produto, do Breno.**
-
----
+**A lição de método, que é o que sobra:** observar uma mudança de comportamento não é o mesmo que
+encontrar um defeito. Faltou perguntar *"isto é desejável?"* antes de classificar como regressão —
+e uma tarefa inteira foi gasta consertando uma expectativa que o produto nunca teve.
 
 ## 8. Latência
 
@@ -318,7 +314,7 @@ Meta declarada: abrir para usuários reais só quando a bateria estiver limpa. *
 | # | defeito | teste | estado |
 |---|---|---|---|
 | ~~1~~ | ~~Enunciado de B2 em português~~ | T3 | ✅ **NÃO era defeito** — detector julgava o cabeçalho de interface junto do enunciado (§4.3). PASSOU 3/3 ao vivo com o detector corrigido |
-| 2 | **Persona sumiu da explicação** | T17 | 🔴 achado novo · decisão de produto (§7) |
+| ~~2~~ | ~~Persona sumiu da explicação~~ | T17 | ✅ **não era defeito** — o Professor não tem persona (§7) |
 | 3 | **Bot repete o palavrão do aluno** | R4 | 🔴 achado novo · risco para público de 16 anos |
 | 4 | **Sem reciprocidade com aluno monossilábico** | C10 | 🔴 achado novo · o `reciprocityLine` existe e prevê o caso — investigar se chegou ao prompt |
 | 5 | **Interesses mortos no A1** | C15 | ⚠️ conhecido · 0/9 no T012, 0/3 aqui, **sem hipótese candidata** |
@@ -408,26 +404,19 @@ Depois de T019–T023, T025 e T027, a bateria foi repetida no mesmo v8 publicado
 | teste | v8 (06/09) | v8.1 | |
 |---|---|---|---|
 | **T3** — idioma da trilha | FALHOU 3/3 | **PASSOU** | ✅ conserto de **instrumento** (§4.3), não de produto |
-| **T17** — persona no Professor | FALHOU (rubrica) | **resolvido** | ✅ conserto de **produto** (T021) — ver 12.3 |
+| **T17** — persona no Professor | FALHOU (rubrica) | **não era defeito** | ✅ decisão de produto (§7): o Professor não tem persona |
 | **C15** — interesses no A1 | FALHOU | FALHOU | ⚠️ o probe mede o pior caso (T028) |
 
-### 12.3 T17: as personas voltaram a se distinguir
+### 12.3 ~~T17~~ — encerrado por decisão de produto
 
-Medido nesta rodada, mesmo tópico, mesmo nível:
-
-```
-DEBATER: "Vamos ao ponto, Yuki: esse assunto costuma ser mal explicado por aí"
-BUDDY:   "Que bom te ver, Yuki! Hoje o assunto e legal 🙂"
-```
-
-Corpo da aula idêntico (é o texto revisado do banco), moldura distinta. Sem custo de latência: a
-moldura é determinística, não passa pelo modelo.
+A moldura chegou a funcionar ao vivo (`DEBATER` e `BUDDY` com aberturas distintas e corpo
+idêntico), mas foi **revertida em 10/09**: o Professor não tem persona. Ver §7.
 
 ### 12.4 O que a v8.1 mexeu no produto
 
 | tarefa | efeito medido |
 |---|---|
-| **T021** — moldura de persona | T17 resolvido, 0 s de custo |
+| ~~T021~~ — moldura de persona | **revertida** — o Professor não tem persona (§7) |
 | **T022** — precedência da reciprocidade | C10 de **0/6 → 3/6**; "divide algo próprio" 0/6 → 4/6 |
 | **T023** — gancho de interesses por código | turno neutro **2/4** (era 0/4); no probe de cortesia segue 0 |
 | **T020** — civilidade | publicado; **falta o detector automático** — R4 ainda é leitura humana |

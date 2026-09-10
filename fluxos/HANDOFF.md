@@ -108,11 +108,11 @@ Ordem cronológica, com o efeito **medido** de cada mudança.
 
 | bloco | o que mudou | ganho medido | custo medido |
 |---|---|---|---|
-| **Professor servido do banco** (T006–T008) | 60 explicações pré-geradas, servidas do Postgres com fallback | p90 **8,00 s → 0,98 s** (−88%) | **matou a persona na explicação** (§5.2) — corrigido depois |
+| **Professor servido do banco** (T006–T008) | 60 explicações pré-geradas, servidas do Postgres com fallback | p90 **8,00 s → 0,98 s** (−88%) | **nenhum** — a perda de persona na explicação parecia custo, mas o Professor **não deve ter persona** (decisão de 10/09, §5.2) |
 | **Abre-alas** (T002) | `📚 Tópico N/10` chega 1,16 s antes do modelo | mata a sensação de travamento | — |
 | **Política de idioma** (T005b) | B1..C2 explicam em português; enunciado EN de B1 pra cima | contrato claro | contaminou a geração de questão em B1 (consertado lá) |
 | **Exemplo de formato no A1** (T012) | uma linha no `Prompt Conversa A1` | correção **0/9 → 9/9** | variedade caiu: 7 das 9 correções eram a mesma frase |
-| **Moldura de persona** (T021) | abertura/fecho por persona, determinístico | **T17 resolvido**, 0 s de custo | — |
+| ~~Moldura de persona~~ (T021) | ~~abertura/fecho por persona~~ | — | **revertida em 10/09**: o Professor não tem persona, por decisão de produto |
 | **Precedência da reciprocidade** (T022) | declarar que vence o gesto da persona | C10 **0/6 → 3/6** | — |
 | **Gancho de interesses por código** (T023) | o código escolhe o tema da pergunta final | turno neutro **0/4 → 2/4** | nenhum no probe de cortesia |
 
@@ -192,7 +192,7 @@ Esta seção existe porque o padrão abaixo se repetiu tantas vezes que deixou d
 
 ### 5.1 Metade dos "defeitos" eram do instrumento
 
-Na rodada de 06–10/09, **de seis defeitos reportados, quatro não eram do produto**:
+Na rodada de 06–10/09, **de seis defeitos reportados, apenas um sobreviveu**:
 
 | reportado como | era |
 |---|---|
@@ -200,18 +200,31 @@ Na rodada de 06–10/09, **de seis defeitos reportados, quatro não eram do prod
 | `/menu` e `✅ Pronto` — "não enviam nada" | o texto mora na expressão de um nó Telegram, **invisível ao digest** |
 | C15 — "interesses mortos" | o probe mede uma **abertura de cortesia**, o pior cenário possível |
 | controle do A1 — "~2/3" | detector saturado: contava o bot que só **usa** a forma certa |
+| T17 — "a persona sumiu do Professor" | comportamento **desejado** — o Professor não tem persona (§5.2) |
 
 **Consequência prática:** antes de escrever "o produto está quebrado", leia o `runData` do nó, não
 o agregado do instrumento. Custa minutos; publicar um defeito falso custa dias e envenena quem
 ler depois.
 
-### 5.2 Toda otimização tem um custo — procure por ele
+### 5.2 Nem todo efeito colateral é um custo — pergunte ao produto antes de consertar
 
 Servir a explicação do banco trouxe **−88% de latência** e, no mesmo movimento, fez `DEBATER` e
-`BUDDY` produzirem texto **byte a byte idêntico**. O ganho foi celebrado no handoff; o custo só
-apareceu **duas semanas depois**, num teste de persona.
+`BUDDY` produzirem a explicação **byte a byte idêntica**. Isso foi reportado como o "achado mais
+caro" da bateria, virou o T17, ganhou uma tarefa (T021) e uma implementação.
 
-Quando uma mudança tira o LLM do caminho, pergunte **o que mais ele estava fazendo ali**.
+**Estava errado.** Em 10/09 o Breno decidiu: **o Professor não tem persona; persona forte é do modo
+Conversa.** A explicação da trilha é o texto revisado, e ser igual para todos é o comportamento
+**desejado**. Ou seja: servir do banco foi ganho puro, sem contrapartida, e a moldura foi revertida.
+
+**As duas lições, e a segunda é a que custou:**
+
+1. Quando uma mudança tira o LLM do caminho, pergunte **o que mais ele estava fazendo ali** — a
+   observação era correta e vale repetir.
+2. **Observar uma mudança de comportamento não é o mesmo que ter encontrado um defeito.** Faltou
+   perguntar "isto é desejável?" antes de classificar como regressão e gastar uma tarefa
+   consertando. O teste T17 media uma expectativa que o produto nunca teve — hoje ele mede o
+   contrário (`testa_explicacao_sem_persona.js`), e protege o corpo revisado de ser adulterado por
+   aluno.
 
 ### 5.3 Diretiva solta perde para diretiva marcada como obrigatória
 
@@ -401,7 +414,7 @@ URL corrente em `http://localhost:4040/api/tunnels`.
 **No `npm run gate`** (offline, ~6 s): `regressao_v7.4` · `testa_cadastro_nome` ·
 `testa_nome_camada1` · `testa_abre_alas_professor` · `testa_explicacao_do_banco` ·
 `testa_decompoe_latencia` · `testa_alvo_bateria_a` · `testa_alvo_jornada` · `testa_lang_separado` ·
-`testa_civilidade` · `testa_moldura_persona` · `valida_track` · `valida_explicacoes` ·
+`testa_civilidade` · `testa_explicacao_sem_persona` · `valida_track` · `valida_explicacoes` ·
 `testa_valida_explicacoes` · `simula_vazamento` · `testa_idioma_professor` · `testa_saida_fase_a` ·
 `testa_detector_controle` · e o `git diff --quiet` do congelado.
 

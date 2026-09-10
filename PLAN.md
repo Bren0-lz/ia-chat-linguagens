@@ -345,7 +345,7 @@ a versão anterior.
   corpo **idêntico**; e o **p90 medido** fica abaixo de **3 s** (contra 0,98 s de hoje e 8,00 s
   da geração ao vivo). Se estourar, reverter — o ganho de latência é o que justificou o T008.
 - **Depende de:** —
-- **Status:** VIVO OK — a abertura do DEBATER apareceu na explicacao servida do banco (exec da rodada de 10/09: "Vamos ao ponto, Yuki: esse assunto costuma ser mal explicado por ai"). Moldura DETERMINISTICA (sem chamada de modelo): preserva os 0,98 s em vez de gastar 1-2 s. 5 personas com aberturas distintas, corpo do banco intacto, teto do Telegram respeitado. Teste reprova a versao anterior acusando o T17
+- **Status:** REVERTIDA em 10/09 — decisao de produto do Breno: o Professor NAO tem persona; persona forte e do modo Conversa. O T17 nao era defeito. Teste invertido (`testa_explicacao_sem_persona.js`): agora exige explicacao IGUAL entre personas. Registro do que foi: VIVO OK — a abertura do DEBATER apareceu na explicacao servida do banco (exec da rodada de 10/09: "Vamos ao ponto, Yuki: esse assunto costuma ser mal explicado por ai"). Moldura DETERMINISTICA (sem chamada de modelo): preserva os 0,98 s em vez de gastar 1-2 s. 5 personas com aberturas distintas, corpo do banco intacto, teto do Telegram respeitado. Teste reprova a versao anterior acusando o T17
 
 ### T022 — C10: reciprocidade que o modelo de fato obedece
 - **Escopo:** investigado — **não é instrumento**. O teste semeia `short_streak:2` e envia `ok`
