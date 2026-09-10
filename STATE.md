@@ -1,9 +1,9 @@
 # Estado do loop
 
-- **Tarefa atual:** T019 (abre o Bloco 3 — v8.1). Aguarda autorizacao para republicar o v8
-- **Última concluída:** T018 — relatorio diagnostico comparativo v7.4 x v8, em .md e PDF
+- **Tarefa atual:** T024 (o teste que falta) · depois T026 (revalidar). Bloco 3 com T019-T023 e T025 fechadas
+- **Última concluída:** T022 e T023 — reciprocidade 0/6 -> 3/6; gancho de interesses funciona em turno neutro (2/4) e perde para a cortesia (0/4)
 - **Tentativas na atual:** 0/3
-- **Bloqueios:** T010 aguarda decisao do Breno (credencial da camada 2). Nao bloqueia T011/T012. Ambiente: n8n e Postgres no ar, os dois workflows ativos, webhook do v8 conferido em 06/09.
+- **Bloqueios:** T010 aguarda decisao do Breno (credencial da camada 2 — lixo digitado ainda vira nome). Ambiente OK: Postgres 5433, n8n 5678, v8 publicado com T019-T023.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
 
