@@ -624,4 +624,9 @@ foi **adiado por decisão dele** — sai da lista de bloqueio imediato.
 - **Gate:** `testa_bateria_b_n3.js` verde e no `npm run gate`; o teste do rótulo reprova a
   versão atual.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE (0373f03) na parte (a), em 2 tentativas; parte (b) **riscada por premissa falsa**.
+  A tentativa 1 reprovou porque o teste entrou no gate pela porta errada. Consertando isso
+  descobriu-se que **o gate já não rodava em clone limpo antes desta tarefa** —
+  `testa_decompoe_latencia.js` importava o harness, que exigia `N8N_API_KEY` na carga, e
+  `dotenv`/`pg` nunca foram declarados. Credencial agora é preguiçosa; `npm run gate` exit 0 em
+  clone fora do repositório, sem `.env`, reproduzido pelo verifier

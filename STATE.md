@@ -1,8 +1,8 @@
 # Estado do loop
 
-- **Tarefa atual:** T036 (higiene de instrumento) — REPROVADA na tentativa 1, devolvida ao implementer. T034 e T035 DONE
-- **Última concluída:** T035 (287d2d7) — conteudo escapado na correcao, moldura intacta
-- **Tentativas na atual:** 1/3
+- **Tarefa atual:** nenhuma. **BLOCO 5 FECHADO** (T034, T035, T036a DONE; T036b riscada por premissa falsa). Pendente do Breno: publicar o v8 com T034+T035
+- **Última concluída:** T036 (0373f03) — o gate volta a rodar em clone limpo
+- **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum no fluxo de tarefas. T010 e T030 ADIADOS por decisao do Breno (seguem bloqueando o LANCAMENTO, nao o loop). Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
@@ -237,3 +237,8 @@
 - 2026-09-11 E O CLAUDE.md FICOU MENTINDO: trocou 23 -> 24 e manteve tres linhas abaixo "Todos rodam offline: sem n8n, sem Postgres, sem LLM". Documentacao que mente sobre o gate e o que vira falso PASSOU na sessao seguinte. Devolvido com o conserto certo: checagem de chave PREGUICOSA no harness (serve aos ~20 scripts que o importam) + declarar dotenv e pg como dependencias + PROVAR o gate rodando em clone limpo.
 - 2026-09-11 ERRO MEU, registrado: a parte (b) do T036 partia de premissa FALSA que eu escrevi no PLAN ("existe um ingress do v8.1 fora do mapa ROTULOS"). Nao existe. Confirmado em duas pontas: o v8.json tem UM unico path (`iachat-test-v8`), o cabecalho do tr_bateria_b_v81.md diz "Alvo: v8 — .../iachat-test-v8", e os pares _v8/_v81 sao md5 IDENTICOS. Os arquivos _v81 sao copias manuais de uma rodada no v8. Mapear esse valor para "v8.1" RENOMEARIA as transcricoes do v8 — o oposto do pedido. O implementer parou em vez de inventar um valor, que era o comportamento certo.
 - 2026-09-11 PERDA DE EVIDENCIA CONFIRMADA, e pior do que o primeiro relato: `git show c2219b3 --numstat` mostra tr_bateria_a_v8.md (0/68) e tr_bateria_b_v8.md (18/155) sobrescritos, e o `git log --follow` acha TRES toques em tr_bateria_b_v8.md (9dcce01 = T015 em 06/09 -> 5f73e76 -> c2219b3). O conteudo de 06/09 do v8 so existe em 9dcce01. Vale para o HANDOFF §11.
+- 2026-09-11 T036 DONE na tentativa 2 (0373f03), verificada. A parte (a) entrou no gate; a (b) segue riscada.
+- 2026-09-11 O ACHADO QUE VALE MAIS QUE A TAREFA: o `npm run gate` JA NAO RODAVA EM CLONE LIMPO, e nao por causa do T036. `testa_decompoe_latencia.js`, ha tempos no gate, importa o harness, e o `harness.js` fazia process.exit(1) na CARGA sem N8N_API_KEY; alem disso `dotenv` e `pg` nunca estiveram no package.json. O verifier reproduziu clonando o HEAD: exit 1 em testa_decompoe_latencia. Ninguem tinha visto porque todo mundo roda na maquina que tem .env.
+- 2026-09-11 CONSERTO: credencial PREGUICOSA no harness (`apiKey()`/`testSecret()`, cobradas em jget e postWebhook — serve aos ~20 scripts que o importam) + dotenv e pg em dependencies. Quem vai a rede continua morrendo com a MESMA mensagem: conferido em jget, msg() e gate_vivo_v8.
+- 2026-09-11 PROVA QUE VALE: o verifier clonou o repositorio FORA da arvore (so ali a ausencia de .env e real, porque fromDotEnv olha dois niveis acima), rodou com `env -u N8N_API_KEY -u IACHAT_TEST_SECRET` e obteve exit 0 com 74 asserts. Regra nova no CLAUDE.md: prove em clone limpo antes de acrescentar comando ao gate.
+- 2026-09-11 BLOCO 5 FECHADO: T034 (topico uma vez), T035 (HTML da correcao), T036a (gate em clone limpo). 3 tarefas, 4 vereditos (1 FAIL honesto), gate de 18 -> 24 comandos no dia.
