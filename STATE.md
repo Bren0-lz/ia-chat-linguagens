@@ -1,8 +1,8 @@
 # Estado do loop
 
-- **Tarefa atual:** T036 (higiene de instrumento) — ultima do bloco 5. T034 e T035 DONE
+- **Tarefa atual:** T036 (higiene de instrumento) — REPROVADA na tentativa 1, devolvida ao implementer. T034 e T035 DONE
 - **Última concluída:** T035 (287d2d7) — conteudo escapado na correcao, moldura intacta
-- **Tentativas na atual:** 0/3
+- **Tentativas na atual:** 1/3
 - **Bloqueios:** nenhum no fluxo de tarefas. T010 e T030 ADIADOS por decisao do Breno (seguem bloqueando o LANCAMENTO, nao o loop). Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
@@ -233,3 +233,7 @@
 - 2026-09-11 ARMADILHA NOVA, vale para qualquer teste do Professor Engine: o no MUTA o teacher_state que recebe (idx++, streak=0, answer=''). Teste que reaproveita o mesmo objeto entre duas chamadas mede outro estado — use fabrica de ts por chamada. Deu falso vermelho no implementer antes de ele achar.
 - 2026-09-11 RESSALVA DO VERIFIER: tres assercoes do teste sao regex sobre o texto-fonte do no (inclusive a igualdade do esc(), comparada contra um literal cravado no teste, nao contra o Parse Professor real). Sao redundantes com as comportamentais e nao sustentam o veredito sozinhas; o verifier conferiu a igualdade de forma independente.
 - 2026-09-11 Gate: 23 comandos + congelado. T034 e T035 mexem no fluxo — a proxima publicacao leva as duas.
+- 2026-09-11 T036 (a) feita, (b) BLOCKED, e o conjunto REPROVADO pelo verifier na tentativa 1. O FAIL nao e da logica: e de COMO o teste entrou no gate. `testa_bateria_b_n3.js` importa `bateria_completa_b`, que importa `dotenv` e `pg` (nenhum dos dois no package.json) e o `harness.js:22` faz process.exit(1) sem N8N_API_KEY. Resultado medido em clone simulado: `npm run gate` quebra com "Cannot find module 'dotenv'", e com os modulos presentes mas sem .env sai 1 por credencial ausente — para rodar um teste que NAO usa credencial.
+- 2026-09-11 E O CLAUDE.md FICOU MENTINDO: trocou 23 -> 24 e manteve tres linhas abaixo "Todos rodam offline: sem n8n, sem Postgres, sem LLM". Documentacao que mente sobre o gate e o que vira falso PASSOU na sessao seguinte. Devolvido com o conserto certo: checagem de chave PREGUICOSA no harness (serve aos ~20 scripts que o importam) + declarar dotenv e pg como dependencias + PROVAR o gate rodando em clone limpo.
+- 2026-09-11 ERRO MEU, registrado: a parte (b) do T036 partia de premissa FALSA que eu escrevi no PLAN ("existe um ingress do v8.1 fora do mapa ROTULOS"). Nao existe. Confirmado em duas pontas: o v8.json tem UM unico path (`iachat-test-v8`), o cabecalho do tr_bateria_b_v81.md diz "Alvo: v8 — .../iachat-test-v8", e os pares _v8/_v81 sao md5 IDENTICOS. Os arquivos _v81 sao copias manuais de uma rodada no v8. Mapear esse valor para "v8.1" RENOMEARIA as transcricoes do v8 — o oposto do pedido. O implementer parou em vez de inventar um valor, que era o comportamento certo.
+- 2026-09-11 PERDA DE EVIDENCIA CONFIRMADA, e pior do que o primeiro relato: `git show c2219b3 --numstat` mostra tr_bateria_a_v8.md (0/68) e tr_bateria_b_v8.md (18/155) sobrescritos, e o `git log --follow` acha TRES toques em tr_bateria_b_v8.md (9dcce01 = T015 em 06/09 -> 5f73e76 -> c2219b3). O conteudo de 06/09 do v8 so existe em 9dcce01. Vale para o HANDOFF §11.

@@ -613,8 +613,12 @@ foi **adiado por decisão dele** — sai da lista de bloqueio imediato.
 - **Origem:** duas sobras do bloco 4, ambas de ferramental, nenhuma visível ao aluno.
   (a) `testa_bateria_b_n3.js` dá falso vermelho desde o T031 — cristalizou os nomes históricos do
   `TR` e não aceita a variante datada; **está fora do `npm run gate`**.
-  (b) `alvo.js` não tem o ingress do v8.1 no mapa `ROTULOS`, então o rótulo do relatório daquele
-  alvo é o path cru.
+  (b) ~~`alvo.js` não tem o ingress do v8.1 no mapa `ROTULOS`~~ — **PREMISSA FALSA, riscada em
+  11/09.** Não existe ingress do v8.1: o `v8.json` tem um único `path` (`iachat-test-v8`), o
+  cabeçalho do `tr_bateria_b_v81.md` diz `Alvo: v8 — .../iachat-test-v8`, e os pares `_v8`/`_v81`
+  são **md5 idênticos**. Os `_v81` são cópias manuais de uma rodada no v8; mapear esse valor para
+  "v8.1" renomearia as transcrições do v8. Rotular um marco exigiria decisão de produto (ingress
+  próprio, contra a convenção de não multiplicar fluxos) ou mover o rótulo para fora do `alvo.js`.
 - **Escopo:** (a) aceitar `tr_bateria_b[_v8]_AAAA-MM-DD[-n].md` e **então** entrar no gate;
   (b) mapear o rótulo. Não mexer no que o T031 protege.
 - **Gate:** `testa_bateria_b_n3.js` verde e no `npm run gate`; o teste do rótulo reprova a
