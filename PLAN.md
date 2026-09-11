@@ -561,4 +561,8 @@ O loop não executa nada daqui; o Breno roda entre blocos.
 - **Gate:** `testa_markdown_saida.js` ganha os casos de bullet (`*`, `-`, `+`, com e sem
   indentação) e tem de reprovar a versão atual; ao vivo, `vivo_duvida_markdown.js` passa a sair 0.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE offline (3eac580) — `^([ 	]*)[*+-][ 	]+(?=S)` → `$1• `, idêntica nos três
+  nós; reprova a versão anterior por 16 asserções e sobrevive a 40 contra-exemplos testados pelo
+  verifier. **LIMITE ACEITO:** diálogo com hífen ASCII vira `•` (é sintaticamente um bullet; em
+  pt-BR o modelo usa travessão, que sobrevive). **Falta a verificação ao vivo:** exige republicar
+  o v8 e rodar `vivo_duvida_markdown.js`

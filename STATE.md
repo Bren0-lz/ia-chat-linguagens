@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T033 (bullet de lista ainda vaza markdown), aberta pela verificacao ao vivo do T029. Bloco 4: T029, T031, T032 DONE; T030 ADIADO
-- **Última concluída:** T032 (2b1ea1e) — o que ja foi medido sobrevive a morte do processo
+- **Tarefa atual:** nenhuma no offline. T033 DONE offline (3eac580), FALTA a verificacao ao vivo — depende de republicar o v8 (pedido do Breno)
+- **Última concluída:** T033 (3eac580) — bullet de lista deixa de chegar como `*` ao aluno
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** T010 (credencial da camada 2) aguarda decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
@@ -212,3 +212,7 @@
 - 2026-09-11 A VERIFICACAO AO VIVO REPROVOU, e achou defeito real: exec 4274, o no `Formatar Duvida` RODOU (a versao no ar e a nova), mas o aluno recebeu `*   Good morning (bom dia)...` — BULLET DE LISTA. O desmarkdown trata `**x**`, `*x*`, cerca e `#`; nao trata bullet em inicio de linha.
 - 2026-09-11 LICAO, e e a do §11 do handoff outra vez: o teste offline do T029 passou porque so media as formas que eu escolhi para as fixtures. A forma que o LLM de fato produz numa explicacao — lista com bullets — nao estava la. LACUNA DE COBERTURA E DEFEITO INVISIVEL. O verifier tinha PREVISTO essa lacuna em texto; eu registrei como ressalva e nao virei tarefa. Registrar nao e consertar.
 - 2026-09-11 T033 criada. `vivo_duvida_markdown.js` fica commitado REPROVANDO de proposito: e o instrumento que mede a correcao que falta.
+- 2026-09-11 T033 DONE offline (3eac580), verificada. Uma linha no desmarkdown, identica nos tres nos: `^([ 	]*)[*+-][ 	]+(?=S)` -> `$1• `. O marcador vira • em vez de sumir — cada item e uma regra didatica, achatar juntaria tudo numa parede de texto.
+- 2026-09-11 FALSO POSITIVO ERA O RISCO e foi medido: o verifier testou 40 entradas contra a funcao extraida do JSON. Intactas: `2 * 3`, `a * b * c`, `-5 graus`, `+55 11 90000-0000`, `3 - 1 = 2`, travessao — e –, `C-3PO`, `-ing forma`, `--- separador`, `   -Sem espaco`, e marcador sem conteudo (o lookahead segura). Sem regressao da T029: de 19 entradas comparadas velho x novo, so as 3 de bullet mudaram.
+- 2026-09-11 LIMITE ACEITO E DECLARADO: `- Oi, tudo bem?` (dialogo com hifen ASCII) vira `• Oi, tudo bem?`. E sintaticamente um bullet markdown; nao ha informacao na string que distinga. Probabilidade baixa na saida real (em pt-BR o modelo marca dialogo com travessao, que sobrevive) e o dano e cosmetico.
+- 2026-09-11 PENDENTE: a T033 so vale ao aluno depois de `publica_v8.js` + `vivo_duvida_markdown.js` saindo 0. O v8 no ar ainda tem o desmarkdown sem bullet — e o proprio script ao vivo reprova hoje, de proposito.
