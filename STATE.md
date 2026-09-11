@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T035 (gabarito nao escapado quebra o HTML da correcao). Bloco 5: T034 DONE; T035, T036 pela frente
-- **Última concluída:** T034 (13e1d9e) — o topico deixa de ser anunciado duas vezes
+- **Tarefa atual:** T036 (higiene de instrumento) — ultima do bloco 5. T034 e T035 DONE
+- **Última concluída:** T035 (287d2d7) — conteudo escapado na correcao, moldura intacta
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum no fluxo de tarefas. T010 e T030 ADIADOS por decisao do Breno (seguem bloqueando o LANCAMENTO, nao o loop). Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
@@ -228,3 +228,8 @@
 - 2026-09-11 O TESTE MONTA O PAR COMO O ALUNO RECEBE: extrai o jsCode de `Cabecalho Topico` e `Explicacao do Banco` do proprio JSON e executa os dois, em vez de comparar strings copiadas a mao. Strings literais so no auto-teste do detector (secao 0), que o exercita nas duas direcoes.
 - 2026-09-11 O IMPLEMENTER CONTOU UM ERRO CONTRA SI: a primeira versao do regex nao pegava `Proximo topico (2/10)` por falta de /i e passava na versao velha. Achado com git stash antes de reportar (6 -> 7 falhas). Armadilha nº 13 de novo — e desta vez o proprio autor a pegou.
 - 2026-09-11 PENDENCIA ACUMULADA: T034 mexe no fluxo. Junto com nada mais pendente hoje, a proxima publicacao leva T034 (o v8 no ar ja tem T029 e T033).
+- 2026-09-11 T035 DONE (287d2d7), verificada. A varredura do no valeu mais que o defeito original: alem do gabarito, entraram nome do aluno (track_done, advance, streak) e titulo do topico (ask_doubt, start_quiz). `esc()` byte a byte igual ao do Parse Professor, Cabecalho Topico e Placement Engine.
+- 2026-09-11 DUPLO ESCAPE E O RISCO OPOSTO, e foi medido no caminho COMPLETO (engine -> Parse Professor -> Cabecalho Topico): "Ana & <Cia>" sai com escape unico, nunca &amp;lt;. `out.topicTitle` fica CRU de proposito — quem escapa e o Cabecalho Topico. Quem mexer nisso tem de olhar os dois nos juntos.
+- 2026-09-11 ARMADILHA NOVA, vale para qualquer teste do Professor Engine: o no MUTA o teacher_state que recebe (idx++, streak=0, answer=''). Teste que reaproveita o mesmo objeto entre duas chamadas mede outro estado — use fabrica de ts por chamada. Deu falso vermelho no implementer antes de ele achar.
+- 2026-09-11 RESSALVA DO VERIFIER: tres assercoes do teste sao regex sobre o texto-fonte do no (inclusive a igualdade do esc(), comparada contra um literal cravado no teste, nao contra o Parse Professor real). Sao redundantes com as comportamentais e nao sustentam o veredito sozinhas; o verifier conferiu a igualdade de forma independente.
+- 2026-09-11 Gate: 23 comandos + congelado. T034 e T035 mexem no fluxo — a proxima publicacao leva as duas.

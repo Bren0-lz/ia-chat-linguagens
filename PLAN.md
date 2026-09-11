@@ -604,7 +604,10 @@ foi **adiado por decisão dele** — sai da lista de bloqueio imediato.
 - **Gate:** teste offline com gabarito contendo `<`, `&` e `>`, exigindo que o texto final
   continue sendo HTML válido e que a moldura sobreviva. Reprova a versão atual.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE (287d2d7) — gabarito + mais **quatro** pontos achados na varredura (nome do aluno
+  em 3 lugares, título do tópico em 2). `out.topicTitle` fica cru de propósito: o
+  `Cabeçalho Tópico` já escapa, e escapar na origem daria duplo escape (conferido no caminho
+  completo pelo verifier). Reprova o v8 anterior e o v7.4 por 17 falhas. **PRECISA PUBLICAR**
 
 ### T036 — higiene de instrumento (a dívida do bloco 4)
 - **Origem:** duas sobras do bloco 4, ambas de ferramental, nenhuma visível ao aluno.
