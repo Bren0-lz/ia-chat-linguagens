@@ -118,6 +118,69 @@ ok(ex.pkind === 'explain', 'explicação (fallback LLM): ramo `explain` reconhec
 semMarkdown(sx, 'explicação (fallback LLM)');
 semInjecao(sx, 'explicação (fallback LLM)');
 
+// ============ T033: BULLET DE LISTA ============
+// A T029 nao tratava marcador de lista em inicio de linha — que e a forma que o
+// modelo MAIS produz numa explicacao. Evidencia ao vivo (exec 4274, 11/09): o aluno
+// recebeu "*   Good morning (bom dia) ...". Fixture copiada dessa transcricao.
+// Decisao: o marcador vira `•` (a lista e conteudo didatico; achatar juntaria os itens).
+console.log('\n== Bullet de lista (T033) ==');
+const BULLETS = [
+  'A diferença é simples:',
+  '*   Good morning (bom dia) a gente usa de manhã, quando o sol tá nascendo.',
+  '*   Good afternoon (boa tarde) a gente usa à tarde, depois do meio-dia.',
+  '- Use **do** com I/you/we/they.',
+  '+ E o terceiro marcador que o modelo usa.',
+  '  - item indentado com hífen',
+  '    * item indentado com asterisco',
+].join('\n');
+
+function conferBullets(s, rotulo) {
+  ok(!/(^|\n)[ \t]*[*+-][ \t]/.test(s), rotulo + ': nenhum marcador de lista cru (`* `, `- `, `+ `) em início de linha');
+  ok((s.match(/•/g) || []).length === 6, rotulo + ': os 6 itens viraram `•` (a lista sobrevive, não some)');
+  ok(/•\s+Good morning \(bom dia\)/.test(s), rotulo + ': o conteúdo do item continua logo após o `•`');
+  ok(/\n {2}• item indentado com hífen/.test(s) && /\n {4}• item indentado com asterisco/.test(s),
+    rotulo + ': a indentação do item aninhado é preservada');
+  ok(/• Use do com I\/you\/we\/they\./.test(s), rotulo + ': `**negrito**` dentro do item também é desmarcado');
+  ok(/(^|\n)A diferença é simples:/.test(s), rotulo + ': linha sem marcador não ganha `•`');
+}
+
+// Contra-exemplos: nao sao lista e tem de sobreviver intactos (falso positivo e o
+// risco real desta tarefa). Testados linha a linha para o diagnostico ser preciso.
+const CONTRA = [
+  ['2 * 3 = 6 é a conta.', '2 * 3 = 6 é a conta.', 'multiplicação `2 * 3` em início de linha'],
+  ['-5 graus é frio demais.', '-5 graus é frio demais.', 'número negativo `-5` em início de linha'],
+  ['+55 11 90000-0000 é o telefone.', '+55 11 90000-0000 é o telefone.', 'DDI `+55` em início de linha'],
+  ['— Bom dia, disse ela.', '— Bom dia, disse ela.', 'travessão de diálogo'],
+  ['3 - 1 = 2, simples assim.', '3 - 1 = 2, simples assim.', 'subtração com hífen cercado de espaços'],
+  ['Isso é *importante* mesmo.', 'Isso é importante mesmo.', '*ênfase* no meio da frase (perde o `*`, não vira item)'],
+  ['*ênfase* no início da linha vale igual.', 'ênfase no início da linha vale igual.', '*ênfase* colada no início da linha'],
+  ['-', '-', 'marcador sozinho, sem conteúdo, não vira item'],
+];
+
+for (const no of ['Formatar Dúvida', 'Parse Professor']) {
+  const rotulo = no === 'Formatar Dúvida' ? 'dúvida' : 'correção';
+  const saida = no === 'Formatar Dúvida'
+    ? String(run('Formatar Dúvida', { refs: {}, item: { output: BULLETS } }).finalText || '')
+    : String(parse('wrong', BULLETS, FB_WRONG).finalText || '');
+  conferBullets(saida, rotulo);
+  for (const [entrada, esperado, desc] of CONTRA) {
+    const got = no === 'Formatar Dúvida'
+      ? String(run('Formatar Dúvida', { refs: {}, item: { output: entrada } }).finalText || '')
+      : String(parse('wrong', entrada, FB_WRONG).finalText || '');
+    ok(got.includes(esperado) && !got.includes('•'),
+      rotulo + ': sobrevive intacto — ' + desc + (got.includes(esperado) ? '' : ' [recebeu: ' + got.replace(/\n/g, '\\n') + ']'));
+  }
+}
+
+// cadeia real da duvida: Filtro Anti-Spoiler -> Formatar Dúvida
+{
+  const fasB = run('Filtro Anti-Spoiler', {
+    refs: { 'Professor Engine': { teacher_state_new: { answer: 'playing', q_answered: true } } },
+    item: { output: BULLETS },
+  });
+  conferBullets(String(run('Formatar Dúvida', { refs: {}, item: fasB }).finalText || ''), 'dúvida (cadeia)');
+}
+
 // ============ MESMA LOGICA NOS TRES NOS ============
 console.log('\n== Desmarkdown único ==');
 function extraiDesmark(nome) {
