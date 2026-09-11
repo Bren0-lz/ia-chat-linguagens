@@ -674,7 +674,8 @@ questões** — não constrói caminho novo.
 - **Gate:** teste offline que prova que a **única** diferença estrutural em relação ao v8 é essa +
   `regressao_v7.4.js` (aceita caminho por `argv[2]`) verde contra o arquivo do evento.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE (8dc260e) — 107 nós, igualdade total pós-normalização dos 3 campos; o teste
+  pegou as 11 violações que o verifier inventou. Gate em 26 comandos, provado em clone limpo
 
 ### E002 — o atalho: escolher o nível já leva à personalidade
 - **Escopo:** no `Placement Engine` do arquivo do evento, `sub==='start'` deixa de montar a

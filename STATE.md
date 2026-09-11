@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** E001 (nascer o IAChat_Telegram_evento.json). BLOCO DO EVENTO aberto: E001-E006. Blocos 4 e 5 fechados e publicados
-- **Última concluída:** T036 (0373f03) — o gate volta a rodar em clone limpo
+- **Tarefa atual:** E002 (o atalho: escolher o nivel leva direto a personalidade). E001 DONE. Bloco do evento: E002-E006 pela frente
+- **Última concluída:** E001 (8dc260e) — o arquivo do evento nasceu, copia fiel do v8 com 3 diferencas
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum no fluxo de tarefas. T010 e T030 ADIADOS por decisao do Breno (seguem bloqueando o LANCAMENTO, nao o loop). Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
@@ -254,3 +254,7 @@
 - 2026-09-11 TRES DETALHES QUE VIRAM TRABALHO: o texto da escolha de nivel promete "comeca um teste de 10 questoes"; o `Enviar Pergunta Persona` abre com "📊 Esse e o seu resultado!" (e esse texto mora na EXPRESSAO INLINE do no Telegram, invisivel ao digest — armadilha 14); e os botoes so vao de A1 a B2, porque o teste subia sozinho dali para cima.
 - 2026-09-11 RISCO DECLARADO E NAO RESOLVIDO: o v8 NUNCA foi exposto a usuario real (no ar esta o v7.4), e a rodada v8.1 ficou em N=1 na maioria com a jornada nao executada. Derivar o evento do v8 traz as correcoes de 11/09 e tambem tudo que nunca passou por gente. Por isso jornada + Fase B contra o fluxo do evento ANTES do dia nao sao opcionais.
 - 2026-09-11 `publica_v8.js` NAO SERVE para o evento e NAO deve ser adaptado: alvo cravado no v8, e a trava 2 recusa arquivo com Gatilho Telegram habilitado — que e exatamente o que o evento precisa ter. O evento tera caminho de publicacao proprio, e a ATIVACAO no dia e do Breno, nao minha.
+- 2026-09-11 E001 DONE (8dc260e), verificada. `IAChat_Telegram_evento.json`: 107 nos, copia fiel do v8 com TRES diferencas — name, TEST Ingress em `iachat-test-evento` e `Gatilho Telegram` HABILITADO. O teste exige igualdade TOTAL depois de normalizar so esses tres campos (ids, connections, settings, pinData e os 31 jsCode).
+- 2026-09-11 O VERIFIER INVENTOU 11 VIOLACOES E O TESTE PEGOU AS 11, incluindo as que eu nao teria lembrado: texto de no Telegram alterado (invisivel ao digest — armadilha 14), `active:true` no topo, webhookId do gatilho trocado, conexao removida, id de no trocado, e "habilitaram o gatilho no v8" (a copia na direcao errada, que e a que derrubaria o bot no ar).
+- 2026-09-11 RIGIDEZ CONHECIDA E ACEITA: se alguem escrever `"disabled": false` explicito no evento, o teste reprova mesmo com o gatilho funcionalmente ativo. O export do n8n omite o campo, entao nao bloqueia — mas quem editar a mao precisa saber.
+- 2026-09-11 AVISO PARA A E002: o `testa_arquivo_evento.js` exige jsCode IDENTICO ao do v8, entao ele VAI REPROVAR assim que o Placement Engine do evento mudar. E proposital: a E002 tem de ampliar a lista de diferencas declaradas no teste. Assim toda divergencia entre os dois arquivos vira decisao explicita, em vez de deriva silenciosa entre arquivos parecidos.
