@@ -564,5 +564,5 @@ O loop não executa nada daqui; o Breno roda entre blocos.
 - **Status:** DONE offline (3eac580) — `^([ 	]*)[*+-][ 	]+(?=S)` → `$1• `, idêntica nos três
   nós; reprova a versão anterior por 16 asserções e sobrevive a 40 contra-exemplos testados pelo
   verifier. **LIMITE ACEITO:** diálogo com hífen ASCII vira `•` (é sintaticamente um bullet; em
-  pt-BR o modelo usa travessão, que sobrevive). **Falta a verificação ao vivo:** exige republicar
-  o v8 e rodar `vivo_duvida_markdown.js`
+  pt-BR o modelo usa travessão, que sobrevive). **Verificado AO VIVO** em 11/09 (exec 4278, v8
+  republicado): `vivo_duvida_markdown.js` exit 0 e o aluno recebeu a lista com `•`
