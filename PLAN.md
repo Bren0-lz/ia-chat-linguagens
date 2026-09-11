@@ -501,7 +501,9 @@ no fim desta seção, sem ID — o loop não executa, o Breno roda entre blocos.
   ingress (não enfraquecer o que já protege). O teste roda em **diretório temporário**: não
   encostar nos `tr_*.md` reais, que são evidência.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE (08fc94c) — `caminhoLivre(alvo, existe, agora)` com disco e relógio injetados;
+  livre mantém o nome histórico, ocupado ganha data e desempate. Os três chamadores passam por
+  ele; os 13 `tr_*.md` conferidos por md5 antes e depois
 
 ### T032 — a bateria sobrevive à morte por memória
 - **Origem:** em 10/09 o sistema matou o processo **três vezes**; a Fase B ficou em N=1 e a

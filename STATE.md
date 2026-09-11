@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T031 (transcricao que nao sobrescreve evidencia). Bloco 4: T029 DONE; T031, T032 offline; T030 ADIADO por decisao do Breno
-- **Última concluída:** T029 (393d70c) — markdown na Duvida e na Correcao; PRECISA PUBLICAR para valer ao vivo
+- **Tarefa atual:** T032 (bateria sobrevive a morte por memoria) — ultima do bloco 4. T029 e T031 DONE; T030 ADIADO por decisao do Breno
+- **Última concluída:** T031 (08fc94c) — nenhuma rodada sobrescreve a evidencia de outra
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** T010 (credencial da camada 2) aguarda decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
@@ -198,3 +198,7 @@
 - 2026-09-11 BURACO FORA DE ESCOPO, achado pelo implementer e conferido pelo verifier: o `feedback` do `Professor Engine` interpola `ts.answer` dentro de <b></b> sem escapar. Hoje e seguro porque a string vem do fluxo, nao do LLM, mas um gabarito com `<` quebraria o HTML do Telegram. Candidata a tarefa, nao entrou no T029.
 - 2026-09-11 RESSALVA DO VERIFIER, registrada de proposito: os 3 asserts da secao "Explicacao do Banco" no teste novo passam trivialmente (o fixture nao tem markdown). Quem cobre os 60 .md de verdade e a regra HTML_MARKDOWN do valida_explicacoes.js. E conferencia de passagem, nao rede.
 - 2026-09-11 PENDENCIA ACUMULADA DO BLOCO: T029 mudou o fluxo. Sem `node fluxos/_teststand/publica_v8.js` o gate ao vivo testa a versao antiga e da falso PASSOU. Publicar so com pedido explicito do Breno.
+- 2026-09-11 T031 DONE (08fc94c), verificada. `caminhoLivre(alvo, existe, agora)` no alvo.js: disco e relogio INJETADOS, entao a logica e deterministica e testavel; `agora` invalido LANCA em vez de cair no relogio em silencio. Livre -> nome historico; ocupado -> data; mesmo dia -> -2, -3.
+- 2026-09-11 AFETA A T032: o `TR` e resolvido UMA VEZ, no carregamento do modulo, e e ai que a data e decidida. Uma retomada em processo novo veria o parcial da rodada anterior como "ocupado" e escolheria OUTRO caminho — quem implementar a retomada tem de passar o caminho do parcial explicitamente, nao reusar o TR do topo.
+- 2026-09-11 ACHADO MENOR: `tr_bateria_a_v81.md` e `tr_bateria_b_v81.md` vieram de um ingress fora do mapa ROTULOS do alvo.js — o rotulo cai no `String(testPath)` saneado, entao funciona, mas o relatorio daquele alvo mostra o path cru em vez de "v8.1".
+- 2026-09-11 RESSALVA DO VERIFIER: a checagem de pureza do teste procura `Date.now()` literal e nao pegaria um `new Date()` sem argumento. Nao bloqueia — a determinancia real vem da exigencia do `agora` injetado.
