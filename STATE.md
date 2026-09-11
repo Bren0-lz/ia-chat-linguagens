@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T032 (bateria sobrevive a morte por memoria) — ultima do bloco 4. T029 e T031 DONE; T030 ADIADO por decisao do Breno
-- **Última concluída:** T031 (08fc94c) — nenhuma rodada sobrescreve a evidencia de outra
+- **Tarefa atual:** nenhuma. **BLOCO 4 FECHADO** (T029, T031, T032 DONE; T030 ADIADO por decisao do Breno). Proximo passo e do Breno: publicar o v8 e decidir o proximo bloco
+- **Última concluída:** T032 (2b1ea1e) — o que ja foi medido sobrevive a morte do processo
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** T010 (credencial da camada 2) aguarda decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
@@ -202,3 +202,8 @@
 - 2026-09-11 AFETA A T032: o `TR` e resolvido UMA VEZ, no carregamento do modulo, e e ai que a data e decidida. Uma retomada em processo novo veria o parcial da rodada anterior como "ocupado" e escolheria OUTRO caminho — quem implementar a retomada tem de passar o caminho do parcial explicitamente, nao reusar o TR do topo.
 - 2026-09-11 ACHADO MENOR: `tr_bateria_a_v81.md` e `tr_bateria_b_v81.md` vieram de um ingress fora do mapa ROTULOS do alvo.js — o rotulo cai no `String(testPath)` saneado, entao funciona, mas o relatorio daquele alvo mostra o path cru em vez de "v8.1".
 - 2026-09-11 RESSALVA DO VERIFIER: a checagem de pureza do teste procura `Date.now()` literal e nao pegaria um `new Date()` sem argumento. Nao bloqueia — a determinancia real vem da exigencia do `agora` injetado.
+- 2026-09-11 T032 DONE (2b1ea1e), verificada. `parcial.js`: diario JSONL append-only com fs e agora INJETADOS, tolerante a ultima linha truncada, enderecado pelo nome CANONICO da transcricao (o unico que um processo novo recalcula igual). `--continuar` anexa a MESMA transcricao; sem a flag, parcial esquecido e ARQUIVADO com data, nao apagado.
+- 2026-09-11 O VERIFIER FOI ALEM DO TESTE ESPELHO, e vale como metodo: a secao de regex sobre o fonte nao provaria comportamento, entao ele carregou `bateria_completa_b.js` como modulo em diretorio temporario, com parcial no disco e --continuar, e confirmou TR = a transcricao interrompida, vereditos do processo morto presentes no arquivo final e FALHOU continuando FALHOU.
+- 2026-09-11 DIVIDA CONFIRMADA POR DUAS PONTAS: `testa_bateria_b_n3.js` (FORA do gate) da falso vermelho desde a T031 — cristalizou os nomes historicos do TR e nao aceita a variante datada. E defeito do TESTE, nao do produto; nao mascara nada porque nao esta no gate.
+- 2026-09-11 REGRA OPERACIONAL NOVA: enquanto existir `.parcial_tr_*.jsonl` na raiz, existe rodada interrompida. Retomar e `--continuar`. Entra no HANDOFF quando ele for atualizado.
+- 2026-09-11 BLOCO 4 FECHADO: 3 tarefas, 3 PASS, 6 commits. Gate passa de 18 para 21 comandos + o congelado. PENDENCIA PARA O BRENO: o v8 no n8n esta defasado (T029 mudou o fluxo) — sem `publica_v8.js` o gate ao vivo testa a versao antiga e da falso PASSOU.

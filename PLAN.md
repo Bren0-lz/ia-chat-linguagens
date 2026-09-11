@@ -516,7 +516,9 @@ no fim desta seção, sem ID — o loop não executa, o Breno roda entre blocos.
 - **Gate:** teste offline que simula a interrupção — grava N resultados, "mata", retoma, e exige
   que os N anteriores estejam na evidência final. Reprova a versão atual, onde eles somem.
 - **Depende de:** T031 (as duas mexem em como a transcrição é escrita; nesta ordem, sem conflito)
-- **Status:** TODO
+- **Status:** DONE (2b1ea1e) — `parcial.js` (JSONL append-only, `fs` e `agora` injetados,
+  endereçado pelo nome canônico), `--continuar` nas três baterias, parcial esquecido arquivado
+  em vez de apagado. Formato publicado intacto
 
 ### Só fecha ao vivo — fora do fluxo de tarefas
 O loop não executa nada daqui; o Breno roda entre blocos.
@@ -527,3 +529,19 @@ O loop não executa nada daqui; o Breno roda entre blocos.
   contrato de naturalidade, mais de uma variável se feito de uma vez
 - **Jornada refeita com a máquina folgada**: "não executado" não vira "passou"
 - **T010, revisão humana dos 60 `.md`, `DEV_COMMANDS`**: dependem do Breno, não de código
+
+### Dívida aberta pelo bloco 4 (candidatas, ainda sem ID)
+- **`testa_bateria_b_n3.js` dá falso vermelho desde a T031** e **não está no `npm run gate`**:
+  ele cristalizou os nomes históricos do `TR` (`tr_bateria_b.md` / `_v8.md`) e não aceita a
+  variante datada, que passou a ser o comportamento correto. Defeito do **teste**, confirmado
+  independentemente pelo verifier. Conserto: aceitar `tr_bateria_b[_v8]_AAAA-MM-DD[-n].md` — e
+  só então entrar no gate.
+- **`feedback` do `Professor Engine` interpola o gabarito dentro de `<b>` sem escapar.** Hoje é
+  seguro (a string vem do fluxo, não do LLM), mas um gabarito com `<` quebraria o HTML do
+  Telegram. Achado no T029, fora do escopo dele.
+- **Rótulo fora do mapa `ROTULOS`** (`alvo.js`): o ingress do v8.1 cai no `String(testPath)`
+  saneado, então o relatório daquele alvo mostra o path cru em vez de "v8.1".
+- **Fase A não tem `--from`**: em `--continuar` ela re-executa de A1 e reanexa linhas ao corpo
+  bruto. O `resultados` deduplica por id, então o RESUMO fica certo — é ruído, não erro.
+- **Fase B com `--continuar` e sem parcial no disco** abre `.md` novo **sem cabeçalho**. Só
+  ocorre fora do caso previsto (interrupção real sempre deixa parcial).
