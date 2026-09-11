@@ -1,9 +1,9 @@
 # Estado do loop
 
-- **Tarefa atual:** nenhuma. T033 DONE e VERIFICADA AO VIVO (exec 4278). Bloco 4 fechado; proximo bloco a definir com o Breno
+- **Tarefa atual:** T034 (o aluno ve o topico duas vezes). Bloco 5 aberto: T034, T035, T036 — todas offline
 - **Última concluída:** T033 (3eac580) — bullet de lista deixa de chegar como `*` ao aluno
 - **Tentativas na atual:** 0/3
-- **Bloqueios:** T010 (credencial da camada 2) aguarda decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
+- **Bloqueios:** nenhum no fluxo de tarefas. T010 e T030 ADIADOS por decisao do Breno (seguem bloqueando o LANCAMENTO, nao o loop). Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
 
@@ -220,3 +220,7 @@
 - 2026-09-11 T033 VERIFICADA AO VIVO: exec 4278, `vivo_duvida_markdown.js` exit 0. O aluno recebeu "• Good morning (bom dia) a gente usa de manha..." — a lista virou bullet de verdade, sem `*` literal. O MESMO script que reprovava na exec 4274 agora passa: e a prova nas duas direcoes, na mesma regua, no mesmo ambiente.
 - 2026-09-11 CICLO COMPLETO DO T029/T033, e vale como metodo: teste offline verde -> publicacao -> verificacao AO VIVO da rota alterada -> defeito real achado (bullet) -> tarefa -> conserto -> republicacao -> a mesma verificacao passando. Sem o passo da verificacao ao vivo, o T029 teria sido declarado pronto com o aluno ainda recebendo asteriscos.
 - 2026-09-11 Estado final do dia: gate offline exit 0 (21 comandos + congelado), gate_vivo_v8 exit 0, vivo_duvida_markdown exit 0, v7.4 intocado e no ar, 2 contas reais na base.
+- 2026-09-11 DECISAO DO BRENO: T010 ADIADO — "deixa esse nome esquisito virar nome, vamos lidar com isso depois; precisamos focar mais nas interacoes do que nesses pequenos pontos". A camada 2 segue em fail-open e isso segue bloqueando o LANCAMENTO, mas sai do caminho do loop.
+- 2026-09-11 BLOCO 5 escrito com a prioridade dele: o que o aluno VE primeiro (T034, T035), higiene de instrumento por ultimo (T036).
+- 2026-09-11 T034 CONFERIDO NA FONTE antes de virar tarefa: a duplicacao do topico acontece em DOIS momentos, nao um. Inicio da trilha (feedback[7] "Modo Professor — nivel X. Vamos comecar a trilha! Topico 1/10: Y" + cabecalho "📚 Topico 1/10: Y") e avanco (feedback[3] "dominou X. Proximo topico (2/10): Y" + cabecalho). A nota de 05/09 chamava de cosmetico e subestimava.
+- 2026-09-11 FORA DO LOOP, e e o item de interacao que mais vale: correcao de erro sintatico em nivel alto (gerundio 0/6 em B2 e 0/6 em C1). E ao vivo, N>=6, e mexe em C8 e no contrato de naturalidade — precisa de desenho, nao cabe em loop autonomo.

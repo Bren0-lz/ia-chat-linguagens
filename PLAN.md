@@ -169,7 +169,7 @@ Status: `TODO` · `DOING` · `DONE` · `BLOCKED`
   autenticar nesse caminho, o relatório **diz isso**, em vez de deixar o fail-open mascarar.
 - **Gate:** o script sai 0 com os dois casos corretos
 - **Depende de:** T001
-- **Status:** BLOCKED — instrumento pronto e confirmado ao vivo (execs 3586/3588/3590/3592); a camada 2 NAO autentica: `Validar Nome (IA)` recebe "Authorization failed / missing required authentication credential" da Vertex, o `Veredito IA` cai no fail-open e `asdfgh` vira nome de aluno. Decisao do Breno: corrigir `scopes` da credencial `mKfC2ANkOKHfbKal` ou criar `googlePalmApi` com API key do AI Studio
+- **Status:** ADIADO por decisão do Breno (11/09) — "deixa esse nome esquisito virar nome, vamos lidar com isso depois; o foco agora é a interação". Continua na lista do que bloqueia o lançamento. Registro do diagnóstico: instrumento pronto e confirmado ao vivo (execs 3586/3588/3590/3592); a camada 2 NAO autentica: `Validar Nome (IA)` recebe "Authorization failed / missing required authentication credential" da Vertex, o `Veredito IA` cai no fail-open e `asdfgh` vira nome de aluno. Decisao do Breno: corrigir `scopes` da credencial `mKfC2ANkOKHfbKal` ou criar `googlePalmApi` com API key do AI Studio
 
 ### T011 — baseline do A1 no v8
 - **Escopo:** `experimento_a1.js` contra o v8, N=3, sem mexer em nada. Confirma que o v8 reproduz
@@ -566,3 +566,53 @@ O loop não executa nada daqui; o Breno roda entre blocos.
   verifier. **LIMITE ACEITO:** diálogo com hífen ASCII vira `•` (é sintaticamente um bullet; em
   pt-BR o modelo usa travessão, que sobrevive). **Verificado AO VIVO** em 11/09 (exec 4278, v8
   republicado): `vivo_duvida_markdown.js` exit 0 e o aluno recebeu a lista com `•`
+
+---
+
+## Bloco 5 — a interação com o aluno
+
+Prioridade dada pelo Breno em 11/09: **"focar nas interações, não nos pequenos pontos"**. Por isso
+o que o aluno vê vem primeiro, e a higiene de instrumento fica por último. O T010 (lixo vira nome)
+foi **adiado por decisão dele** — sai da lista de bloqueio imediato.
+
+### T034 — o aluno vê o tópico duas vezes
+- **Origem:** anotado como cosmético em 05/09, nunca tratado, e é pior do que a nota dizia: a
+  duplicação acontece em **dois** momentos. No início da trilha o `Professor Engine` manda
+  `📚 Modo Professor — nível A1. Vamos começar a trilha! Tópico 1/10: "X"` e o nó
+  `Cabeçalho Tópico` (T002) manda em seguida `📚 Tópico 1/10: X`. No avanço, o feedback
+  `🎉 ... dominou "X". Próximo tópico (2/10): "Y"` é seguido de `📚 Tópico 2/10: Y`.
+- **Escopo:** uma mensagem, não duas. O abre-alas do T002 existe para matar a sensação de
+  travamento (chega 1,16 s antes do modelo) — **ele fica**; quem perde a repetição é o
+  `feedback` do engine. Preservar o que o feedback tem de próprio (a celebração, o nível, o
+  convite) e tirar só a repetição de número e título do tópico.
+- **Gate:** teste offline que roda o `Professor Engine` nos dois estados (início da trilha e
+  avanço de tópico), monta o par feedback + `headerText` como o aluno recebe, e exige que
+  número e título apareçam **uma** vez. Reprova a versão atual, provado com `git stash`.
+- **Depende de:** —
+- **Status:** TODO
+
+### T035 — gabarito não escapado quebra o HTML da correção
+- **Origem:** achado no T029 e confirmado pelo verifier. O `Professor Engine` monta
+  `out.feedback='❌ Quase! A resposta certa era: <b>'+String(ts.answer||'')+'</b>.'` — o gabarito
+  entra **sem escapar** dentro de `<b>`. O envio é `parse_mode: HTML`: um gabarito com `<`
+  (ex.: `a < b`, ou qualquer resposta com sinal de menor) quebra a mensagem inteira no Telegram.
+- **Escopo:** escapar o gabarito na interpolação, sem escapar a moldura `<b>` que é HTML
+  legítimo do fluxo. Conferir se há outras interpolações de conteúdo de banco/aluno dentro de
+  HTML no mesmo nó e tratá-las junto.
+- **Gate:** teste offline com gabarito contendo `<`, `&` e `>`, exigindo que o texto final
+  continue sendo HTML válido e que a moldura sobreviva. Reprova a versão atual.
+- **Depende de:** —
+- **Status:** TODO
+
+### T036 — higiene de instrumento (a dívida do bloco 4)
+- **Origem:** duas sobras do bloco 4, ambas de ferramental, nenhuma visível ao aluno.
+  (a) `testa_bateria_b_n3.js` dá falso vermelho desde o T031 — cristalizou os nomes históricos do
+  `TR` e não aceita a variante datada; **está fora do `npm run gate`**.
+  (b) `alvo.js` não tem o ingress do v8.1 no mapa `ROTULOS`, então o rótulo do relatório daquele
+  alvo é o path cru.
+- **Escopo:** (a) aceitar `tr_bateria_b[_v8]_AAAA-MM-DD[-n].md` e **então** entrar no gate;
+  (b) mapear o rótulo. Não mexer no que o T031 protege.
+- **Gate:** `testa_bateria_b_n3.js` verde e no `npm run gate`; o teste do rótulo reprova a
+  versão atual.
+- **Depende de:** —
+- **Status:** TODO
