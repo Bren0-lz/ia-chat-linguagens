@@ -1,6 +1,6 @@
 # Estado do loop
 
-- **Tarefa atual:** nenhuma. **BLOCO 4 FECHADO** (T029, T031, T032 DONE; T030 ADIADO por decisao do Breno). Proximo passo e do Breno: publicar o v8 e decidir o proximo bloco
+- **Tarefa atual:** T033 (bullet de lista ainda vaza markdown), aberta pela verificacao ao vivo do T029. Bloco 4: T029, T031, T032 DONE; T030 ADIADO
 - **Última concluída:** T032 (2b1ea1e) — o que ja foi medido sobrevive a morte do processo
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** T010 (credencial da camada 2) aguarda decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
@@ -207,3 +207,8 @@
 - 2026-09-11 DIVIDA CONFIRMADA POR DUAS PONTAS: `testa_bateria_b_n3.js` (FORA do gate) da falso vermelho desde a T031 — cristalizou os nomes historicos do TR e nao aceita a variante datada. E defeito do TESTE, nao do produto; nao mascara nada porque nao esta no gate.
 - 2026-09-11 REGRA OPERACIONAL NOVA: enquanto existir `.parcial_tr_*.jsonl` na raiz, existe rodada interrompida. Retomar e `--continuar`. Entra no HANDOFF quando ele for atualizado.
 - 2026-09-11 BLOCO 4 FECHADO: 3 tarefas, 3 PASS, 6 commits. Gate passa de 18 para 21 comandos + o congelado. PENDENCIA PARA O BRENO: o v8 no n8n esta defasado (T029 mudou o fluxo) — sem `publica_v8.js` o gate ao vivo testa a versao antiga e da falso PASSOU.
+- 2026-09-11 V8 PUBLICADO a pedido explicito do Breno: `publica_v8.js` exit 0, 107 nos gravados, v8 active=true E v7.4 (9MA0o1XJjD33BnKc) active=true — o bot no ar nao foi tocado. O deny de publicacao foi suspenso so para esta execucao e RESTAURADO em seguida: a proxima publicacao exige novo pedido (convencao §8).
+- 2026-09-11 gate_vivo_v8 exit 0 depois de publicar, MAS ele so cobre onboarding — nao encosta na rota que o T029 mudou. Escrito `vivo_duvida_markdown.js` (padrao do vivo_explicacao_banco.js) para dirigir a rota da duvida e julgar pelo runData.
+- 2026-09-11 A VERIFICACAO AO VIVO REPROVOU, e achou defeito real: exec 4274, o no `Formatar Duvida` RODOU (a versao no ar e a nova), mas o aluno recebeu `*   Good morning (bom dia)...` — BULLET DE LISTA. O desmarkdown trata `**x**`, `*x*`, cerca e `#`; nao trata bullet em inicio de linha.
+- 2026-09-11 LICAO, e e a do §11 do handoff outra vez: o teste offline do T029 passou porque so media as formas que eu escolhi para as fixtures. A forma que o LLM de fato produz numa explicacao — lista com bullets — nao estava la. LACUNA DE COBERTURA E DEFEITO INVISIVEL. O verifier tinha PREVISTO essa lacuna em texto; eu registrei como ressalva e nao virei tarefa. Registrar nao e consertar.
+- 2026-09-11 T033 criada. `vivo_duvida_markdown.js` fica commitado REPROVANDO de proposito: e o instrumento que mede a correcao que falta.

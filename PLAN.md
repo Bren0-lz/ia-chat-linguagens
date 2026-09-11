@@ -545,3 +545,20 @@ O loop não executa nada daqui; o Breno roda entre blocos.
   bruto. O `resultados` deduplica por id, então o RESUMO fica certo — é ruído, não erro.
 - **Fase B com `--continuar` e sem parcial no disco** abre `.md` novo **sem cabeçalho**. Só
   ocorre fora do caso previsto (interrupção real sempre deixa parcial).
+
+### T033 — o markdown que sobrou: bullet de lista
+- **Origem:** a verificação ao vivo da própria T029 (`vivo_duvida_markdown.js`, exec 4274, no v8
+  publicado em 11/09). O nó `Formatar Dúvida` rodou — a versão no ar é a nova —, mas o aluno
+  recebeu `*   Good morning (bom dia) a gente usa de manhã...`: **bullet de lista**, a forma que
+  o LLM mais produz numa explicação. O `desmarkdown` trata `**x**`, `*x*`, cerca de bloco e
+  `#`, e não trata `*`/`-`/`+` em início de linha. O verifier da T029 previu a lacuna; o teste
+  offline não a cobria.
+- **Escopo:** tratar bullet em início de linha nas três cópias do `desmarkdown` (o gate exige que
+  o bloco seja byte a byte igual nos três nós). Decidir o destino do bullet — virar `•` preserva
+  a lista, apagar o marcador achata o texto; a lista é conteúdo didático, então `•` é o caminho
+  provável. Cuidado com o falso positivo óbvio: `2 * 3` e `*ênfase*` no meio da frase não são
+  bullets.
+- **Gate:** `testa_markdown_saida.js` ganha os casos de bullet (`*`, `-`, `+`, com e sem
+  indentação) e tem de reprovar a versão atual; ao vivo, `vivo_duvida_markdown.js` passa a sair 0.
+- **Depende de:** —
+- **Status:** TODO
