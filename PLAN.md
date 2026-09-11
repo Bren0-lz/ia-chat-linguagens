@@ -630,3 +630,105 @@ foi **adiado por decisão dele** — sai da lista de bloqueio imediato.
   `testa_decompoe_latencia.js` importava o harness, que exigia `N8N_API_KEY` na carga, e
   `dotenv`/`pg` nunca foram declarados. Credencial agora é preguiçosa; `npm run gate` exit 0 em
   clone fora do repositório, sem `.env`, reproduzido pelo verifier
+
+---
+
+## Bloco do EVENTO — o IAChat sem teste de nivelamento
+
+O IAChat vai ser apresentado num evento com **usuários reais**, que usam o bot e depois respondem
+um formulário. O teste adaptativo de 10 questões é longo demais para esse formato: o aluno passa a
+**escolher o próprio nível** e cai direto em personalidade → interesses → modos.
+
+Decisões do Breno em 11/09: **mesmo bot** do Telegram · **arquivo novo** derivado do v8 · cadeia
+**personalidade → interesses → modos** · níveis **A1 a C2**.
+
+### O encaixe (achado na exploração, não suposto)
+
+A auto-declaração de nível **já existe** — hoje ela calibra onde o teste começa:
+
+```
+cadastro (nome → idade) → placement_intro → [TESTE 10q] → pick_persona → pick_interests → done (modos)
+                           ↑ pl_start_A1..B2              ↑ é aqui que o evento precisa cair
+```
+
+O fim do teste, no `Placement Engine`, já faz o que o evento precisa: grava `level`, põe
+`onboarding='pick_persona'` e passa a vez para a persona. O atalho **reproduz esse efeito sem as
+questões** — não constrói caminho novo.
+
+### Riscos assumidos (declarados, não descobertos no dia)
+
+1. **Ativar o evento derruba o v7.4** — mesmo `webhookId`. A troca é um corte, e a volta tem de
+   estar ensaiada antes.
+2. **`publica_v8.js` não serve** e não deve ser adaptado: alvo cravado no v8, e a trava 2 recusa
+   arquivo com `Gatilho Telegram` habilitado — que é o que o evento precisa ter.
+3. **O v8 nunca viu usuário real.** No ar está o v7.4; a rodada v8.1 teve N=1 na maioria e a
+   jornada não rodou. Por isso o ensaio completo antes do evento não é opcional.
+4. **Infra local:** Docker/Postgres, n8n e ngrok. URL do ngrok trocada = 404 em tudo com
+   `active: true` (handoff §7).
+5. **`DEV_COMMANDS = true`**: `/reset` aberto a qualquer participante. Mantido por ora, declarado.
+
+### E001 — nascer o `IAChat_Telegram_evento.json`
+- **Escopo:** cópia fiel do `v8.json` (107 nós) por script Node, com duas diferenças:
+  `TEST Ingress.path` → `iachat-test-evento` e `Gatilho Telegram` **habilitado**. `name` do
+  workflow identifica o evento.
+- **Gate:** teste offline que prova que a **única** diferença estrutural em relação ao v8 é essa +
+  `regressao_v7.4.js` (aceita caminho por `argv[2]`) verde contra o arquivo do evento.
+- **Depende de:** —
+- **Status:** TODO
+
+### E002 — o atalho: escolher o nível já leva à personalidade
+- **Escopo:** no `Placement Engine` do arquivo do evento, `sub==='start'` deixa de montar a
+  primeira questão e passa a gravar `level` escolhido, `profile.level`, `onboarding='pick_persona'`
+  e `placement_state=NULL`, entregando a vez para a persona. Reusar o SQL e o `q()` do próprio nó.
+  **Não** inserir em `placement_attempts` — não houve tentativa.
+- **Gate:** teste offline que roda o `Placement Engine` do evento com `pl_start_B1` e exige
+  `level='B1'`, `onboarding='pick_persona'`, nenhuma questão no texto e nenhum
+  `INSERT INTO placement_attempts`. O **mesmo teste contra o v8 tem de reprovar** — é a prova de
+  que o atalho existe.
+- **Depende de:** E001
+- **Status:** TODO
+
+### E003 — os textos e os botões que o aluno vê
+- **Escopo:** (a) `Etapa de Cadastro`: a escolha de nível para de prometer "um teste de 10
+  questões" e passa a dizer que dá para trocar depois; (b) `Enviar Pergunta Persona`: sai o
+  "📊 Esse é o seu resultado!" — no evento não houve resultado. Esse texto mora na **expressão
+  inline do nó Telegram**, invisível ao `digest()` (armadilha nº 14): o teste tem de lê-lo do JSON;
+  (c) `Enviar Pergunta Nível`: acrescentar `pl_start_C1` e `pl_start_C2`, teclado em duas colunas.
+- **Gate:** teste offline sobre os três nós — nenhuma promessa de teste, nenhuma menção a
+  "resultado", seis callbacks `pl_start_*` distintos. Reprova o arquivo antes da mudança.
+- **Depende de:** E001
+- **Status:** TODO
+
+### E004 — as rotas que sobraram sem teste
+- **Escopo:** `/nivel` **reabre a escolha de nível**; `/pausa`, `/continuar`, `pl_pause`,
+  `pl_resume` e `ans_*` respondem uma linha dizendo que não há teste em andamento. Silêncio é o
+  pior resultado possível num evento — a pessoa acha que o bot travou.
+- **Gate:** teste offline que percorre cada gatilho e exige rota registrada e resposta não vazia.
+- **Depende de:** E002
+- **Status:** TODO
+
+### E005 — a prova ponta a ponta, sem Telegram
+- **Escopo:** `fluxos/_teststand/vivo_evento.js` — percorre a jornada inteira do participante pelo
+  ingress `iachat-test-evento`: `/start` → nome → idade → nível → personalidade → interesses →
+  modo → primeira conversa, julgando pelo `runData` (armadilha nº 3), exigindo resposta não vazia
+  em cada etapa e provando que **nenhuma questão de nivelamento** apareceu. Modelo:
+  `vivo_topico_uma_vez.js` e `vivo_duvida_markdown.js`.
+- **Gate:** o script, exit 0, contra o workflow do evento publicado e **inativo** (publicar ≠
+  ativar: inativo não disputa o bot).
+- **Depende de:** E003, E004 · **Precisa de ambiente**
+- **Status:** TODO
+
+### E006 — runbook do corte e da volta
+- **Escopo:** `fluxos/RUNBOOK_EVENTO.md` — véspera (Docker, ngrok e `WEBHOOK_URL` casados, n8n na
+  mesma janela, E005 verde, backup do banco); corte (desativar v7.4 → ativar evento → **conferir no
+  Telegram de verdade**, não só `active: true`); durante; e a **volta**. Com os sintomas do ngrok
+  trocado e do Docker travado, e a ação de cada um.
+- **Gate:** ensaio da troca e da volta **antes** do dia, com o bot real, cronometrado. Runbook não
+  ensaiado não é runbook.
+- **Depende de:** E005 · **Precisa de ambiente**
+- **Status:** TODO
+
+### Fora deste bloco, por decisão
+- **`/avaliar` com o link do formulário** dentro do bot — não foi pedido; vira E007 se quiser
+- **Desligar `DEV_COMMANDS`** — segue ligado, declarado no risco 5
+- **Migrar o bot para o v8 em definitivo** — o evento é temporário e volta para o v7.4
