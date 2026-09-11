@@ -437,4 +437,86 @@ Não viraram tarefa aqui porque **dependem do Breno**, não de código:
 - **Gate:** o novo probe roda com N>=6 e o relatorio mostra as duas medidas; o baseline antigo
   continua legivel para comparacao.
 - **Depende de:** —
+- **Status:** FORA DO FLUXO (11/09) — so fecha ao vivo (N>=6 com LLM). Movido para a lista
+  "So fecha ao vivo" do bloco 4; o loop nao executa, o Breno roda entre blocos
+
+---
+
+## Bloco 4 — offline, para o loop rodar sozinho
+
+Escolhido em 11/09 com o Breno: o bloco é **100% offline**, porque a autonomia passa a ser
+auto-ritmada (`/loop /next`). O que só fecha ao vivo saiu do fluxo de tarefas e está declarado
+no fim desta seção, sem ID — o loop não executa, o Breno roda entre blocos.
+
+### T029 — markdown vaza para o aluno na Dúvida e na Correção
+- **Origem:** T9 do handoff (§4.3). O envio é `parse_mode: HTML`, então `*` e `**` chegam
+  literais ao aluno. O `Filtro Anti-Spoiler` **já resolve isso** para o modo Conversa (tira
+  ```` ``` ````, `**x**`, `*x*`, `# título`) — duas rotas não passam por ele:
+  - `Enviar Dúvida` formata **na expressão inline do nó Telegram**
+    (`String($json.output||'').replace(/&/g,'&amp;')…`): só escapa HTML. E texto em expressão de
+    nó Telegram é **invisível ao `digest()`** (armadilha nº 14) — nenhum instrumento vê essa rota.
+  - `Parse Professor`, ramo `wrong` (e o `explain` de fallback do LLM): `esc(out)` sem desmarkdown.
+- **Escopo:** extrair o desmarkdown do `Filtro Anti-Spoiler` para um helper reusado nos dois
+  pontos; mover a formatação da dúvida da expressão inline para um **nó de código**
+  (`Formatar Dúvida`), com entrada em `connections` — o ganho não é só de teste, é de
+  visibilidade. Ordem obrigatória: desmarkdown **antes** do escape, sem destruir o HTML legítimo
+  que o próprio fluxo monta (`<b>`). Conferir de passagem se a explicação servida do banco (os 60
+  `.md` revisados) chega com markdown literal; se chegar, entra no mesmo conserto.
+- **Gate:** `fluxos/_teststand/testa_markdown_saida.js` novo, somado ao `npm run gate` — extrai os
+  nós e roda a formatação sobre fixtures (`**negrito**`, `*itálico*`, bloco de código, `# título`,
+  HTML legítimo, `<script>` do aluno), exigindo: nenhum `*` literal na saída, `<b>` preservado,
+  `<` do aluno escapado. Tem de **reprovar o v8 atual**, provado com `git stash`.
+- **Depende de:** —
 - **Status:** TODO
+
+### T030 — fechar `/reset` e `/resetfull`
+- **Origem:** `Roteador Mestre:7` tem `const DEV_COMMANDS = true`, ligado em 04/09 para liberar o
+  `/resetfull`. Hoje **qualquer usuário apaga a própria conta**. Bloqueia o lançamento.
+- **Escopo:** depende da decisão de método, ainda não tomada:
+  - **(a) restringir à faixa de teste** (`990000000–999999999`): o teststand continua semeando
+    estado e o A7 vira teste offline permanente;
+  - **(b) desligar a flag** (o que o handoff prescreve): mais simples, mas tira o `/resetfull` do
+    teststand — o que semeia estado nas baterias precisa de outro caminho.
+- **Gate:** a definir com o método; nas duas hipóteses é offline, extraindo o `Roteador Mestre` e
+  exigindo que ID real caia em comando desconhecido.
+- **Depende de:** decisão do Breno
+- **Status:** BLOCKED — aguarda a escolha entre (a) e (b)
+
+### T031 — transcrição que não sobrescreve evidência
+- **Origem:** achado de 10/09. `fluxos/_teststand/alvo.js` deriva o nome do ingress
+  (`transcricaoDe`), o que impede o v8 de apagar o v7.4 — mas distingue por **versão, não por
+  data**: duas rodadas no mesmo v8 colidem, e a jornada grava com `writeFileSync`. Em 10/09 só
+  não perdemos o lado esquerdo da comparação porque o processo morreu antes de gravar.
+- **Escopo:** nunca sobrescrever. `transcricaoDe` segue pura; entra ao lado uma função que recebe
+  "existe?" e "agora" **injetados** (nada de `fs` nem de `Date.now()` dentro da lógica — armadilha
+  nº 12: teste que sorteia a própria condição mede sorte), devolvendo o caminho datado quando o
+  nome base já está ocupado. Atualizar `bateria_completa_a.js`, `bateria_completa_b.js` e
+  `jornada_usuario.js`.
+- **Gate:** teste offline novo + `testa_alvo_jornada.js` continua exigindo que o rótulo derive do
+  ingress (não enfraquecer o que já protege). O teste roda em **diretório temporário**: não
+  encostar nos `tr_*.md` reais, que são evidência.
+- **Depende de:** —
+- **Status:** TODO
+
+### T032 — a bateria sobrevive à morte por memória
+- **Origem:** em 10/09 o sistema matou o processo **três vezes**; a Fase B ficou em N=1 e a
+  jornada não rodou. Pior que perder a rodada: ao retomar, o script **sobrescreve** a transcrição,
+  e o parcial some.
+- **Escopo:** gravação incremental — cada teste concluído é persistido assim que fecha, num
+  parcial que a retomada **lê e preserva** em vez de zerar; a consolidação continua no fim. Sem
+  mudar o formato publicado da transcrição (o comparativo de 04/09 é o padrão, e
+  `testa_saida_fase_a.js` guarda isso).
+- **Gate:** teste offline que simula a interrupção — grava N resultados, "mata", retoma, e exige
+  que os N anteriores estejam na evidência final. Reprova a versão atual, onde eles somem.
+- **Depende de:** T031 (as duas mexem em como a transcrição é escrita; nesta ordem, sem conflito)
+- **Status:** TODO
+
+### Só fecha ao vivo — fora do fluxo de tarefas
+O loop não executa nada daqui; o Breno roda entre blocos.
+- **Probe do C15** (o antigo T028): medir interesses em turno neutro, publicando os dois números
+  lado a lado, nunca substituindo o histórico
+- **Gate ao vivo da rota Professor**: dívida de 05/09 — `gate_vivo_v8.js` só percorre o onboarding
+- **Aperto de formato em B1+**: a hipótese que sobra para o gerúndio 0/12; mexe em C8 e no
+  contrato de naturalidade, mais de uma variável se feito de uma vez
+- **Jornada refeita com a máquina folgada**: "não executado" não vira "passou"
+- **T010, revisão humana dos 60 `.md`, `DEV_COMMANDS`**: dependem do Breno, não de código

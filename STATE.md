@@ -1,9 +1,9 @@
 # Estado do loop
 
-- **Tarefa atual:** T024 (o teste que falta) · depois T026 (revalidar). Bloco 3 com T019-T023 e T025 fechadas
-- **Última concluída:** T022 e T023 — reciprocidade 0/6 -> 3/6; gancho de interesses funciona em turno neutro (2/4) e perde para a cortesia (0/4)
+- **Tarefa atual:** T029 (markdown vaza na Duvida e na Correcao). Bloco 4 aberto em 11/09: T029, T031, T032 offline; T030 BLOCKED
+- **Última concluída:** T026 — bateria repetida no v8.1, com as ressalvas de ambiente declaradas
 - **Tentativas na atual:** 0/3
-- **Bloqueios:** T010 aguarda decisao do Breno (credencial da camada 2 — lixo digitado ainda vira nome). Ambiente OK: Postgres 5433, n8n 5678, v8 publicado com T019-T023.
+- **Bloqueios:** T010 (credencial da camada 2) e T030 (metodo para fechar /reset) aguardam decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
 
@@ -184,3 +184,10 @@
 - 2026-09-10 CONSEQUENCIA 3: o teste foi INVERTIDO — `testa_moldura_persona.js` virou `testa_explicacao_sem_persona.js` e agora exige que as 5 personas produzam a MESMA explicacao, protegendo o corpo revisado de ser adulterado aluno a aluno. Reprova a versao com moldura (exit 1).
 - 2026-09-10 LICAO QUE CUSTOU UMA TAREFA INTEIRA: observar uma mudanca de comportamento NAO e o mesmo que encontrar um defeito. Faltou perguntar "isto e desejavel?" antes de classificar o T17 como regressao. O teste media uma expectativa que o produto nunca teve.
 - 2026-09-10 PLACAR DA §5.1 ATUALIZADO: dos seis defeitos que reportei na bateria, agora so UM sobreviveu como defeito de produto. Quatro eram instrumento e um (T17) era comportamento desejado.
+- 2026-09-11 AMBIENTE CONFERIDO DE VERDADE (nao pela nota): Postgres 5433, n8n 5678 (/healthz 200), ngrok 4040 em https://unhealed-lacy-kaolinic.ngrok-free.dev, v7.4 e v8 ativos com 101 e 106 nos, gate_vivo_v8 exit 0 (exec 4269), npm run gate exit 0 (18 comandos + congelado). Usuario de teste limpo, 2 contas reais preservadas.
+- 2026-09-11 A URL do ngrok MUDOU em relacao as notas anteriores. O gate ao vivo entra pelo ingress HTTP local e NAO prova que o Telegram alcanca o bot; so mensagem real prova, e isso e do Breno.
+- 2026-09-11 PERMISSOES REPARADAS: `.claude/settings.local.json` era lixo de agosto (scripts `_patch_*.js` que nem existem) e nao tinha `npm run gate`, `git add`, `git commit` nem os scripts do teststand — o loop morreria no primeiro prompt. Agora: allowlist dos gates verificados + DENY explicito de publica_v8.js, mede_latencia_real.js, set_telegram_commands.js, db:push, git push e dos MCPs de escrita do n8n. Backup do antigo no scratchpad da sessao.
+- 2026-09-11 EFEITO COLATERAL CONFIRMADO do deny: os tools MCP de escrita do n8n (create/update/delete/autofix workflow) sairam do alcance desta sessao. E o comportamento desejado — publicar exige pedido explicito, e agora a regra e mecanica, nao so textual.
+- 2026-09-11 AGENTES REVISADOS com o §5 do handoff: implementer ganhou "leia o runData, nao o agregado", "mudanca de comportamento nao e defeito — pergunte se e desejavel antes de consertar", detector testado nas duas direcoes, proibicao de escrever em PLAN.md/STATE.md e de republicar (reporta PRECISA PUBLICAR). Verifier ganhou cegueira do digest, onError continueRegularOutput no json.error, conferencia de alvo (URL cravada ja mandou teste para PRODUCAO), detector de mao unica = FAIL, e FAIL se o implementer mexer no PLAN/STATE ou apagar evidencia. next.md ganhou a secao do modo /loop.
+- 2026-09-11 BLOCO 4 ESCRITO (T029-T032), 100% offline por decisao, porque a autonomia passa a ser auto-ritmada. T028 saiu do fluxo de tarefas: so fecha ao vivo.
+- 2026-09-11 DECISAO PENDENTE (T030): fechar /reset por faixa de ID de teste (990000000-999999999) ou desligar DEV_COMMANDS. A opcao (b) tira o /resetfull do teststand, que e como as baterias semeiam estado — quem escolher (b) precisa dizer qual e o outro caminho.

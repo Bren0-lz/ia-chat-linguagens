@@ -48,9 +48,34 @@ n8n. Contexto completo: `fluxos/HANDOFF.md`.
   - ler, escrever ou imprimir `.env` e credenciais
   - apagar evidência: `documentos/`, `MEDICOES_*.md`, `tr_*.md`, `_teststand/backup_*.json`
 - Nunca enfraqueça um teste para fazê-lo passar. Se o teste está errado, isso é um BLOCKED.
+- **Não escreva em `PLAN.md` nem em `STATE.md`.** São do orquestrador. Marcar-se DONE
+  contamina o ponto de controle — quem verifica é outro agente.
+- **Não republique.** Mudança no fluxo só vale ao vivo depois de `publica_v8.js`, e publicar
+  exige pedido explícito do Breno. Se a sua tarefa só fecha com verificação ao vivo, entregue o
+  offline verde e reporte `PRECISA PUBLICAR` no lugar de DONE.
 - Se a tarefa for impossível, ambígua ou depender de algo que não existe (Postgres no ar, n8n
   ativo, LLM): PARE e reporte `BLOCKED: <motivo em uma frase>`. Parar cedo custa menos que
   construir a coisa errada.
+
+## Método — o que a rodada de 10/09 ensinou (§5 do handoff)
+
+Cinco defeitos reportados naquela rodada eram do instrumento ou comportamento desejado. Antes de
+escrever "está quebrado":
+
+- **Leia o `runData` do nó, não o agregado do instrumento.** Silêncio do instrumento não é fato
+  sobre o produto: texto estático de nó Telegram é invisível ao `digest()`, e erro de nó com
+  `onError: continueRegularOutput` viaja no `json.error` do item, não em `runData[nó][0].error`.
+- **Mudança de comportamento não é defeito.** Pergunte "isto é desejável?" antes de consertar. O
+  Professor perder a persona parecia regressão e era o produto funcionando. Se a resposta depender
+  de decisão de produto: `BLOCKED`.
+- **Detector novo se testa nas duas direções ANTES de gastar rodada ao vivo:** ele tem de
+  **reprovar** o comportamento errado **e aprovar** o certo. Um que só faz metade não mede nada.
+- **Quem amplia o que um teste julga confere o que entrou no escopo do julgamento.** Já custou
+  quatro falsos vermelhos aqui — o último introduzido por um conserto.
+- **Experimento é uma variável por vez:** baseline N≥6 → mudar uma linha → medir → **reverter** se
+  não melhorar, conferindo nas duas pontas com `git diff`.
+- **Prove que o teste reprova a versão anterior rodando** (`git stash`, ou contra o `v7.4.json`),
+  não afirmando no relatório.
 
 ## Relatório final
 

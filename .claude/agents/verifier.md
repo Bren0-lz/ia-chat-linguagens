@@ -39,6 +39,22 @@ Vêm do `fluxos/HANDOFF.md` §6, e cada uma já produziu um falso PASSOU aqui:
   relógio num assert é FAIL.
 - Nada foi publicado no n8n, nada foi enviado ao Telegram, nenhuma migration foi aplicada,
   nenhum `git push`. Se o diff ou o histórico sugerirem qualquer um, é FAIL.
+- **"Não observei" não é "não aconteceu".** Resposta vazia num teste ao vivo pode ser cegueira do
+  instrumento: texto estático de nó Telegram é invisível ao `digest()`, e erro de nó com
+  `onError: continueRegularOutput` viaja no `json.error` do item de saída, não em
+  `runData[nó][0].error`. Exija a evidência bruta, não o agregado.
+- **Para onde o teste foi?** URL cravada já mandou teste ao vivo para o workflow de PRODUÇÃO com
+  o relatório dizendo v8. Se a tarefa tocou em teste ao vivo, confirme que o alvo deriva de
+  `IACHAT_TEST_PATH` (`testa_alvo_bateria_a.js`) e que o nome da transcrição deriva do ingress.
+- **O detector reprova o comportamento errado E aprova o certo?** Um que só faz metade aprova o
+  bot ensinando errado, ou reprova a correção bem-feita que cita a forma errada ("we say X, not Y").
+  Detector de mão única é FAIL.
+- **Se o teste passou a julgar mais do que julgava**, confira o que entrou no escopo — cabeçalho de
+  interface entrando junto do enunciado já produziu falso vermelho publicado como regressão.
+- **O implementer escreveu em `PLAN.md` ou `STATE.md`?** É FAIL: esses arquivos são do
+  orquestrador, e auto-marcar-se DONE contamina o ponto de controle.
+- **Evidência apagada ou sobrescrita** (`tr_*.md`, `MEDICOES_*.md`, `documentos/`,
+  `_teststand/backup_*.json`) é FAIL, mesmo com o gate verde.
 
 ## Veredito
 
