@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T034 (o aluno ve o topico duas vezes). Bloco 5 aberto: T034, T035, T036 — todas offline
-- **Última concluída:** T033 (3eac580) — bullet de lista deixa de chegar como `*` ao aluno
+- **Tarefa atual:** T035 (gabarito nao escapado quebra o HTML da correcao). Bloco 5: T034 DONE; T035, T036 pela frente
+- **Última concluída:** T034 (13e1d9e) — o topico deixa de ser anunciado duas vezes
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum no fluxo de tarefas. T010 e T030 ADIADOS por decisao do Breno (seguem bloqueando o LANCAMENTO, nao o loop). Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
@@ -224,3 +224,7 @@
 - 2026-09-11 BLOCO 5 escrito com a prioridade dele: o que o aluno VE primeiro (T034, T035), higiene de instrumento por ultimo (T036).
 - 2026-09-11 T034 CONFERIDO NA FONTE antes de virar tarefa: a duplicacao do topico acontece em DOIS momentos, nao um. Inicio da trilha (feedback[7] "Modo Professor — nivel X. Vamos comecar a trilha! Topico 1/10: Y" + cabecalho "📚 Topico 1/10: Y") e avanco (feedback[3] "dominou X. Proximo topico (2/10): Y" + cabecalho). A nota de 05/09 chamava de cosmetico e subestimava.
 - 2026-09-11 FORA DO LOOP, e e o item de interacao que mais vale: correcao de erro sintatico em nivel alto (gerundio 0/6 em B2 e 0/6 em C1). E ao vivo, N>=6, e mexe em C8 e no contrato de naturalidade — precisa de desenho, nao cabe em loop autonomo.
+- 2026-09-11 T034 DONE (13e1d9e), verificada. Duas linhas do `Professor Engine`: o feedback para de repetir numero e titulo, o abre-alas do T002 fica. 107 nos antes e depois, `connections` byte-identico.
+- 2026-09-11 O TESTE MONTA O PAR COMO O ALUNO RECEBE: extrai o jsCode de `Cabecalho Topico` e `Explicacao do Banco` do proprio JSON e executa os dois, em vez de comparar strings copiadas a mao. Strings literais so no auto-teste do detector (secao 0), que o exercita nas duas direcoes.
+- 2026-09-11 O IMPLEMENTER CONTOU UM ERRO CONTRA SI: a primeira versao do regex nao pegava `Proximo topico (2/10)` por falta de /i e passava na versao velha. Achado com git stash antes de reportar (6 -> 7 falhas). Armadilha nº 13 de novo — e desta vez o proprio autor a pegou.
+- 2026-09-11 PENDENCIA ACUMULADA: T034 mexe no fluxo. Junto com nada mais pendente hoje, a proxima publicacao leva T034 (o v8 no ar ja tem T029 e T033).

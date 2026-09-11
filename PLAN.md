@@ -589,7 +589,9 @@ foi **adiado por decisão dele** — sai da lista de bloqueio imediato.
   avanço de tópico), monta o par feedback + `headerText` como o aluno recebe, e exige que
   número e título apareçam **uma** vez. Reprova a versão atual, provado com `git stash`.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE (13e1d9e) — duas linhas do `Professor Engine`; celebração, nome, motivo, nível e
+  convite preservados (o teste exige). Reprova o v8 anterior por 7 falhas e o v7.4 por 2.
+  **PRECISA PUBLICAR**
 
 ### T035 — gabarito não escapado quebra o HTML da correção
 - **Origem:** achado no T029 e confirmado pelo verifier. O `Professor Engine` monta
