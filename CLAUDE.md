@@ -6,7 +6,8 @@ estado, plano). **Responda sempre em pt-BR.**
 ## O que é o código aqui
 
 O produto é um workflow n8n. O código de produção mora dentro de um JSON —
-`fluxos/IAChat_Telegram_v8.json`, ~101 nós, dos quais 28 são nós de código JavaScript.
+`fluxos/IAChat_Telegram_v8.json`, **107 nós**, dos quais **31** são nós de código JavaScript
+(o v7.4 congelado tem 101 e 28).
 Testar = extrair o `jsCode` do nó e executá-lo fora do n8n (é o que o `_teststand` faz).
 Não há framework de teste: os testes são scripts Node com asserts caseiros que terminam em
 `process.exit(fails ? 1 : 0)`. Siga esse estilo.
@@ -30,14 +31,21 @@ Por isso publicar/ativar exige pedido explícito do Breno, sempre.
 
 | Comando | Tempo | Cobre |
 |---|---|---|
-| `npm run gate` | ~7 s | os quatro abaixo, em sequência |
-| `npm run gate:regressao` | 0,3 s | placement, roteador, anti-spoiler, interesses + sintaxe dos 28 nós de código |
-| `npm run gate:cadastro` | <1 s | Triagem de Nome → Etapa de Cadastro |
-| `npm run gate:nome` | <1 s | 77 casos da camada 1 da validação de nome |
+| `npm run gate` | ~3 s | **21 comandos** em sequência — os quatro abaixo são só os mais usados à parte |
+| `npm run gate:regressao` | ~1 s | placement, roteador, anti-spoiler, interesses + sintaxe dos 31 nós de código |
+| `npm run gate:cadastro` | ~1 s | Triagem de Nome → Etapa de Cadastro |
+| `npm run gate:nome` | ~1 s | 77 casos da camada 1 da validação de nome |
 | `npm run gate:congelado` | instantâneo | prova que o `v7.4.json` não foi tocado |
 
 Todos rodam **offline**: sem n8n, sem Postgres, sem LLM. Uma tarefa só está concluída quando
-todos retornam exit code 0.
+todos retornam exit code 0. A lista completa dos 21 está no `fluxos/HANDOFF.md` §9 — e quem
+acrescentar um comando ao `gate` atualiza os dois lugares, senão a próxima sessão acredita no
+número velho.
+
+**Gate verde não cobre a rota que você mudou.** `gate_vivo_v8.js` só percorre o onboarding, e o
+offline mede as fixtures que você mesmo escolheu: em 11/09 o T029 passou no offline e o aluno
+continuou recebendo `*` porque nenhuma fixture tinha bullet de lista. Quem mexe numa rota escreve
+a verificação ao vivo dela (modelo: `vivo_duvida_markdown.js`, `vivo_explicacao_banco.js`).
 
 As baterias ao vivo (`bateria_completa_a.js`, `bateria_completa_b.js`, `jornada_usuario.js`)
 **não são gates**: exigem n8n ativo, Postgres e chamadas reais de LLM, e são não-determinísticas.
