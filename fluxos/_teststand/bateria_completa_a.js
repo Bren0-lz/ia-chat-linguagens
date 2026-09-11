@@ -9,6 +9,8 @@
 // (a Fase B cobre os que dependem do LLM)
 //
 //   N8N_API_KEY=... node bateria_completa_a.js
+//   node bateria_completa_a.js --continuar   (retoma a rodada que o sistema matou:
+//                                             preserva o parcial e a MESMA transcricao)
 //
 // CODIGO DE SAIDA (T013). Ate 06/09 o script saia 0 mesmo com testes FALHOU — so o `.catch`
 // de erro fatal saia 1. "Verde" nao queria dizer nada, e um relatorio de 17/17 podia nunca ter
@@ -24,6 +26,7 @@ const fs = require('fs');
 const { Client } = require('pg');
 const { msg, cb, digest, WEBHOOK, TEST_PATH } = require('./harness');
 const { rotuloDe, transcricaoDe, caminhoLivre } = require('./alvo');
+const { abrirDiario, caminhoParcialDe } = require('./parcial');
 const { matchQuestion } = require('./seed');
 
 // ALVO (T014). Ate 06/09 tres requisicoes desta bateria -- A6, R3 e S1 -- montavam a URL
@@ -34,7 +37,19 @@ const { matchQuestion } = require('./seed');
 const ALVO = rotuloDe(TEST_PATH);
 // T031: nunca sobrescrever. Se o nome da versao ja estiver ocupado, a rodada nova ganha
 // data (e desempate); o disco e o relogio entram INJETADOS no caminhoLivre.
-const TR = caminhoLivre(transcricaoDe('tr_bateria_a', TEST_PATH), fs.existsSync, Date.now());
+// T032: cada resultado e persistido assim que fecha, num diario parcial. Se o processo
+// morrer (em 10/09 a falta de memoria matou tres), `--continuar` LE esse parcial, retoma a
+// MESMA transcricao e consolida o que ja foi medido -- em vez de zerar. O diario e
+// endereçado pelo nome CANONICO (sem data): e o unico que um processo novo recalcula igual.
+const MODO_SCRIPT = require.main === module;
+const CONTINUAR = process.argv.includes('--continuar');
+const DIARIO = abrirDiario({
+  caminho: caminhoParcialDe(transcricaoDe('tr_bateria_a', TEST_PATH)), fs, agora: Date.now(),
+  continuar: CONTINUAR, ativo: MODO_SCRIPT,
+});
+// Na retomada o alvo e a transcricao INTERROMPIDA. Sem isso o caminhoLivre a veria como
+// "ocupada" e abriria outro arquivo -- o oposto do que retomar significa (aviso da T031).
+const TR = DIARIO.transcricaoAnterior || caminhoLivre(transcricaoDe('tr_bateria_a', TEST_PATH), fs.existsSync, Date.now());
 const TEST_SECRET = (() => {
   try {
     const t = fs.readFileSync(require('path').join(__dirname, '..', '..', '.env'), 'utf8');
@@ -65,10 +80,14 @@ const novoUid = () => ++uidSeq;
 const NOME_VALIDO = 'Rafael';
 console.log('alvo: ' + ALVO + ' -> ' + WEBHOOK);
 console.log("faixa de user_id desta rodada: " + (UID_BASE+1) + "+");
-const resultados = [];
+// Ja vem com o que a rodada interrompida mediu (vazio quando nao e retomada).
+const resultados = DIARIO.anteriores.slice();
 
 function reg(id, ok, detalhe) {
-  resultados.push({ id, ok, detalhe });
+  const r = { id, ok, detalhe };
+  DIARIO.registrar(r); // ANTES da consolidacao: se morrer no teste seguinte, este ja esta no disco
+  const j = resultados.findIndex(x => x.id === id);
+  if (j >= 0) resultados[j] = r; else resultados.push(r);
   const tag = ok === true ? 'PASSOU  ' : ok === false ? 'FALHOU  ' : 'INCONCL.';
   console.log('  ' + tag + id + ' — ' + detalhe);
   fs.appendFileSync(TR, '- **' + id + '**: ' + (ok === true ? 'PASSOU' : ok === false ? 'FALHOU' : 'INCONCLUSIVO') + ' — ' + detalhe + '\n');
@@ -92,7 +111,9 @@ async function semear(uid, campos) {
 }
 
 (async () => {
-  fs.writeFileSync(TR, '# Bateria completa — Fase A (determinísticos) — ' + ALVO + '\n\n');
+  if (!CONTINUAR) fs.writeFileSync(TR, '# Bateria completa — Fase A (determinísticos) — ' + ALVO + '\n\n');
+  else console.log('RETOMANDO: ' + resultados.length + ' resultado(s) preservado(s) -> ' + TR);
+  DIARIO.iniciar(TR);
   console.log('BATERIA COMPLETA — Fase A (determinísticos, sem consumo de cota)\n');
 
   // ============ A. ONBOARDING ============
@@ -388,6 +409,10 @@ async function semear(uid, campos) {
     const r = await fetch(WEBHOOK, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
     reg('S1', r.status === 403, 'chamada sem header -> HTTP ' + r.status + ' (esperado 403)');
   }
+
+  // A rodada chegou inteira ao fim: o parcial ja nao tem uso, tudo esta na transcricao.
+  // Enquanto o arquivo de parcial EXISTE, existe rodada interrompida -- essa e a informacao.
+  DIARIO.concluir();
 
   // ============ RESUMO ============
   const p = resultados.filter(r => r.ok === true).length;

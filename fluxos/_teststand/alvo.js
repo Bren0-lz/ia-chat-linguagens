@@ -54,4 +54,4 @@ function caminhoLivre(alvo, existe, agora) {
   throw new Error('caminhoLivre: 1000 transcricoes em ' + dia + ' para ' + alvo);
 }
 
-module.exports = { rotuloDe, transcricaoDe, caminhoLivre };
+module.exports = { rotuloDe, transcricaoDe, caminhoLivre, dataDe };

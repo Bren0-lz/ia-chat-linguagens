@@ -42,7 +42,8 @@
 //   node bateria_completa_b.js --only=C1,C3,T12    (subconjunto)
 //   node bateria_completa_b.js --from=T1           (retoma de um ponto)
 //   node bateria_completa_b.js --rodadas=3         (N dos qualitativos; default 3)
-//   node bateria_completa_b.js --continuar         (nao reescreve a transcricao)
+//   node bateria_completa_b.js --continuar         (retoma: le o parcial, preserva os
+//                                                  vereditos ja medidos e anexa a MESMA transcricao)
 //   PACE=12000 node bateria_completa_b.js          (mais devagar; o n8n cai sob carga)
 //
 // O ALVO vem do ingress (IACHAT_TEST_PATH) e o nome da transcricao TAMBEM: o v7.4 grava
@@ -58,6 +59,7 @@ const fs = require('fs');
 const { Client } = require('pg');
 const { msg, cb, digest, WEBHOOK, TEST_PATH } = require('./harness');
 const { rotuloDe, transcricaoDe, caminhoLivre } = require('./alvo');
+const { abrirDiario, caminhoParcialDe } = require('./parcial');
 const { contratoIdioma, vereditoT3 } = require('./idioma_professor');
 
 // Contrato de idioma da TRILHA, derivado do fluxo (T013). Se o LANG mudar de forma, isto
@@ -65,9 +67,24 @@ const { contratoIdioma, vereditoT3 } = require('./idioma_professor');
 const CONTRATO_TRILHA = contratoIdioma();
 
 const ALVO = rotuloDe(TEST_PATH);
+const CONTINUAR = process.argv.includes('--continuar');
+// So grava quando este arquivo E o script rodando. Requerido como modulo (pelo teste
+// offline do instrumento), nao toca a transcricao nem o parcial -- que sao evidencia.
+const MODO_SCRIPT = require.main === module;
+// T032: cada resultado vai para um diario parcial ASSIM QUE FECHA. Em 10/09 a falta de
+// memoria matou o processo tres vezes e o que ja tinha sido medido sumia do agregado,
+// porque `resultados` so existia em memoria. Com `--continuar` o parcial e LIDO e
+// PRESERVADO, e a rodada volta a gravar na MESMA transcricao.
+const DIARIO = abrirDiario({
+  caminho: caminhoParcialDe(transcricaoDe('tr_bateria_b', TEST_PATH)), fs, agora: Date.now(),
+  continuar: CONTINUAR, ativo: MODO_SCRIPT,
+  chave: (r) => r.id + '#' + r.rodada, // o mesmo id em outra rodada e outro dado, nao um reteste
+});
 // T031: nunca sobrescrever. Se o nome da versao ja estiver ocupado, a rodada nova ganha
 // data (e desempate); o disco e o relogio entram INJETADOS no caminhoLivre.
-const TR = caminhoLivre(transcricaoDe('tr_bateria_b', TEST_PATH), fs.existsSync, Date.now());
+// Na retomada, porem, o alvo e a transcricao INTERROMPIDA: um processo novo a veria como
+// "ocupada" e abriria outro arquivo, que e o oposto de retomar (aviso da T031).
+const TR = DIARIO.transcricaoAnterior || caminhoLivre(transcricaoDe('tr_bateria_b', TEST_PATH), fs.existsSync, Date.now());
 const UID_BASE = 990000000 + (Date.now() % 9000000); // mesma faixa da limpeza (ver Fase A)
 let uidSeq = UID_BASE;
 const novoUid = () => ++uidSeq;
@@ -75,7 +92,6 @@ const novoUid = () => ++uidSeq;
 const arg = (n) => (process.argv.find((a) => a.startsWith('--' + n + '=')) || '').split('=')[1] || '';
 const SOMENTE = arg('only') ? arg('only').split(',').map((s) => s.trim().toUpperCase()) : null;
 const DESDE = arg('from').toUpperCase();
-const CONTINUAR = process.argv.includes('--continuar');
 const RODADAS = Math.max(1, Number(arg('rodadas') || process.env.RODADAS || 3));
 let comecou = !DESDE;
 
@@ -86,18 +102,21 @@ const N_POR_TESTE = (id) => (DETERMINISTICOS.includes(id) ? 1 : RODADAS);
 
 let RODADA = 1;
 let cotaEstourada = false;
-const resultados = [];
+// Ja vem com o que a rodada interrompida mediu (vazio quando nao e retomada): o agregado
+// do fim conta os dois. Armadilha no 24 -- "nao executado" nao vira "passou", mas "ja
+// executado" tambem nao pode virar "nao medido".
+const resultados = DIARIO.anteriores.slice();
 // Contagem separada dos turnos que NAO produziram resposta. A armadilha n.1 do handoff e
 // exatamente isto: turno vazio passando por aprovacao em teste de negativa.
 const turnos = { vazios: 0, perdidos: 0 };
 
-// So grava quando este arquivo E o script rodando. Requerido como modulo (pelo teste
-// offline do instrumento), nao toca a transcricao -- que e evidencia.
-const MODO_SCRIPT = require.main === module;
 function escrever(linha) { if (MODO_SCRIPT) fs.appendFileSync(TR, linha + '\n'); }
 
 function reg(id, ok, detalhe, saida) {
-  resultados.push({ id, ok, rodada: RODADA });
+  const r = { id, ok, rodada: RODADA };
+  DIARIO.registrar(r); // ANTES da consolidacao: se morrer no teste seguinte, este ja esta no disco
+  const j = resultados.findIndex(x => x.id === id && x.rodada === RODADA);
+  if (j >= 0) resultados[j] = r; else resultados.push(r);
   const tag = ok === true ? 'PASSOU  ' : ok === false ? 'FALHOU  ' : ok === 'revisar' ? 'REVISAR ' : 'INCONCL.';
   const nDoTeste = N_POR_TESTE(id);
   const selo = 'rodada ' + RODADA + '/' + nDoTeste;
@@ -639,7 +658,10 @@ async function principal() {
       + '> o agregado esta no fim. **Passar em 2 de 3 nao e PASSOU: e INSTAVEL.**\n\n'
       + '> Alvo: ' + ALVO + ' — ' + WEBHOOK + '\n'
       + '> Inicio: ' + new Date().toISOString() + ' — faixa de user_id: ' + (UID_BASE + 1) + '+\n');
+  } else if (resultados.length) {
+    console.log('RETOMANDO: ' + resultados.length + ' resultado(s) preservado(s) do parcial -> ' + TR);
   }
+  DIARIO.iniciar(TR);
   console.log('BATERIA COMPLETA — Fase B (LLM) — alvo ' + ALVO + ' -> ' + WEBHOOK);
   console.log('N=' + RODADAS + ' nos qualitativos, N=1 nos deterministicos (' + DETERMINISTICOS.join(',') + ')');
   console.log('faixa de user_id desta rodada: ' + (UID_BASE + 1) + '+\n');
@@ -652,6 +674,8 @@ async function principal() {
     if (cotaEstourada) break;
   }
 
+  // O agregado ve a rodada inteira: o que esta rodada mediu MAIS o que a interrompida
+  // deixou no parcial. So depois disso o parcial pode sumir.
   const linhas = agregar(resultados);
   escrever('\n---\n\n## Agregado — ' + linhas.length + ' testes\n');
   escrever('| teste | N | veredito | passou/falhou/revisar/inconcl. | media | desvio |');
@@ -684,6 +708,8 @@ async function principal() {
   if (conta('INSTAVEL')) console.log('  INSTAVEIS: ' + cita('INSTAVEL'));
   if (conta('REVISAR')) console.log('  PARA LER NA TRANSCRICAO: ' + cita('REVISAR'));
   console.log('\ntranscricao: ' + TR);
+  // Consolidado. Enquanto o arquivo de parcial EXISTE, existe rodada interrompida.
+  if (!cotaEstourada) DIARIO.concluir();
 }
 
 module.exports = { llmRespondeu, agregar, DETERMINISTICOS, N_POR_TESTE, TR, ALVO, turnos };

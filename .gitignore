@@ -31,3 +31,7 @@ documentos/livros/*.pdf
 
 # PDF de leitura gerado a partir do PLAN.md — regeravel, nao e fonte
 /IAChat_tarefas_futuras.pdf
+
+# diario parcial das baterias (T032): arquivo de trabalho, nao evidencia.
+# Enquanto ele existe, ha rodada interrompida — retome com `--continuar`.
+/.parcial_*.jsonl

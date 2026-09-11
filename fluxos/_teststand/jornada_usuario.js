@@ -7,6 +7,8 @@
 //
 //   node fluxos/_teststand/jornada_usuario.js
 //   node fluxos/_teststand/jornada_usuario.js --uid=991234567   (retomar um aluno)
+//   node fluxos/_teststand/jornada_usuario.js --uid=... --continuar  (anexa a transcricao
+//                                             interrompida em vez de comecar outra)
 //
 // Cada turno gasta ~30s por causa do retry do envio ao Telegram (chatId sintetico
 // falha; ver armadilha 2 do HANDOFF). A jornada inteira leva ~15 min.
@@ -17,16 +19,32 @@ const { msg, cb, digest, nodeOut } = require('./harness');
 const { matchQuestion } = require('./seed');
 
 const { rotuloDe, transcricaoDe, caminhoLivre } = require('./alvo');
+const { abrirDiario, caminhoParcialDe } = require('./parcial');
 const ALVO = rotuloDe(process.env.IACHAT_TEST_PATH || 'iachat-test');
 // Deriva do ingress: o v7.4 mantem o nome historico, qualquer outro ganha sufixo.
 // Sem isso, rodar a jornada no v8 SOBRESCREVE a evidencia de 04/09 (writeFileSync).
 // T031: e nem a rodada anterior da MESMA versao -- nome ocupado ganha data (caminhoLivre).
-const TR = caminhoLivre(transcricaoDe('tr_jornada', process.env.IACHAT_TEST_PATH || 'iachat-test'), fs.existsSync, Date.now());
+// T032: a jornada gravava SO NO FIM (linhas.join no writeFileSync). Em 10/09 ela morreu
+// aos 36 turnos por falta de memoria e nao sobrou nada -- 36 turnos de conversa real
+// perdidos por serem 36 strings em memoria. Agora cada linha vai ao disco na hora, e
+// `--continuar` anexa a transcricao INTERROMPIDA em vez de abrir outra (aviso da T031:
+// um processo novo veria a anterior como "ocupada" e escolheria outro caminho).
+const MODO_SCRIPT = require.main === module;
+const CONTINUAR = process.argv.includes('--continuar');
+const DIARIO = abrirDiario({
+  caminho: caminhoParcialDe(transcricaoDe('tr_jornada', process.env.IACHAT_TEST_PATH || 'iachat-test')),
+  fs, agora: Date.now(), continuar: CONTINUAR, ativo: MODO_SCRIPT,
+});
+const TR = DIARIO.transcricaoAnterior || caminhoLivre(transcricaoDe('tr_jornada', process.env.IACHAT_TEST_PATH || 'iachat-test'), fs.existsSync, Date.now());
+if (MODO_SCRIPT && !CONTINUAR) fs.writeFileSync(TR, '');
+if (MODO_SCRIPT) DIARIO.iniciar(TR);
 const arg = (k, d) => { const a = process.argv.find(x => x.startsWith('--' + k + '=')); return a ? a.split('=')[1] : d; };
 const UID = Number(arg('uid', 0)) || (990000000 + (Date.now() % 9000000));
 
 const linhas = [];
-function log(s) { console.log(s); linhas.push(s); }
+// Grava JA: a transcricao da jornada e a evidencia, e evidencia que so existe em memoria
+// morre junto com o processo.
+function log(s) { console.log(s); linhas.push(s); if (MODO_SCRIPT) fs.appendFileSync(TR, s + '\n'); }
 // `envios` (opcional) = d.enviosTentados: nos de envio que RODARAM no turno.
 // Sem ele, um turno cujo texto mora na expressao de um no Telegram aparecia como
 // "nada foi enviado ao aluno" -- afirmacao sobre o PRODUTO tirada do silencio do
@@ -209,6 +227,13 @@ function respostaPara(exec, modo) {
   }
 
   log('\n---\n\n_aluno de teste `' + UID + '` — limpar com `node db/cleanup_test_users.js --apply`_');
-  fs.writeFileSync(TR, linhas.join('\n'));
+  // Nada a gravar aqui: cada linha ja foi para o disco quando foi impressa.
+  DIARIO.concluir();
   console.log('\n\ntranscricao salva em ' + TR);
-})().catch(e => { console.error('FATAL', e); fs.writeFileSync(TR, linhas.join('\n')); process.exit(1); });
+})().catch(e => {
+  console.error('FATAL', e);
+  // A jornada parou no meio. O que ela ja tinha visto esta na transcricao, e o parcial
+  // fica para tras de proposito: e ele que diz "retome com --continuar".
+  console.error('parcial preservado em ' + TR + ' -- retome com --continuar');
+  process.exit(1);
+});
