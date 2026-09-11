@@ -54,10 +54,10 @@ prompt e de comportamento são baratas **agora** e ficam caras depois.
 | | |
 |---|---|
 | **Fluxo do bot** | `IAChat_Telegram_v7.4` — n8n id `9MA0o1XJjD33BnKc`, **101 nós**, `active=true`. **CONGELADO** na tag git `v7.4-congelado`; é ele que atende o Telegram |
-| **Fluxo de trabalho** | `IAChat_Telegram_v8` — n8n id `PbwEf7L9xEXhJaCg`, **106 nós**, `active=true` **em paralelo**. Só tráfego de teste: ingress `iachat-test-v8` e `Gatilho Telegram` desabilitado |
+| **Fluxo de trabalho** | `IAChat_Telegram_v8` — n8n id `PbwEf7L9xEXhJaCg`, **107 nós**, `active=true` **em paralelo**. Só tráfego de teste: ingress `iachat-test-v8` e `Gatilho Telegram` desabilitado |
 | **Arquivo de edição** | `fluxos/IAChat_Telegram_v8.json` — **nunca** o v7.4 |
 | **Publicar** | `node fluxos/_teststand/publica_v8.js` (único caminho autorizado; alvo cravado, aborta se o arquivo puder roubar o bot) |
-| **Loop** | `PLAN.md` + `STATE.md` + `/next`; agentes em `.claude/agents/`. Gate: `npm run gate` (~6 s, offline, 17 comandos) |
+| **Loop** | `PLAN.md` + `STATE.md` + `/next`; agentes em `.claude/agents/`. Gate: `npm run gate` (~3 s, offline, **21 comandos**) |
 | **Modelos** | `gemini-2.5-flash` (Conversa, Professor, Dúvida), `gemini-2.5-flash-lite` (Extrator, Validar Nome), `whisper-large-v3` na Groq (áudio) |
 | **Banco** | Postgres `127.0.0.1:5433` (Docker `iachat-pg`), 14 migrations |
 
@@ -396,7 +396,8 @@ URL corrente em `http://localhost:4040/api/tunnels`.
 | Script | Para quê |
 |---|---|
 | `harness.js` | base: POST no ingress + captura da execução + `digest()` (expõe `enviosTentados`) |
-| `alvo.js` | **rótulo e nome de transcrição derivados do ingress** — impede sobrescrever evidência |
+| `alvo.js` | **rótulo e nome de transcrição derivados do ingress** — impede sobrescrever evidência. Desde o T031, `caminhoLivre(alvo, existe, agora)` (disco e relógio injetados) data o arquivo quando o nome base já está ocupado |
+| `parcial.js` | **T032** — diário incremental (JSONL append-only) que faz a bateria sobreviver à morte por memória: `--continuar` retoma na mesma transcrição; sem a flag, parcial esquecido é arquivado, não apagado |
 | `registra_urls.js` | preload que grava toda URL de `fetch`: prova para onde o teste foi |
 | `publica_v8.js` | **único** caminho autorizado de publicação; alvo cravado no v8 |
 | `gate_vivo_v8.js` | gate ao vivo — uma mensagem pelo ingress (**só cobre onboarding**) |
@@ -408,15 +409,18 @@ URL corrente em `http://localhost:4040/api/tunnels`.
 | `experimento_reciprocidade.js` | C10 com detector objetivo (divide algo próprio + ≤1 pergunta) |
 | `mede_correcao_nivel_alto.js` | **T024** — correção de erro fora da lista em B2/C1 |
 | `testa_nome_camada2_vivo.js` | camada 2 da validação de nome; distingue recusa de fail-open |
+| `vivo_duvida_markdown.js` | **T029/T033** — a rota da dúvida no fluxo publicado: prova que `Formatar Dúvida` rodou (se não rodou, o v8 no ar é o velho) e que o texto chega sem markdown |
 | `analisa_latencia.js` | L1 por rota (union de intervalos, baldes disjuntos) |
 | `conteudo/md_para_pdf.js` | `.md` → HTML → Chrome headless. Sem pandoc, sem puppeteer, sem instalar nada |
 
-**No `npm run gate`** (offline, ~6 s): `regressao_v7.4` · `testa_cadastro_nome` ·
-`testa_nome_camada1` · `testa_abre_alas_professor` · `testa_explicacao_do_banco` ·
-`testa_decompoe_latencia` · `testa_alvo_bateria_a` · `testa_alvo_jornada` · `testa_lang_separado` ·
-`testa_civilidade` · `testa_explicacao_sem_persona` · `valida_track` · `valida_explicacoes` ·
-`testa_valida_explicacoes` · `simula_vazamento` · `testa_idioma_professor` · `testa_saida_fase_a` ·
-`testa_detector_controle` · e o `git diff --quiet` do congelado.
+**No `npm run gate`** (offline, ~3 s medidos em 11/09, **21 comandos**): `regressao_v7.4` ·
+`testa_cadastro_nome` · `testa_nome_camada1` · `testa_abre_alas_professor` ·
+`testa_explicacao_do_banco` · `testa_decompoe_latencia` · `testa_alvo_bateria_a` ·
+`testa_alvo_jornada` · `testa_transcricao_sem_sobrescrita` · `testa_parcial_retomada` ·
+`testa_lang_separado` · `testa_civilidade` · `testa_explicacao_sem_persona` ·
+`testa_markdown_saida` · `valida_track` · `valida_explicacoes` · `testa_valida_explicacoes` ·
+`simula_vazamento` · `testa_idioma_professor` · `testa_saida_fase_a` · `testa_detector_controle` ·
+e o `git diff --quiet` do congelado.
 
 ---
 
