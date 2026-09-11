@@ -1685,7 +1685,7 @@
     {
       "parameters": {
         "chatId": "={{ $('Normalizar').first().json.chatId }}",
-        "text": "={{ String($json.output||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }}",
+        "text": "={{ $json.finalText }}",
         "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": {
           "rows": [
@@ -3300,7 +3300,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const eng=$('Professor Engine').first().json;\nconst out=String($json.output||'').trim();\nconst feedback=eng.feedback||'';\nfunction esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }\nfunction clean(s){ return String(s||'').replace(/^[>\\-\\*\\d\\.\\)\\s]+/,'').replace(/[*_`#]/g,'').replace(/^\\s*[\"“”']|[\"“”']\\s*$/g,'').trim(); }\nlet res={ pkind:'explain', finalText:'', answer:'', sqlAns:'', parseFail:false };\nif(eng.llmTask==='question'){\n  const raw=out.replace(/\\r/g,'');\n  const lines=raw.split('\\n').map(function(x){return x.trim();}).filter(Boolean);\n  let qy='', a='';\n  // 1) rotulos aceitos em varias formas: P:, Q:, Pergunta:, Question:, R:, A:, Resposta:, Answer:\n  const RQ=/^[*_\\s>\\-\\d\\.\\)]*(?:\\**\\s*)(p|q|pergunta|question|quest\\u00e3o|questao)\\s*[:\\-\\u2013]\\s*/i;\n  const RA=/^[*_\\s>\\-\\d\\.\\)]*(?:\\**\\s*)(r|a|resposta|answer|gabarito)\\s*[:\\-\\u2013]\\s*/i;\n  for(let i=0;i<lines.length;i++){ const ln=lines[i];\n    if(!qy && RQ.test(ln)) qy=clean(ln.replace(RQ,''));\n    else if(!a && RA.test(ln)) a=clean(ln.replace(RA,''));\n  }\n  // 2) fallback: duas linhas nao rotuladas\n  if(!qy && lines.length) qy=clean(lines[0]);\n  if(!a && lines.length>1) a=clean(lines[lines.length-1]);\n  // 3) fallback: tudo numa linha so (\"... R: xxx\" ou \"... - resposta: xxx\")\n  if(qy && !a){ const m=raw.match(/(?:\\bR\\s*[:\\-]|\\bresposta\\s*[:\\-]|\\banswer\\s*[:\\-])\\s*(.+)$/i); if(m) a=clean(m[1]); }\n  if(a.length>60) a=a.split(/[.;\\n]/)[0].trim();\n  const valid=!!(qy && a && qy.length>=6 && a.length>=1 && a.length<=60);\n  if(!valid){\n    // Nunca enviar \"(questao indisponivel)\" nem gravar gabarito vazio: cai no banco local\n    const bank=(eng.practice_bank||[]).filter(function(b){ return b && b.answer && b.prompt; });\n    // Preferir a questao do topico corrente; so entao qualquer uma do nivel.\n    const _tt=String(eng.topicTitle||'');\n    const sameTopic=bank.filter(function(b){ return String(b.track_topic||'')===_tt; });\n    const pool=sameTopic.length?sameTopic:bank;\n    if(pool.length){ const pick=pool[Math.floor(Math.random()*pool.length)]; qy=clean(pick.prompt); a=clean(pick.answer); }\n    else { res.parseFail=true; }\n  }\n  if(res.parseFail){\n    res.pkind='explain';\n    res.finalText='😅 Deu um probleminha pra montar a questão agora. Toque em <b>▶️ Começar questões</b> pra eu tentar de novo, ou me mande uma dúvida sobre o tópico.';\n    return { json: res };\n  }\n  res.pkind='question'; res.answer=a;\n  res.finalText=(feedback?feedback+'\\n\\n':'')+'❓ '+esc(qy);\n  const uid=parseInt(eng.userId,10);\n  const recent=(Array.isArray(eng.recent_q)?eng.recent_q:[]).concat([qy]).slice(-5);\n  function lit(s){ return \"'\"+String(s).replace(/'/g,\"''\")+\"'\"; }\n  res.sqlAns=\"UPDATE students SET teacher_state=COALESCE(teacher_state,'{}'::jsonb) || jsonb_build_object('answer', \"+lit(a)+\"::text, 'question', \"+lit(qy)+\"::text, 'q_answered', false, 'recent_q', \"+lit(JSON.stringify(recent))+\"::jsonb), updated_at=now() WHERE user_id=\"+uid+\";\";\n}else if(eng.llmTask==='wrong'){\n  res.pkind='wrong';\n  res.finalText=(feedback?feedback+'\\n\\n':'')+esc(out||'')+'\\n\\n🤔 Alguma dúvida ou seguimos para a próxima?';\n  if(res.finalText.length>4096){ res.finalText=res.finalText.slice(0,4080)+'…'; }\n}else{\n  res.pkind='explain';\n  const body=out?esc(out):'Vamos direto às questões deste tópico — toque em ▶️ Começar questões.';\n  res.finalText=(feedback?feedback+'\\n\\n':'')+body;\n  if(res.finalText.length>4096){ res.finalText=res.finalText.slice(0,4080)+'…'; }\n}\nreturn { json: res };\n"
+        "jsCode": "const eng=$('Professor Engine').first().json;\nconst out=String($json.output||'').trim();\nconst feedback=eng.feedback||'';\nfunction esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }\n// MARKDOWN: o envio e parse_mode HTML, entao ** e * chegam literais ao aluno.\n// Mesma logica nas tres rotas (duvida, correcao e o filtro anti-spoiler);\n// o gate testa_markdown_saida.js exige que este bloco seja identico nos tres nos.\nfunction desmarkdown(s){ return String(s == null ? '' : s)\n  .replace(/```+/g, '')\n  .replace(/(\\*\\*|__)(?=\\S)([\\s\\S]*?\\S)\\1/g, '$2')\n  .replace(/(^|[^\\w*])\\*(?=\\S)([^*\\n]*?\\S)\\*(?!\\w)/g, '$1$2')\n  .replace(/^#{1,6}\\s+/gm, ''); }\nfunction clean(s){ return String(s||'').replace(/^[>\\-\\*\\d\\.\\)\\s]+/,'').replace(/[*_`#]/g,'').replace(/^\\s*[\"“”']|[\"“”']\\s*$/g,'').trim(); }\nlet res={ pkind:'explain', finalText:'', answer:'', sqlAns:'', parseFail:false };\nif(eng.llmTask==='question'){\n  const raw=out.replace(/\\r/g,'');\n  const lines=raw.split('\\n').map(function(x){return x.trim();}).filter(Boolean);\n  let qy='', a='';\n  // 1) rotulos aceitos em varias formas: P:, Q:, Pergunta:, Question:, R:, A:, Resposta:, Answer:\n  const RQ=/^[*_\\s>\\-\\d\\.\\)]*(?:\\**\\s*)(p|q|pergunta|question|quest\\u00e3o|questao)\\s*[:\\-\\u2013]\\s*/i;\n  const RA=/^[*_\\s>\\-\\d\\.\\)]*(?:\\**\\s*)(r|a|resposta|answer|gabarito)\\s*[:\\-\\u2013]\\s*/i;\n  for(let i=0;i<lines.length;i++){ const ln=lines[i];\n    if(!qy && RQ.test(ln)) qy=clean(ln.replace(RQ,''));\n    else if(!a && RA.test(ln)) a=clean(ln.replace(RA,''));\n  }\n  // 2) fallback: duas linhas nao rotuladas\n  if(!qy && lines.length) qy=clean(lines[0]);\n  if(!a && lines.length>1) a=clean(lines[lines.length-1]);\n  // 3) fallback: tudo numa linha so (\"... R: xxx\" ou \"... - resposta: xxx\")\n  if(qy && !a){ const m=raw.match(/(?:\\bR\\s*[:\\-]|\\bresposta\\s*[:\\-]|\\banswer\\s*[:\\-])\\s*(.+)$/i); if(m) a=clean(m[1]); }\n  if(a.length>60) a=a.split(/[.;\\n]/)[0].trim();\n  const valid=!!(qy && a && qy.length>=6 && a.length>=1 && a.length<=60);\n  if(!valid){\n    // Nunca enviar \"(questao indisponivel)\" nem gravar gabarito vazio: cai no banco local\n    const bank=(eng.practice_bank||[]).filter(function(b){ return b && b.answer && b.prompt; });\n    // Preferir a questao do topico corrente; so entao qualquer uma do nivel.\n    const _tt=String(eng.topicTitle||'');\n    const sameTopic=bank.filter(function(b){ return String(b.track_topic||'')===_tt; });\n    const pool=sameTopic.length?sameTopic:bank;\n    if(pool.length){ const pick=pool[Math.floor(Math.random()*pool.length)]; qy=clean(pick.prompt); a=clean(pick.answer); }\n    else { res.parseFail=true; }\n  }\n  if(res.parseFail){\n    res.pkind='explain';\n    res.finalText='😅 Deu um probleminha pra montar a questão agora. Toque em <b>▶️ Começar questões</b> pra eu tentar de novo, ou me mande uma dúvida sobre o tópico.';\n    return { json: res };\n  }\n  res.pkind='question'; res.answer=a;\n  res.finalText=(feedback?feedback+'\\n\\n':'')+'❓ '+esc(qy);\n  const uid=parseInt(eng.userId,10);\n  const recent=(Array.isArray(eng.recent_q)?eng.recent_q:[]).concat([qy]).slice(-5);\n  function lit(s){ return \"'\"+String(s).replace(/'/g,\"''\")+\"'\"; }\n  res.sqlAns=\"UPDATE students SET teacher_state=COALESCE(teacher_state,'{}'::jsonb) || jsonb_build_object('answer', \"+lit(a)+\"::text, 'question', \"+lit(qy)+\"::text, 'q_answered', false, 'recent_q', \"+lit(JSON.stringify(recent))+\"::jsonb), updated_at=now() WHERE user_id=\"+uid+\";\";\n}else if(eng.llmTask==='wrong'){\n  res.pkind='wrong';\n  // ORDEM: desmarkdown ANTES do esc. O `feedback` do engine e HTML legitimo do fluxo\n  // (<b>resposta certa</b>) e segue cru; so o texto do LLM e desmarcado e escapado.\n  res.finalText=(feedback?feedback+'\\n\\n':'')+esc(desmarkdown(out||''))+'\\n\\n🤔 Alguma dúvida ou seguimos para a próxima?';\n  if(res.finalText.length>4096){ res.finalText=res.finalText.slice(0,4080)+'…'; }\n}else{\n  res.pkind='explain';\n  const body=out?esc(desmarkdown(out)):'Vamos direto às questões deste tópico — toque em ▶️ Começar questões.';\n  res.finalText=(feedback?feedback+'\\n\\n':'')+body;\n  if(res.finalText.length>4096){ res.finalText=res.finalText.slice(0,4080)+'…'; }\n}\nreturn { json: res };\n"
       },
       "id": "71b933a9-87cb-45ed-99ea-7e18c94cd8cd",
       "name": "Parse Professor",
@@ -3533,7 +3533,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Filtro Anti-Spoiler (deterministico).\n// A v7.4 confia no LLM para nao revelar o gabarito de uma questao ainda aberta.\n// Medido ao vivo: o prompt e explicito, o estado (q_answered=false) esta correto,\n// e mesmo assim o modelo entrega a resposta quando o aluno pergunta \"por que essa\n// era a resposta certa?\". Aqui a garantia deixa de depender de obediencia.\nconst eng = $('Professor Engine').first().json || {};\nconst ts = eng.teacher_state_new || {};\nconst ans = String(ts.answer || '').trim();\nlet out = String($json.output || '');\nlet mascarou = false;\n\n// MARKDOWN: o envio e parse_mode HTML, entao ** e * chegam literais ao aluno.\n// O prompt da duvida ja pede texto puro e o modelo desobedece (2/2 na medicao\n// de 03/09), entao a garantia fica aqui, como a do spoiler. Roda ANTES do\n// mascaramento para nao mexer no ___ que ele insere.\nout = out\n  .replace(/```+/g, '')\n  .replace(/(\\*\\*|__)(?=\\S)([\\s\\S]*?\\S)\\1/g, '$2')\n  .replace(/(^|[^\\w*])\\*(?=\\S)([^*\\n]*?\\S)\\*(?!\\w)/g, '$1$2')\n  .replace(/^#{1,6}\\s+/gm, '');\n\nif (ans && ts.q_answered === false) {\n  const esc = ans.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n  const re = new RegExp('(^|[^\\\\p{L}\\\\p{N}])(' + esc + ')(?![\\\\p{L}\\\\p{N}])', 'giu');\n  const novo = out.replace(re, '$1___');\n  if (novo !== out) { out = novo; mascarou = true; }\n}\nif (mascarou) {\n  out += '\\n\\n😉 Segurei a resposta de proposito — tenta voce primeiro!';\n}\nreturn { json: Object.assign({}, $json, { output: out, antispoiler: mascarou }) };\n"
+        "jsCode": "// Filtro Anti-Spoiler (deterministico).\n// A v7.4 confia no LLM para nao revelar o gabarito de uma questao ainda aberta.\n// Medido ao vivo: o prompt e explicito, o estado (q_answered=false) esta correto,\n// e mesmo assim o modelo entrega a resposta quando o aluno pergunta \"por que essa\n// era a resposta certa?\". Aqui a garantia deixa de depender de obediencia.\nconst eng = $('Professor Engine').first().json || {};\nconst ts = eng.teacher_state_new || {};\nconst ans = String(ts.answer || '').trim();\nlet out = String($json.output || '');\nlet mascarou = false;\n\n// MARKDOWN: o envio e parse_mode HTML, entao ** e * chegam literais ao aluno.\n// Mesma logica nas tres rotas (duvida, correcao e o filtro anti-spoiler);\n// o gate testa_markdown_saida.js exige que este bloco seja identico nos tres nos.\nfunction desmarkdown(s){ return String(s == null ? '' : s)\n  .replace(/```+/g, '')\n  .replace(/(\\*\\*|__)(?=\\S)([\\s\\S]*?\\S)\\1/g, '$2')\n  .replace(/(^|[^\\w*])\\*(?=\\S)([^*\\n]*?\\S)\\*(?!\\w)/g, '$1$2')\n  .replace(/^#{1,6}\\s+/gm, ''); }\n// Roda ANTES do mascaramento para nao mexer no ___ que ele insere.\nout = desmarkdown(out);\n\nif (ans && ts.q_answered === false) {\n  const esc = ans.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n  const re = new RegExp('(^|[^\\\\p{L}\\\\p{N}])(' + esc + ')(?![\\\\p{L}\\\\p{N}])', 'giu');\n  const novo = out.replace(re, '$1___');\n  if (novo !== out) { out = novo; mascarou = true; }\n}\nif (mascarou) {\n  out += '\\n\\n😉 Segurei a resposta de proposito — tenta voce primeiro!';\n}\nreturn { json: Object.assign({}, $json, { output: out, antispoiler: mascarou }) };\n"
       },
       "id": "d5555555-5555-4555-8555-555555555555",
       "name": "Filtro Anti-Spoiler",
@@ -3986,6 +3986,19 @@
       ],
       "id": "c0ffee05-ab1e-4a1a-9a00-000000000005",
       "name": "Explicação do Banco"
+    },
+    {
+      "parameters": {
+        "jsCode": "// T029 — formatacao da resposta da Duvida, tirada da expressao inline do no Telegram.\n// Texto que mora em expressao de no Telegram e invisivel ao digest() (armadilha no 14):\n// aqui o instrumento enxerga o que o aluno recebe, e a formatacao fica testavel offline.\n// ORDEM OBRIGATORIA: desmarkdown ANTES do escape de HTML — escapar primeiro nao\n// impede o ** de chegar literal, e desmarcar depois mexeria em &lt;/&gt; ja escapados.\n// O corpo aqui vem inteiro do LLM: nao ha HTML legitimo a preservar, entao escapa tudo.\n// MARKDOWN: o envio e parse_mode HTML, entao ** e * chegam literais ao aluno.\n// Mesma logica nas tres rotas (duvida, correcao e o filtro anti-spoiler);\n// o gate testa_markdown_saida.js exige que este bloco seja identico nos tres nos.\nfunction desmarkdown(s){ return String(s == null ? '' : s)\n  .replace(/```+/g, '')\n  .replace(/(\\*\\*|__)(?=\\S)([\\s\\S]*?\\S)\\1/g, '$2')\n  .replace(/(^|[^\\w*])\\*(?=\\S)([^*\\n]*?\\S)\\*(?!\\w)/g, '$1$2')\n  .replace(/^#{1,6}\\s+/gm, ''); }\nfunction esc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }\nconst finalText = esc(desmarkdown($json.output));\nreturn { json: Object.assign({}, $json, { finalText: finalText }) };"
+      },
+      "id": "f0d2a9c1-7b3e-4a55-9c10-029duvida010",
+      "name": "Formatar Dúvida",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        2352
+      ]
     }
   ],
   "connections": {
@@ -4971,7 +4984,7 @@
       "main": [
         [
           {
-            "node": "Enviar Dúvida",
+            "node": "Formatar Dúvida",
             "type": "main",
             "index": 0
           }
@@ -5118,6 +5131,17 @@
         [
           {
             "node": "Enviar Explicacao Prof",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Dúvida": {
+      "main": [
+        [
+          {
+            "node": "Enviar Dúvida",
             "type": "main",
             "index": 0
           }

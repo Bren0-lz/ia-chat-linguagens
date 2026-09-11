@@ -133,9 +133,13 @@ function digest(exec) {
   // agente. O filtro roda depois e mascara o gabarito pendente. Ler o agente
   // aqui fazia todo teste de vazamento julgar a string errada: dava alarme
   // falso quando a protecao tinha funcionado, e passava sem nunca exercita-la.
+  // T029: quem monta o texto final da duvida e `Formatar Dúvida` (desmarkdown + escape).
+  // Antes isso morava na expressao do no Telegram, invisivel ao digest (armadilha no 14).
   const duvFiltrada = nodeOut(rd, 'Filtro Anti-Spoiler');
   const duvAgente = nodeOut(rd, 'Agente Dúvida');
-  if (duvFiltrada) push('DUVIDA', duvFiltrada.output);
+  const duvFormatada = nodeOut(rd, 'Formatar Dúvida');
+  if (duvFormatada) push('DUVIDA', duvFormatada.finalText);
+  else if (duvFiltrada) push('DUVIDA', duvFiltrada.output);
   else if (duvAgente) push('DUVIDA', duvAgente.output);
   const antispoiler = duvFiltrada ? !!duvFiltrada.antispoiler : undefined;
   const expectedAnswer = (pp && pp.answer) || (peng && peng.teacher_state_new && peng.teacher_state_new.answer) || null;
