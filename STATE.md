@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** T029 (markdown vaza na Duvida e na Correcao). Bloco 4: T029, T031, T032 offline; T030 ADIADO por decisao do Breno
-- **Última concluída:** T026 — bateria repetida no v8.1, com as ressalvas de ambiente declaradas
+- **Tarefa atual:** T031 (transcricao que nao sobrescreve evidencia). Bloco 4: T029 DONE; T031, T032 offline; T030 ADIADO por decisao do Breno
+- **Última concluída:** T029 (393d70c) — markdown na Duvida e na Correcao; PRECISA PUBLICAR para valer ao vivo
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** T010 (credencial da camada 2) aguarda decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
@@ -193,3 +193,8 @@
 - 2026-09-11 DECISAO PENDENTE (T030): fechar /reset por faixa de ID de teste (990000000-999999999) ou desligar DEV_COMMANDS. A opcao (b) tira o /resetfull do teststand, que e como as baterias semeiam estado — quem escolher (b) precisa dizer qual e o outro caminho.
 - 2026-09-11 DECISAO DO BRENO: o `/resetfull` FICA como esta. T030 sai do fluxo de tarefas (ADIADO), mas segue na lista de itens que bloqueiam o lancamento — `DEV_COMMANDS = true` deixa `/reset` e `/resetfull` abertos a qualquer usuario.
 - 2026-09-11 Loop auto-ritmado iniciado (/loop /next) sobre o bloco 4: T029 -> T031 -> T032.
+- 2026-09-11 T029 DONE (393d70c), verificada. ACHADO QUE CORRIGE O HANDOFF: o T9 (§4.3) sobrevivia de fato so na CORRECAO — na Duvida o `Filtro Anti-Spoiler` ja tirava o markdown desde 03/09. O ganho na rota da duvida foi de VISIBILIDADE: a formatacao morava na expressao inline do no Telegram, invisivel ao digest() (armadilha 14), e agora mora no no `Formatar Duvida`.
+- 2026-09-11 O gate passa a ter 19 comandos + o congelado, e o v8 passa a ter 107 nos. O HANDOFF §9 e §2 ficaram desatualizados — corrigir quando o bloco fechar.
+- 2026-09-11 BURACO FORA DE ESCOPO, achado pelo implementer e conferido pelo verifier: o `feedback` do `Professor Engine` interpola `ts.answer` dentro de <b></b> sem escapar. Hoje e seguro porque a string vem do fluxo, nao do LLM, mas um gabarito com `<` quebraria o HTML do Telegram. Candidata a tarefa, nao entrou no T029.
+- 2026-09-11 RESSALVA DO VERIFIER, registrada de proposito: os 3 asserts da secao "Explicacao do Banco" no teste novo passam trivialmente (o fixture nao tem markdown). Quem cobre os 60 .md de verdade e a regra HTML_MARKDOWN do valida_explicacoes.js. E conferencia de passagem, nao rede.
+- 2026-09-11 PENDENCIA ACUMULADA DO BLOCO: T029 mudou o fluxo. Sem `node fluxos/_teststand/publica_v8.js` o gate ao vivo testa a versao antiga e da falso PASSOU. Publicar so com pedido explicito do Breno.

@@ -467,7 +467,10 @@ no fim desta seção, sem ID — o loop não executa, o Breno roda entre blocos.
   HTML legítimo, `<script>` do aluno), exigindo: nenhum `*` literal na saída, `<b>` preservado,
   `<` do aluno escapado. Tem de **reprovar o v8 atual**, provado com `git stash`.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE (393d70c) — nó `Formatar Dúvida` na cadeia da dúvida e `esc(desmarkdown(out))`
+  nos ramos `wrong`/`explain`; teste novo reprova a versão anterior por 13 falhas de conteúdo.
+  **ACHADO:** o T9 sobrevivia de fato só na Correção — na Dúvida o `Filtro Anti-Spoiler` já
+  tirava o markdown, e o ganho foi de visibilidade (armadilha nº 14). **PRECISA PUBLICAR**
 
 ### T030 — fechar `/reset` e `/resetfull`
 - **Origem:** `Roteador Mestre:7` tem `const DEV_COMMANDS = true`, ligado em 04/09 para liberar o
