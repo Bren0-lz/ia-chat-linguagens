@@ -57,7 +57,7 @@ prompt e de comportamento são baratas **agora** e ficam caras depois.
 | **Fluxo de trabalho** | `IAChat_Telegram_v8` — n8n id `PbwEf7L9xEXhJaCg`, **107 nós**, `active=true` **em paralelo**. Só tráfego de teste: ingress `iachat-test-v8` e `Gatilho Telegram` desabilitado |
 | **Arquivo de edição** | `fluxos/IAChat_Telegram_v8.json` — **nunca** o v7.4 |
 | **Publicar** | `node fluxos/_teststand/publica_v8.js` (único caminho autorizado; alvo cravado, aborta se o arquivo puder roubar o bot) |
-| **Loop** | `PLAN.md` + `STATE.md` + `/next`; agentes em `.claude/agents/`. Gate: `npm run gate` (~3 s, offline, **21 comandos**) |
+| **Loop** | `PLAN.md` + `STATE.md` + `/next`; agentes em `.claude/agents/`. Gate: `npm run gate` (~3 s, offline, **22 comandos**) |
 | **Modelos** | `gemini-2.5-flash` (Conversa, Professor, Dúvida), `gemini-2.5-flash-lite` (Extrator, Validar Nome), `whisper-large-v3` na Groq (áudio) |
 | **Banco** | Postgres `127.0.0.1:5433` (Docker `iachat-pg`), 14 migrations |
 
@@ -413,12 +413,12 @@ URL corrente em `http://localhost:4040/api/tunnels`.
 | `analisa_latencia.js` | L1 por rota (union de intervalos, baldes disjuntos) |
 | `conteudo/md_para_pdf.js` | `.md` → HTML → Chrome headless. Sem pandoc, sem puppeteer, sem instalar nada |
 
-**No `npm run gate`** (offline, ~3 s medidos em 11/09, **21 comandos**): `regressao_v7.4` ·
+**No `npm run gate`** (offline, ~3 s medidos em 11/09, **22 comandos**): `regressao_v7.4` ·
 `testa_cadastro_nome` · `testa_nome_camada1` · `testa_abre_alas_professor` ·
 `testa_explicacao_do_banco` · `testa_decompoe_latencia` · `testa_alvo_bateria_a` ·
 `testa_alvo_jornada` · `testa_transcricao_sem_sobrescrita` · `testa_parcial_retomada` ·
 `testa_lang_separado` · `testa_civilidade` · `testa_explicacao_sem_persona` ·
-`testa_markdown_saida` · `valida_track` · `valida_explicacoes` · `testa_valida_explicacoes` ·
+`testa_markdown_saida` · `testa_topico_uma_vez` · `valida_track` · `valida_explicacoes` · `testa_valida_explicacoes` ·
 `simula_vazamento` · `testa_idioma_professor` · `testa_saida_fase_a` · `testa_detector_controle` ·
 e o `git diff --quiet` do congelado.
 

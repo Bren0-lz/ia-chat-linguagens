@@ -31,14 +31,14 @@ Por isso publicar/ativar exige pedido explícito do Breno, sempre.
 
 | Comando | Tempo | Cobre |
 |---|---|---|
-| `npm run gate` | ~3 s | **21 comandos** em sequência — os quatro abaixo são só os mais usados à parte |
+| `npm run gate` | ~3 s | **22 comandos** em sequência — os quatro abaixo são só os mais usados à parte |
 | `npm run gate:regressao` | ~1 s | placement, roteador, anti-spoiler, interesses + sintaxe dos 31 nós de código |
 | `npm run gate:cadastro` | ~1 s | Triagem de Nome → Etapa de Cadastro |
 | `npm run gate:nome` | ~1 s | 77 casos da camada 1 da validação de nome |
 | `npm run gate:congelado` | instantâneo | prova que o `v7.4.json` não foi tocado |
 
 Todos rodam **offline**: sem n8n, sem Postgres, sem LLM. Uma tarefa só está concluída quando
-todos retornam exit code 0. A lista completa dos 21 está no `fluxos/HANDOFF.md` §9 — e quem
+todos retornam exit code 0. A lista completa dos 22 está no `fluxos/HANDOFF.md` §9 — e quem
 acrescentar um comando ao `gate` atualiza os dois lugares, senão a próxima sessão acredita no
 número velho.
 
