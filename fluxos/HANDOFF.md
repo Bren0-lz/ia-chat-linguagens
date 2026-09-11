@@ -57,7 +57,7 @@ prompt e de comportamento são baratas **agora** e ficam caras depois.
 | **Fluxo de trabalho** | `IAChat_Telegram_v8` — n8n id `PbwEf7L9xEXhJaCg`, **107 nós**, `active=true` **em paralelo**. Só tráfego de teste: ingress `iachat-test-v8` e `Gatilho Telegram` desabilitado |
 | **Arquivo de edição** | `fluxos/IAChat_Telegram_v8.json` — **nunca** o v7.4 |
 | **Publicar** | `node fluxos/_teststand/publica_v8.js` (único caminho autorizado; alvo cravado, aborta se o arquivo puder roubar o bot) |
-| **Loop** | `PLAN.md` + `STATE.md` + `/next`; agentes em `.claude/agents/`. Gate: `npm run gate` (~3 s, offline, **23 comandos**) |
+| **Loop** | `PLAN.md` + `STATE.md` + `/next`; agentes em `.claude/agents/`. Gate: `npm run gate` (~3 s, offline, **24 comandos**) |
 | **Modelos** | `gemini-2.5-flash` (Conversa, Professor, Dúvida), `gemini-2.5-flash-lite` (Extrator, Validar Nome), `whisper-large-v3` na Groq (áudio) |
 | **Banco** | Postgres `127.0.0.1:5433` (Docker `iachat-pg`), 14 migrations |
 
@@ -395,7 +395,7 @@ URL corrente em `http://localhost:4040/api/tunnels`.
 
 | Script | Para quê |
 |---|---|
-| `harness.js` | base: POST no ingress + captura da execução + `digest()` (expõe `enviosTentados`) |
+| `harness.js` | base: POST no ingress + captura da execução + `digest()` (expõe `enviosTentados`). **T036:** credencial cobrada no primeiro uso de rede, nao na carga — importar o módulo não exige `.env` |
 | `alvo.js` | **rótulo e nome de transcrição derivados do ingress** — impede sobrescrever evidência. Desde o T031, `caminhoLivre(alvo, existe, agora)` (disco e relógio injetados) data o arquivo quando o nome base já está ocupado |
 | `parcial.js` | **T032** — diário incremental (JSONL append-only) que faz a bateria sobreviver à morte por memória: `--continuar` retoma na mesma transcrição; sem a flag, parcial esquecido é arquivado, não apagado |
 | `registra_urls.js` | preload que grava toda URL de `fetch`: prova para onde o teste foi |
@@ -410,18 +410,19 @@ URL corrente em `http://localhost:4040/api/tunnels`.
 | `mede_correcao_nivel_alto.js` | **T024** — correção de erro fora da lista em B2/C1 |
 | `testa_nome_camada2_vivo.js` | camada 2 da validação de nome; distingue recusa de fail-open |
 | `vivo_duvida_markdown.js` | **T029/T033** — a rota da dúvida no fluxo publicado: prova que `Formatar Dúvida` rodou (se não rodou, o v8 no ar é o velho) e que o texto chega sem markdown |
+| `testa_bateria_b_n3.js` | **T015/T036** — instrumento da Fase B: alvo, N por teste, turno perdido e a **familia** de nomes de transcricao (canonico ou datado pelo `caminhoLivre`) |
 | `testa_html_correcao.js` | **T035** — o `Professor Engine` interpolando gabarito/nome/tópico em HTML: moldura `<b>` intacta, conteúdo escapado |
 | `analisa_latencia.js` | L1 por rota (union de intervalos, baldes disjuntos) |
 | `conteudo/md_para_pdf.js` | `.md` → HTML → Chrome headless. Sem pandoc, sem puppeteer, sem instalar nada |
 
-**No `npm run gate`** (offline, ~3 s medidos em 11/09, **23 comandos**): `regressao_v7.4` ·
+**No `npm run gate`** (offline, ~3 s medidos em 11/09, **24 comandos**): `regressao_v7.4` ·
 `testa_cadastro_nome` · `testa_nome_camada1` · `testa_abre_alas_professor` ·
 `testa_explicacao_do_banco` · `testa_decompoe_latencia` · `testa_alvo_bateria_a` ·
 `testa_alvo_jornada` · `testa_transcricao_sem_sobrescrita` · `testa_parcial_retomada` ·
 `testa_lang_separado` · `testa_civilidade` · `testa_explicacao_sem_persona` ·
 `testa_markdown_saida` · `testa_topico_uma_vez` · `valida_track` · `valida_explicacoes` · `testa_valida_explicacoes` ·
 `simula_vazamento` · `testa_idioma_professor` · `testa_saida_fase_a` · `testa_detector_controle` ·
-`testa_html_correcao` ·
+`testa_html_correcao` · `testa_bateria_b_n3` ·
 e o `git diff --quiet` do congelado.
 
 ---

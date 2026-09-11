@@ -32,6 +32,20 @@ function ok(cond, nome, detalhe) {
   else { fails++; console.log('  FALHOU  ' + nome + (detalhe ? ' — ' + detalhe : '')); }
 }
 
+// O nome LEGITIMO de uma transcricao: o que `transcricaoDe` da para o ingress corrente,
+// ou a variante datada (com desempate) que o `caminhoLivre` produz quando o base ja existe.
+// Nada mais -- em especial, nao o nome de OUTRA versao.
+function daFamilia(tr, base, testPath) {
+  const canonico = require('./alvo').transcricaoDe(base, testPath);
+  const semExt = canonico.replace(/\.md$/, '');
+  const m = String(tr).match(/^(.*?)(?:_(\d{4})-(\d{2})-(\d{2})(?:-(\d+))?)?\.md$/);
+  if (!m || m[1] !== semExt) return false;
+  if (m[2] === undefined) return true;            // o proprio canonico
+  const mes = Number(m[3]), dia = Number(m[4]);
+  if (mes < 1 || mes > 12 || dia < 1 || dia > 31) return false;
+  return m[5] === undefined || Number(m[5]) >= 2; // desempate comeca em 2
+}
+
 const ESTATICO = (process.argv.find((a) => a.startsWith('--estatico=')) || '').split('=')[1] || '';
 const src = fs.readFileSync(ESTATICO || path.join(__dirname, 'bateria_completa_b.js'), 'utf8');
 if (ESTATICO) console.log('modo estatico — fonte analisada: ' + ESTATICO);
@@ -56,6 +70,50 @@ const linhasCodigo = src.split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l)
   ok(transcricaoDe('tr_bateria_b', 'iachat-test-v8') === './tr_bateria_b_v8.md',
     'v8 -> tr_bateria_b_v8.md (nao sobrescreve a evidencia do v7.4)');
   ok(rotuloDe('iachat-test-v8') === 'v8', 'rotulo do ingress do v8 e v8');
+}
+
+// ---- 1b. o harness CARREGA sem credencial (T036) ------------------------------------
+// Este teste entrou no `npm run gate`, e o gate tem de rodar em clone limpo. Enquanto o
+// `harness.js` validava N8N_API_KEY/IACHAT_TEST_SECRET no TOPO, importa-lo para ler
+// constantes matava o processo (`process.exit(1)`) em qualquer maquina sem `.env` --
+// credencial exigida por um teste que nao faz uma requisicao sequer.
+//
+// A copia vai para um diretorio TEMPORARIO de proposito: o `fromDotEnv` procura o `.env`
+// dois niveis acima do arquivo, entao so fora do repo a ausencia de credencial e real.
+// Nada e escrito na raiz (a evidencia `tr_*.md` nao e regeneravel).
+{
+  const os = require('os');
+  const { execFileSync } = require('child_process');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'iachat-harness-'));
+  try {
+    const dir = path.join(tmp, 'fluxos', '_teststand');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.copyFileSync(path.join(__dirname, 'harness.js'), path.join(dir, 'harness.js'));
+    const limpo = { ...process.env };
+    delete limpo.N8N_API_KEY; delete limpo.IACHAT_TEST_SECRET;
+    let saida = '', codigo = 0;
+    try {
+      saida = execFileSync(process.execPath,
+        ['-e', "const h=require('./harness');console.log('CARREGOU ' + typeof h.digest)"],
+        { cwd: dir, env: limpo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    } catch (e) { codigo = e.status || 1; saida = String(e.stdout || '') + String(e.stderr || ''); }
+    ok(codigo === 0 && /CARREGOU function/.test(saida),
+      'sem N8N_API_KEY e sem .env, requerer o harness NAO mata o processo',
+      'codigo=' + codigo + ' saida=' + saida.trim().slice(0, 90));
+
+    // A outra direcao: quem vai a REDE sem credencial continua parando, com a mensagem.
+    let saidaRede = '', codigoRede = 0;
+    try {
+      execFileSync(process.execPath,
+        ['-e', "require('./harness').jget('http://127.0.0.1:1/x').then(()=>console.log('FOI'))"],
+        { cwd: dir, env: limpo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    } catch (e) { codigoRede = e.status || 1; saidaRede = String(e.stdout || '') + String(e.stderr || ''); }
+    ok(codigoRede === 1 && /N8N_API_KEY ausente/.test(saidaRede),
+      'ao primeiro uso de rede sem chave, o harness ainda para com a mensagem clara',
+      'codigo=' + codigoRede + ' saida=' + saidaRede.trim().slice(0, 90));
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
 }
 
 // ---- 2. N por teste, declarado e coerente -------------------------------------------
@@ -98,8 +156,39 @@ const B = require('./bateria_completa_b');
   ok(quali.length === 22, 'sobram 22 qualitativos', String(quali.length));
   ok(quali.every((id) => B.N_POR_TESTE(id) === 3),
     'qualitativo mede N=3 por default', JSON.stringify(quali.map((id) => id + '=' + B.N_POR_TESTE(id))));
-  ok(B.TR === './tr_bateria_b_v8.md' || B.TR === './tr_bateria_b.md',
-    'o modulo expoe o TR derivado do ingress corrente', String(B.TR));
+  // O TR tem de pertencer a FAMILIA do ingress corrente -- canonico ou datado pelo
+  // `caminhoLivre` (T031). Cravar os dois nomes historicos aqui reprovava o produto por
+  // fazer a coisa certa: com `tr_bateria_b.md` ja no disco, o nome correto passa a ser
+  // `tr_bateria_b_2026-09-11.md`. O que o assert continua protegendo (e o unico que
+  // importa) e que o nome deriva do ingress: TR de OUTRA versao segue reprovando.
+  const { transcricaoDe: tDe } = require('./alvo');
+  const ingress = process.env.IACHAT_TEST_PATH || 'iachat-test';
+  ok(daFamilia(B.TR, 'tr_bateria_b', ingress),
+    'o TR exposto pertence a familia do ingress corrente (canonico ou datado)',
+    String(B.TR) + ' vs familia de ' + tDe('tr_bateria_b', ingress));
+}
+
+// ---- 2b. a familia de nomes reprova o que tem de reprovar ---------------------------
+// Detector novo se testa nas DUAS direcoes (handoff §5.6): aceitar o datado sem aceitar
+// o nome de outra versao. Sem isto, "afrouxar o assert" e indistinguivel de conserta-lo.
+{
+  const aceita = (tr, ing) => daFamilia(tr, 'tr_bateria_b', ing);
+  ok(aceita('./tr_bateria_b.md', 'iachat-test'), 'v7.4: aceita o nome historico');
+  ok(aceita('./tr_bateria_b_2026-09-11.md', 'iachat-test'), 'v7.4: aceita o datado do T031');
+  ok(aceita('./tr_bateria_b_2026-09-11-3.md', 'iachat-test'), 'v7.4: aceita o desempate');
+  ok(aceita('./tr_bateria_b_v8.md', 'iachat-test-v8'), 'v8: aceita o nome do v8');
+  ok(aceita('./tr_bateria_b_v8_2026-09-11.md', 'iachat-test-v8'), 'v8: aceita o datado do v8');
+  ok(aceita('./tr_bateria_b_v8_2026-09-11-2.md', 'iachat-test-v8'), 'v8: aceita o desempate do v8');
+
+  ok(!aceita('./tr_bateria_b.md', 'iachat-test-v8'),
+    'rodando no v8, o TR do v7.4 REPROVA (era exatamente a armadilha n.22)');
+  ok(!aceita('./tr_bateria_b_v8.md', 'iachat-test'),
+    'rodando no v7.4, o TR do v8 REPROVA');
+  ok(!aceita('./tr_bateria_b_v81.md', 'iachat-test-v8'),
+    'nome de outra versao REPROVA mesmo parecendo o do v8');
+  ok(!aceita('./tr_jornada_v8.md', 'iachat-test-v8'), 'transcricao de outra bateria REPROVA');
+  ok(!aceita('./tr_bateria_b_2026-13-99.md', 'iachat-test'), 'sufixo que nao e data REPROVA');
+  ok(!aceita('./tr_bateria_b_final.md', 'iachat-test'), 'sufixo livre REPROVA');
 }
 
 // ---- 3. turno perdido NAO e aprovacao -----------------------------------------------

@@ -1,6 +1,7 @@
 // Harness to drive the IAChat n8n workflow via the TEST Ingress webhook and read
 // the generated replies from execution data. No Telegram delivery is relied upon.
-// Configure via env: N8N_API_KEY (obrigatório), N8N_URL (opcional, default localhost:5678).
+// Configure via env: N8N_API_KEY (obrigatório ao ir à rede — cobrado no primeiro uso, nao na
+// carga), N8N_URL (opcional, default localhost:5678).
 const BASE = process.env.N8N_URL || 'http://localhost:5678';
 const API = BASE + '/api/v1';
 // O path do TEST Ingress varia por versao do fluxo: o v7.4 (no ar) atende em
@@ -18,14 +19,26 @@ function fromDotEnv(name) {
   } catch (e) { return ''; }
 }
 
-const KEY = process.env.N8N_API_KEY || fromDotEnv('N8N_API_KEY');
-if (!KEY) { console.error('N8N_API_KEY ausente (.env da raiz ou variável de ambiente) — JWT da API do n8n.'); process.exit(1); }
+// A credencial e EXIGIDA na hora de usar, nao no carregamento (T036). Validar no topo
+// obrigava qualquer script que apenas IMPORTA o harness para ler constantes -- caso do
+// `testa_bateria_b_n3.js`, que entrou no `npm run gate` -- a ter `.env` com chave: o gate
+// morria em clone limpo, exigindo credencial para um teste que nao vai a rede nenhuma.
+// Quem vai a rede continua recebendo o MESMO erro, com a mesma mensagem, ao primeiro uso.
+function exigir(nome, valor, extra) {
+  if (!valor) {
+    console.error(nome + ' ausente (.env da raiz ou variável de ambiente)' + (extra || '.'));
+    process.exit(1);
+  }
+  return valor;
+}
+const apiKey = () => exigir('N8N_API_KEY', process.env.N8N_API_KEY || fromDotEnv('N8N_API_KEY'),
+  ' — JWT da API do n8n.');
 
 // O TEST Ingress passou a exigir header auth na v7.4 (correção do S1: antes ele
 // aceitava injeção de update sem autenticação nenhuma). O segredo mora no .env
 // da raiz do repo, como IACHAT_TEST_SECRET.
-const TEST_SECRET = process.env.IACHAT_TEST_SECRET || fromDotEnv('IACHAT_TEST_SECRET');
-if (!TEST_SECRET) { console.error('IACHAT_TEST_SECRET ausente (.env da raiz ou variável de ambiente).'); process.exit(1); }
+const testSecret = () => exigir('IACHAT_TEST_SECRET',
+  process.env.IACHAT_TEST_SECRET || fromDotEnv('IACHAT_TEST_SECRET'));
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
@@ -41,7 +54,7 @@ async function rfetch(url, opts, tries = 5) {
 async function jget(url) {
   for (let k = 0; k < 5; k++) {
     try {
-      const r = await rfetch(url, { headers: { 'X-N8N-API-KEY': KEY } });
+      const r = await rfetch(url, { headers: { 'X-N8N-API-KEY': apiKey() } });
       if (!r.ok) { await sleep(600); continue; }
       return await r.json();
     } catch (e) { await sleep(800); }
@@ -62,7 +75,7 @@ async function postWebhook(update) {
   try {
     const r = await rfetch(WEBHOOK, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-iachat-test': TEST_SECRET },
+      headers: { 'content-type': 'application/json', 'x-iachat-test': testSecret() },
       body: JSON.stringify(update),
     });
     await r.text().catch(() => {});
