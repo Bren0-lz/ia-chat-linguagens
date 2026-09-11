@@ -1,6 +1,6 @@
 # Estado do loop
 
-- **Tarefa atual:** nenhuma. **BLOCO 5 FECHADO** (T034, T035, T036a DONE; T036b riscada por premissa falsa). Pendente do Breno: publicar o v8 com T034+T035
+- **Tarefa atual:** nenhuma. **BLOCO 5 FECHADO e PUBLICADO** (T034, T035, T036a DONE; T036b riscada). v8 no ar com tudo, verificado ao vivo
 - **Última concluída:** T036 (0373f03) — o gate volta a rodar em clone limpo
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum no fluxo de tarefas. T010 e T030 ADIADOS por decisao do Breno (seguem bloqueando o LANCAMENTO, nao o loop). Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
@@ -242,3 +242,9 @@
 - 2026-09-11 CONSERTO: credencial PREGUICOSA no harness (`apiKey()`/`testSecret()`, cobradas em jget e postWebhook — serve aos ~20 scripts que o importam) + dotenv e pg em dependencies. Quem vai a rede continua morrendo com a MESMA mensagem: conferido em jget, msg() e gate_vivo_v8.
 - 2026-09-11 PROVA QUE VALE: o verifier clonou o repositorio FORA da arvore (so ali a ausencia de .env e real, porque fromDotEnv olha dois niveis acima), rodou com `env -u N8N_API_KEY -u IACHAT_TEST_SECRET` e obteve exit 0 com 74 asserts. Regra nova no CLAUDE.md: prove em clone limpo antes de acrescentar comando ao gate.
 - 2026-09-11 BLOCO 5 FECHADO: T034 (topico uma vez), T035 (HTML da correcao), T036a (gate em clone limpo). 3 tarefas, 4 vereditos (1 FAIL honesto), gate de 18 -> 24 comandos no dia.
+- 2026-09-11 V8 REPUBLICADO com T034+T035 (o Breno rodou o publica_v8.js): 107 nos, v8 active=true, v7.4 active=true.
+- 2026-09-11 POSTGRES CAIU E VOLTOU no meio: a 5433 fechou (Docker Desktop sem responder, sintoma do §7) e voltou depois. A limpeza de usuarios de teste ficou pendente uma rodada e foi feita depois: students -5, 2 contas reais preservadas.
+- 2026-09-11 VERIFICACAO AO VIVO DAS TRES ROTAS no fluxo publicado: gate_vivo_v8 (onboarding) exit 0, vivo_duvida_markdown exit 0, vivo_topico_uma_vez exit 0 (novo). O aluno recebe "📚 Topico 1/10: Cumprimentos" + "📚 Modo Professor — nivel A1. Vamos comecar a trilha!" — anuncio UMA vez, corpo do banco inteiro (2365 chars).
+- 2026-09-11 ARMADILHA Nº 13 COMIGO, e registro porque e o mesmo erro que ja custou quatro vezes neste projeto: a primeira versao do vivo_topico_uma_vez somava o CORPO da explicacao ao par julgado e acusou o titulo 2x. Nao era o produto — a explicacao A1/1 comeca com "Cumprimentos e despedidas sao as palavras que usamos", conteudo didatico legitimo. Conferi no banco ANTES de declarar defeito; o teste passou a julgar cabecalho + feedback (o que o T034 mexeu) e o corpo virou assert proprio.
+- 2026-09-11 LICAO REFORCADA: quem escreve verificacao ao vivo tem de decidir CONSCIENTEMENTE o que entra no escopo do julgamento. Somar "tudo o que o aluno recebe" parece mais seguro e e justamente o que produz falso vermelho — o corpo revisado fala do assunto por desenho.
+- 2026-09-11 T035 NAO TEM verificacao ao vivo propria: um gabarito com `<` ou `&` so aparece se o LLM gerar um, e nao da para forcar sem semear estado artificial. Coberto offline (testa_html_correcao, 17 falhas na versao anterior) e declarado aqui como limite conhecido.
