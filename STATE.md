@@ -1,9 +1,9 @@
 # Estado do loop
 
-- **Tarefa atual:** T029 (markdown vaza na Duvida e na Correcao). Bloco 4 aberto em 11/09: T029, T031, T032 offline; T030 BLOCKED
+- **Tarefa atual:** T029 (markdown vaza na Duvida e na Correcao). Bloco 4: T029, T031, T032 offline; T030 ADIADO por decisao do Breno
 - **Última concluída:** T026 — bateria repetida no v8.1, com as ressalvas de ambiente declaradas
 - **Tentativas na atual:** 0/3
-- **Bloqueios:** T010 (credencial da camada 2) e T030 (metodo para fechar /reset) aguardam decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
+- **Bloqueios:** T010 (credencial da camada 2) aguarda decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
 
@@ -191,3 +191,5 @@
 - 2026-09-11 AGENTES REVISADOS com o §5 do handoff: implementer ganhou "leia o runData, nao o agregado", "mudanca de comportamento nao e defeito — pergunte se e desejavel antes de consertar", detector testado nas duas direcoes, proibicao de escrever em PLAN.md/STATE.md e de republicar (reporta PRECISA PUBLICAR). Verifier ganhou cegueira do digest, onError continueRegularOutput no json.error, conferencia de alvo (URL cravada ja mandou teste para PRODUCAO), detector de mao unica = FAIL, e FAIL se o implementer mexer no PLAN/STATE ou apagar evidencia. next.md ganhou a secao do modo /loop.
 - 2026-09-11 BLOCO 4 ESCRITO (T029-T032), 100% offline por decisao, porque a autonomia passa a ser auto-ritmada. T028 saiu do fluxo de tarefas: so fecha ao vivo.
 - 2026-09-11 DECISAO PENDENTE (T030): fechar /reset por faixa de ID de teste (990000000-999999999) ou desligar DEV_COMMANDS. A opcao (b) tira o /resetfull do teststand, que e como as baterias semeiam estado — quem escolher (b) precisa dizer qual e o outro caminho.
+- 2026-09-11 DECISAO DO BRENO: o `/resetfull` FICA como esta. T030 sai do fluxo de tarefas (ADIADO), mas segue na lista de itens que bloqueiam o lancamento — `DEV_COMMANDS = true` deixa `/reset` e `/resetfull` abertos a qualquer usuario.
+- 2026-09-11 Loop auto-ritmado iniciado (/loop /next) sobre o bloco 4: T029 -> T031 -> T032.

@@ -480,7 +480,9 @@ no fim desta seção, sem ID — o loop não executa, o Breno roda entre blocos.
 - **Gate:** a definir com o método; nas duas hipóteses é offline, extraindo o `Roteador Mestre` e
   exigindo que ID real caia em comando desconhecido.
 - **Depende de:** decisão do Breno
-- **Status:** BLOCKED — aguarda a escolha entre (a) e (b)
+- **Status:** ADIADO por decisão do Breno (11/09) — o `/resetfull` fica como está. Continua na
+  lista de itens que bloqueiam o lançamento (§2 do handoff), não no fluxo de tarefas. Reabrir
+  quando o lançamento entrar em pauta
 
 ### T031 — transcrição que não sobrescreve evidência
 - **Origem:** achado de 10/09. `fluxos/_teststand/alvo.js` deriva o nome do ingress
