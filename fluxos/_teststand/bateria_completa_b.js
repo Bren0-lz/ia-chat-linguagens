@@ -57,7 +57,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.e
 const fs = require('fs');
 const { Client } = require('pg');
 const { msg, cb, digest, WEBHOOK, TEST_PATH } = require('./harness');
-const { rotuloDe, transcricaoDe } = require('./alvo');
+const { rotuloDe, transcricaoDe, caminhoLivre } = require('./alvo');
 const { contratoIdioma, vereditoT3 } = require('./idioma_professor');
 
 // Contrato de idioma da TRILHA, derivado do fluxo (T013). Se o LANG mudar de forma, isto
@@ -65,7 +65,9 @@ const { contratoIdioma, vereditoT3 } = require('./idioma_professor');
 const CONTRATO_TRILHA = contratoIdioma();
 
 const ALVO = rotuloDe(TEST_PATH);
-const TR = transcricaoDe('tr_bateria_b', TEST_PATH);
+// T031: nunca sobrescrever. Se o nome da versao ja estiver ocupado, a rodada nova ganha
+// data (e desempate); o disco e o relogio entram INJETADOS no caminhoLivre.
+const TR = caminhoLivre(transcricaoDe('tr_bateria_b', TEST_PATH), fs.existsSync, Date.now());
 const UID_BASE = 990000000 + (Date.now() % 9000000); // mesma faixa da limpeza (ver Fase A)
 let uidSeq = UID_BASE;
 const novoUid = () => ++uidSeq;

@@ -23,7 +23,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.e
 const fs = require('fs');
 const { Client } = require('pg');
 const { msg, cb, digest, WEBHOOK, TEST_PATH } = require('./harness');
-const { rotuloDe, transcricaoDe } = require('./alvo');
+const { rotuloDe, transcricaoDe, caminhoLivre } = require('./alvo');
 const { matchQuestion } = require('./seed');
 
 // ALVO (T014). Ate 06/09 tres requisicoes desta bateria -- A6, R3 e S1 -- montavam a URL
@@ -32,7 +32,9 @@ const { matchQuestion } = require('./seed');
 // requisicao sem header para producao, e o relatorio dizia v8. Armadilha no 13 do handoff.
 // Agora TODO request sai pelo WEBHOOK do harness, que respeita IACHAT_TEST_PATH.
 const ALVO = rotuloDe(TEST_PATH);
-const TR = transcricaoDe('tr_bateria_a', TEST_PATH);
+// T031: nunca sobrescrever. Se o nome da versao ja estiver ocupado, a rodada nova ganha
+// data (e desempate); o disco e o relogio entram INJETADOS no caminhoLivre.
+const TR = caminhoLivre(transcricaoDe('tr_bateria_a', TEST_PATH), fs.existsSync, Date.now());
 const TEST_SECRET = (() => {
   try {
     const t = fs.readFileSync(require('path').join(__dirname, '..', '..', '.env'), 'utf8');
