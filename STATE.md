@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** E003 (textos e botoes do evento). E001 e E002 DONE. Bloco do evento: E003-E006 pela frente
-- **Última concluída:** E002 (1f42256) — o atalho de nivel do evento leva direto a personalidade
+- **Tarefa atual:** E004 (rotas orfas + /nivel). E001, E002 e E003 DONE. Bloco do evento: E004-E006 pela frente
+- **Última concluída:** E003 (8de8c6c) — textos e botoes do evento, aprovados pelo Breno na leitura
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum no fluxo de tarefas. T010 e T030 ADIADOS por decisao do Breno (seguem bloqueando o LANCAMENTO, nao o loop). Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
@@ -265,3 +265,8 @@
 - 2026-09-11 INJECAO TESTADA: callback `pl_start_B1'; DROP TABLE students;--` cai em A1 pela guarda LEVELS; nada do cru vaza para o SQL.
 - 2026-09-11 TEXTO PROVISORIO NO ATALHO: o participante ve `🎯 Seu nivel: <X>` porque o `Dividir Gabarito` exige gabarito nao vazio (senao manda "📋 Gabarito indisponivel."). Cai na E003, junto com o "📊 Esse e o seu resultado!" do Enviar Pergunta Persona.
 - 2026-09-11 DOIS PADROES DE NIVEL HERDADOS DO V8, ambos validos e agora fixados em teste: sufixo invalido em pl_start_* -> A1; callback sem o prefixo -> A2.
+- 2026-09-11 E003 DONE (8de8c6c), verificada. O BRENO LEU E APROVOU os textos — nao e so assert. Convite de nivel sem promessa de prova, persona sem "resultado", confirmacao "🎯 Nivel anotado: <L>", teclado 3x2 com os seis niveis e rotulos que situam quem nao conhece o CEFR.
+- 2026-09-11 ACHADO QUE EVITOU DEFEITO NO EVENTO: o texto de escolha de nivel existe em DOIS ramos do `Etapa de Cadastro` (pos-idade e retomada em placement_intro). Mexer so num deixaria a promessa do teste viva para quem voltasse a tela — e a retomada e caminho real.
+- 2026-09-11 `testa_arquivo_evento.js` ganhou `PARAMETRO_PODE_DIFERIR` para declarar divergencia FORA de jsCode (texto de no Telegram, teclado). Sao 7 divergencias declaradas entre evento e v8, cada uma cobrada por EXISTENCIA. O verifier injetou 6 violacoes (inclusive em nos nao declarados e "voltou ao valor do v8") e todas reprovaram.
+- 2026-09-11 DOIS REPAROS DE REDACAO que passaram por mim E pelo Breno, achados pelo verifier lendo como participante: (i) "da pra trocar depois" e cheque sem fundo — o unico caminho e `/nivel`, que no evento ainda MONTA O TESTE, contradizendo o "nao e prova"; (ii) "Falta so o estilo do seu tutor" e FALSO, porque depois da persona vem os interesses, e e redundante com o "Nivel anotado" anterior. Os dois entram na E004.
+- 2026-09-11 LICAO: assert de texto prova ausencia de palavra proibida, nao COERENCIA entre mensagens consecutivas nem promessa cumprida pelo fluxo. Quem revisa texto de produto tem de ler a sequencia inteira como participante — foi assim que os dois reparos apareceram.

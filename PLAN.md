@@ -700,13 +700,20 @@ questões** — não constrói caminho novo.
 - **Gate:** teste offline sobre os três nós — nenhuma promessa de teste, nenhuma menção a
   "resultado", seis callbacks `pl_start_*` distintos. Reprova o arquivo antes da mudança.
 - **Depende de:** E001
-- **Status:** TODO
+- **Status:** DONE (8de8c6c) — textos aprovados pelo Breno na leitura. Os **dois** ramos do convite
+  de nível tratados; confirmação do atalho rodada nos seis níveis sem cair em "Gabarito
+  indisponível"; teclado 3×2 com os seis níveis. Reprova o v8 (61 falhas) e a versão anterior (37)
 
 ### E004 — as rotas que sobraram sem teste
 - **Escopo:** `/nivel` **reabre a escolha de nível**; `/pausa`, `/continuar`, `pl_pause`,
   `pl_resume` e `ans_*` respondem uma linha dizendo que não há teste em andamento. Silêncio é o
   pior resultado possível num evento — a pessoa acha que o bot travou.
 - **Gate:** teste offline que percorre cada gatilho e exige rota registrada e resposta não vazia.
+- **REPAROS DE REDAÇÃO herdados da E003** (achados pelo verifier lendo como participante):
+  (i) *"dá pra trocar depois"* é promessa sem caminho — com o `/nivel` novo, o texto deve citá-lo
+  pelo nome; (ii) *"🎨 Nível registrado! Falta só o estilo do seu tutor"* é **falso**, porque depois
+  da persona ainda vêm os interesses, e é redundante com o "Nível anotado" da mensagem anterior —
+  enxugar uma das duas.
 - **ATENÇÃO herdada da E002:** como o `start` virou atalho, a regressão do motor de placement no
   arquivo do evento (B1/B2/B3/B6) passou a entrar pelo `restart`. Se o `/nivel` do evento deixar de
   montar o teste, essa porta some: a regressão vai **reprovar alto** (não em silêncio), mas a
