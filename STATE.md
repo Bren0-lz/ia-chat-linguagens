@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** E002 (o atalho: escolher o nivel leva direto a personalidade). E001 DONE. Bloco do evento: E002-E006 pela frente
-- **Última concluída:** E001 (8dc260e) — o arquivo do evento nasceu, copia fiel do v8 com 3 diferencas
+- **Tarefa atual:** E003 (textos e botoes do evento). E001 e E002 DONE. Bloco do evento: E003-E006 pela frente
+- **Última concluída:** E002 (1f42256) — o atalho de nivel do evento leva direto a personalidade
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum no fluxo de tarefas. T010 e T030 ADIADOS por decisao do Breno (seguem bloqueando o LANCAMENTO, nao o loop). Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
@@ -258,3 +258,10 @@
 - 2026-09-11 O VERIFIER INVENTOU 11 VIOLACOES E O TESTE PEGOU AS 11, incluindo as que eu nao teria lembrado: texto de no Telegram alterado (invisivel ao digest — armadilha 14), `active:true` no topo, webhookId do gatilho trocado, conexao removida, id de no trocado, e "habilitaram o gatilho no v8" (a copia na direcao errada, que e a que derrubaria o bot no ar).
 - 2026-09-11 RIGIDEZ CONHECIDA E ACEITA: se alguem escrever `"disabled": false` explicito no evento, o teste reprova mesmo com o gatilho funcionalmente ativo. O export do n8n omite o campo, entao nao bloqueia — mas quem editar a mao precisa saber.
 - 2026-09-11 AVISO PARA A E002: o `testa_arquivo_evento.js` exige jsCode IDENTICO ao do v8, entao ele VAI REPROVAR assim que o Placement Engine do evento mudar. E proposital: a E002 tem de ampliar a lista de diferencas declaradas no teste. Assim toda divergencia entre os dois arquivos vira decisao explicita, em vez de deriva silenciosa entre arquivos parecidos.
+- 2026-09-11 E002 DONE (1f42256), verificada. O atalho NAO constroi caminho novo: reproduz o efeito do FIM do teste (level, profile.level, onboarding='pick_persona', placement_state=NULL) e sai pelo mesmo send_kind='gabarito', percorrendo Salvar Placement -> Envio Placement -> Dividir Gabarito -> Enviar Gabarito -> Apos Gabarito -> Enviar Pergunta Persona. Sem no orfao, sem regra nova no switch. Nao insere em placement_attempts.
+- 2026-09-11 EU DESCONFIEI E ESTAVA ERRADA: o implementer fez a `regressao_v7.4.js` entrar pelo `restart` quando o nome do arquivo casa /evento/i, e eu mandei o verifier auditar isso como possivel cobertura de fachada. Nao e: o ramo restart do evento esta INTACTO (buildState, sorteio, loop adaptativo, teto/piso, B6) e `/nivel` o alcanca de verdade. O que saiu de cobertura foi so a derivacao do nivel inicial por pl_start_*, que naquele arquivo deixou de existir — e e o que o teste novo passou a cobrir.
+- 2026-09-11 O PAR DE TESTES E DE MAO DUPLA, e e isso que sustenta: se o start do EVENTO voltar a montar questao, `testa_atalho_nivel_evento` reprova; se o start do V8 virar atalho, a regressao do v8 (que segue entrando por start) reprova.
+- 2026-09-11 `testa_arquivo_evento.js` ampliado sem afrouxar: lista FECHADA `CODIGO_PODE_DIFERIR=['Placement Engine']`, igualdade byte a byte nos outros 30 jsCode, e ele ainda COBRA que a divergencia declarada exista (se o Placement Engine do evento voltar a ser igual ao v8, reprova).
+- 2026-09-11 INJECAO TESTADA: callback `pl_start_B1'; DROP TABLE students;--` cai em A1 pela guarda LEVELS; nada do cru vaza para o SQL.
+- 2026-09-11 TEXTO PROVISORIO NO ATALHO: o participante ve `🎯 Seu nivel: <X>` porque o `Dividir Gabarito` exige gabarito nao vazio (senao manda "📋 Gabarito indisponivel."). Cai na E003, junto com o "📊 Esse e o seu resultado!" do Enviar Pergunta Persona.
+- 2026-09-11 DOIS PADROES DE NIVEL HERDADOS DO V8, ambos validos e agora fixados em teste: sufixo invalido em pl_start_* -> A1; callback sem o prefixo -> A2.

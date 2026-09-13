@@ -687,7 +687,9 @@ questões** — não constrói caminho novo.
   `INSERT INTO placement_attempts`. O **mesmo teste contra o v8 tem de reprovar** — é a prova de
   que o atalho existe.
 - **Depende de:** E001
-- **Status:** TODO
+- **Status:** DONE (1f42256) — reproduz o efeito do fim do teste, mesmo caminho de saída, sem
+  `placement_attempts`. Reprova o v8 por 35 falhas. O ramo `restart` ficou intacto e a regressão
+  do evento entra por ele — **a E004 precisa decidir o que fazer com essa porta**
 
 ### E003 — os textos e os botões que o aluno vê
 - **Escopo:** (a) `Etapa de Cadastro`: a escolha de nível para de prometer "um teste de 10
@@ -705,6 +707,10 @@ questões** — não constrói caminho novo.
   `pl_resume` e `ans_*` respondem uma linha dizendo que não há teste em andamento. Silêncio é o
   pior resultado possível num evento — a pessoa acha que o bot travou.
 - **Gate:** teste offline que percorre cada gatilho e exige rota registrada e resposta não vazia.
+- **ATENÇÃO herdada da E002:** como o `start` virou atalho, a regressão do motor de placement no
+  arquivo do evento (B1/B2/B3/B6) passou a entrar pelo `restart`. Se o `/nivel` do evento deixar de
+  montar o teste, essa porta some: a regressão vai **reprovar alto** (não em silêncio), mas a
+  cobertura do motor no evento precisará de outra porta explícita — decida e declare, não remende.
 - **Depende de:** E002
 - **Status:** TODO
 
