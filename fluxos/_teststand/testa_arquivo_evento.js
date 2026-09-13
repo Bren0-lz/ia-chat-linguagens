@@ -1,4 +1,4 @@
-// E001/E002 — o arquivo do evento e uma copia fiel do v8, com uma lista FECHADA de diferencas.
+// E001/E002/E003 — o arquivo do evento e uma copia fiel do v8, com uma lista FECHADA de diferencas.
 //
 // O `IAChat_Telegram_evento.json` nasce do v8 para a apresentacao com usuarios reais
 // (sem teste de nivelamento). Ele e perigoso por construcao: tem o `Gatilho Telegram`
@@ -7,7 +7,7 @@
 //
 //   1. o evento nao diverge do v8 por acidente — depois de normalizar os campos DECLARADOS
 //      (name do workflow, path do TEST Ingress, disabled do Gatilho Telegram e o jsCode do
-//      `Placement Engine`, que a E002 trocou pelo atalho de nivel) os dois JSON tem de ser
+//      `Placement Engine`/`Etapa de Cadastro` e os textos da E003) os dois JSON tem de ser
 //      IGUAIS byte a byte. Cada divergencia entre evento e v8 e uma decisao explicita
 //      registrada AQUI; qualquer outra e deriva silenciosa e reprova;
 //   2. ninguem copiou na direcao errada — o v8 tem de continuar com o gatilho
@@ -28,7 +28,7 @@ const PATH_EVENTO = 'iachat-test-evento';
 let fails = 0;
 function ok(cond, msg) { if (!cond) { fails++; console.log('  ✗ ' + msg); } else console.log('  ✓ ' + msg); }
 function fim() {
-  console.log('\n' + (fails ? 'REPROVOU: ' + fails + ' falha(s)' : 'PASSOU: arquivo do evento e o v8 com as 4 diferencas declaradas'));
+  console.log('\n' + (fails ? 'REPROVOU: ' + fails + ' falha(s)' : 'PASSOU: arquivo do evento e o v8 com as 7 diferencas declaradas'));
   process.exit(fails ? 1 : 0);
 }
 
@@ -70,7 +70,16 @@ ok(ev.name !== v8.name, 'evento: name do workflow difere do v8');
 //   TEST Ingress.path           — E001
 //   Gatilho Telegram.disabled   — E001
 //   Placement Engine.jsCode     — E002 (o atalho: escolher o nivel leva direto a persona)
-const CODIGO_PODE_DIFERIR = ['Placement Engine'];
+//   Etapa de Cadastro.jsCode    — E003 (o convite de nivel para de prometer teste de 10 questoes)
+//   Enviar Pergunta Persona.text        — E003 (sai o "Esse e o seu resultado!")
+//   Enviar Pergunta Nível.inlineKeyboard — E003 (os seis niveis, em duas colunas)
+const CODIGO_PODE_DIFERIR = ['Placement Engine', 'Etapa de Cadastro'];
+// Divergencias fora do jsCode: <no, parametro>. Mesma regra — declarar aqui e decisao de
+// projeto, divergir sem declarar reprova, e declarar sem divergir tambem reprova.
+const PARAMETRO_PODE_DIFERIR = [
+  ['Enviar Pergunta Persona', 'text'],
+  ['Enviar Pergunta Nível', 'inlineKeyboard'],
+];
 
 // Normaliza so o que PODE mudar e exige igualdade total do resto.
 function normaliza(f) {
@@ -81,12 +90,15 @@ function normaliza(f) {
     if (n.name === 'Gatilho Telegram') delete n.disabled;
     if (CODIGO_PODE_DIFERIR.indexOf(n.name) >= 0 && n.parameters && n.parameters.jsCode)
       n.parameters.jsCode = '<JSCODE>';
+    for (const par of PARAMETRO_PODE_DIFERIR)
+      if (n.name === par[0] && n.parameters && n.parameters[par[1]] !== undefined)
+        n.parameters[par[1]] = '<' + par[1].toUpperCase() + '>';
   }
   return c;
 }
 const nv8 = JSON.stringify(normaliza(v8));
 const nev = JSON.stringify(normaliza(ev));
-ok(nv8 === nev, 'evento == v8 depois de normalizar as 4 divergencias declaradas');
+ok(nv8 === nev, 'evento == v8 depois de normalizar as 7 divergencias declaradas');
 
 if (nv8 !== nev) {
   // diagnostico: onde divergiu
@@ -124,7 +136,19 @@ for (const nome of CODIGO_PODE_DIFERIR) {
   ok(jsEV.has(nome), 'evento tem o no de codigo "' + nome + '"');
   if (orig && jsEV.has(nome))
     ok(jsEV.get(nome) !== orig.parameters.jsCode,
-       'divergencia declarada de "' + nome + '" existe de fato (o atalho da E002 nao sumiu)');
+       'divergencia declarada de "' + nome + '" existe de fato (a mudanca declarada nao sumiu)');
+}
+
+// Mesma regra para os parametros declarados: se o texto da persona ou o teclado de nivel
+// voltarem a ser iguais aos do v8, os textos da E003 sumiram e esta lista esta mentindo.
+for (const par of PARAMETRO_PODE_DIFERIR) {
+  const a = no(v8, par[0]), b = no(ev, par[0]);
+  ok(!!a && !!b, 'os dois arquivos tem o no "' + par[0] + '"');
+  if (!a || !b) continue;
+  const pa = JSON.stringify((a.parameters || {})[par[1]]);
+  const pb = JSON.stringify((b.parameters || {})[par[1]]);
+  ok(pa !== undefined && pb !== undefined, par[0] + '.' + par[1] + ' existe nos dois');
+  ok(pa !== pb, 'divergencia declarada de ' + par[0] + '.' + par[1] + ' existe de fato (os textos da E003 nao sumiram)');
 }
 
 fim();
