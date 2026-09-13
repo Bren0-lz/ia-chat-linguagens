@@ -36,7 +36,17 @@ function pl(sub, extra, ps) {
   const rm = Object.assign({ userId: 111, subroute: sub, placement_state: ps, profile: {}, text: '', callbackData: '' }, extra);
   return run('Placement Engine', { refs: { 'Roteador Mestre': rm }, input: exam, item: exam[0] });
 }
-let r = pl('start', { callbackData: 'pl_start_A2' }, null);
+// No arquivo do EVENTO (E002) o `start` e um ATALHO: grava o nivel escolhido e passa a vez
+// para a persona, sem montar questao. O motor do teste continua inteiro no no e e alcancado
+// por `restart` — usamos essa porta ali para nao perder a cobertura de B1/B2/B3/B6.
+// Quem prova que o atalho existe e `testa_atalho_nivel_evento.js`.
+const ATALHO_EVENTO = /evento/i.test(path.basename(FLOW));
+function plStart(level, ps) {
+  return ATALHO_EVENTO
+    ? pl('restart', { profile: { level: level } }, ps)
+    : pl('start', { callbackData: 'pl_start_' + level }, ps);
+}
+let r = plStart('A2', null);
 let ps = JSON.parse(r.sql.match(/placement_state='(.*?)'::jsonb/s)[1].replace(/''/g, "'"));
 ok(ps.cur != null && ps.used.length === 1, 'B3: começa com 1 questão sorteada (seleção dinâmica)');
 
@@ -54,7 +64,7 @@ while (cur && cur.status === 'in_progress' && turns < 20) {
 ok(turns === 10, 'teste termina em 10 questões (foi ' + turns + ')');
 
 // acerta tudo -> teto C1
-cur = JSON.parse(pl('start', { callbackData: 'pl_start_A2' }, null).sql.match(/placement_state='(.*?)'::jsonb/s)[1].replace(/''/g, "'"));
+cur = JSON.parse(plStart('A2', null).sql.match(/placement_state='(.*?)'::jsonb/s)[1].replace(/''/g, "'"));
 turns = 0; let levels = [];
 while (cur && turns < 20) {
   const qq = exam.find(e => e.id === cur.cur);
@@ -69,7 +79,7 @@ ok(new Set(levels).size > 1, 'B3: nível oscila durante o teste (' + levels.join
 console.log('  níveis das questões usadas:', cur ? '' : '');
 
 // B6: texto que não é resposta
-cur = JSON.parse(pl('start', { callbackData: 'pl_start_A2' }, null).sql.match(/placement_state='(.*?)'::jsonb/s)[1].replace(/''/g, "'"));
+cur = JSON.parse(plStart('A2', null).sql.match(/placement_state='(.*?)'::jsonb/s)[1].replace(/''/g, "'"));
 const qq0 = exam.find(e => e.id === cur.cur);
 const b6 = pl('answer', { text: 'não sei, o que significa isso?' }, cur);
 ok(/Não entendi isso como resposta/.test(b6.text) && !/placement_state=/.test(b6.sql), 'B6: mensagem fora de contexto não conta como resposta e reenvia a questão');

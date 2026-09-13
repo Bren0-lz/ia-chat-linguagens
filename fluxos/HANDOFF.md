@@ -57,7 +57,7 @@ prompt e de comportamento são baratas **agora** e ficam caras depois.
 | **Fluxo de trabalho** | `IAChat_Telegram_v8` — n8n id `PbwEf7L9xEXhJaCg`, **107 nós**, `active=true` **em paralelo**. Só tráfego de teste: ingress `iachat-test-v8` e `Gatilho Telegram` desabilitado |
 | **Arquivo de edição** | `fluxos/IAChat_Telegram_v8.json` — **nunca** o v7.4 |
 | **Publicar** | `node fluxos/_teststand/publica_v8.js` (único caminho autorizado; alvo cravado, aborta se o arquivo puder roubar o bot) |
-| **Loop** | `PLAN.md` + `STATE.md` + `/next`; agentes em `.claude/agents/`. Gate: `npm run gate` (~3 s, offline, **26 comandos**) |
+| **Loop** | `PLAN.md` + `STATE.md` + `/next`; agentes em `.claude/agents/`. Gate: `npm run gate` (~3 s, offline, **27 comandos**) |
 | **Modelos** | `gemini-2.5-flash` (Conversa, Professor, Dúvida), `gemini-2.5-flash-lite` (Extrator, Validar Nome), `whisper-large-v3` na Groq (áudio) |
 | **Banco** | Postgres `127.0.0.1:5433` (Docker `iachat-pg`), 14 migrations |
 
@@ -410,13 +410,13 @@ URL corrente em `http://localhost:4040/api/tunnels`.
 | `mede_correcao_nivel_alto.js` | **T024** — correção de erro fora da lista em B2/C1 |
 | `testa_nome_camada2_vivo.js` | camada 2 da validação de nome; distingue recusa de fail-open |
 | `vivo_duvida_markdown.js` | **T029/T033** — a rota da dúvida no fluxo publicado: prova que `Formatar Dúvida` rodou (se não rodou, o v8 no ar é o velho) e que o texto chega sem markdown |
-| `testa_arquivo_evento.js` | **E001** — prova que `IAChat_Telegram_evento.json` é cópia fiel do v8 com exatamente três diferenças (`name`, ingress `iachat-test-evento`, `Gatilho Telegram` habilitado) e que o v8 **continua** com o gatilho desabilitado |
+| `testa_arquivo_evento.js` | **E001/E002** — lista FECHADA das divergências entre `IAChat_Telegram_evento.json` e o v8 (`name`, ingress `iachat-test-evento`, `Gatilho Telegram` habilitado e o `jsCode` do `Placement Engine`); os outros 30 nós de código têm de ser idênticos byte a byte, e o v8 **continua** com o gatilho desabilitado |
 | `testa_bateria_b_n3.js` | **T015/T036** — instrumento da Fase B: alvo, N por teste, turno perdido e a **familia** de nomes de transcricao (canonico ou datado pelo `caminhoLivre`) |
 | `testa_html_correcao.js` | **T035** — o `Professor Engine` interpolando gabarito/nome/tópico em HTML: moldura `<b>` intacta, conteúdo escapado |
 | `analisa_latencia.js` | L1 por rota (union de intervalos, baldes disjuntos) |
 | `conteudo/md_para_pdf.js` | `.md` → HTML → Chrome headless. Sem pandoc, sem puppeteer, sem instalar nada |
 
-**No `npm run gate`** (offline, ~3 s medidos em 11/09, **26 comandos**): `regressao_v7.4` ·
+**No `npm run gate`** (offline, ~3 s medidos em 11/09, **27 comandos**): `regressao_v7.4` ·
 `testa_cadastro_nome` · `testa_nome_camada1` · `testa_abre_alas_professor` ·
 `testa_explicacao_do_banco` · `testa_decompoe_latencia` · `testa_alvo_bateria_a` ·
 `testa_alvo_jornada` · `testa_transcricao_sem_sobrescrita` · `testa_parcial_retomada` ·
@@ -424,7 +424,7 @@ URL corrente em `http://localhost:4040/api/tunnels`.
 `testa_markdown_saida` · `testa_topico_uma_vez` · `valida_track` · `valida_explicacoes` · `testa_valida_explicacoes` ·
 `simula_vazamento` · `testa_idioma_professor` · `testa_saida_fase_a` · `testa_detector_controle` ·
 `testa_html_correcao` · `testa_bateria_b_n3` · `testa_arquivo_evento` ·
-`regressao_v7.4` **no arquivo do evento** ·
+`regressao_v7.4` **no arquivo do evento** · `testa_atalho_nivel_evento` ·
 e o `git diff --quiet` do congelado.
 
 ---
