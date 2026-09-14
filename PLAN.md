@@ -820,3 +820,17 @@ questões** — não constrói caminho novo.
 - **Gate:** a Fase A contra o v8 continua com os mesmos vereditos de hoje (nada de N/A lá); contra
   o evento, B1/B3/B5 saem como N/A e o código de saída deixa de ser 1 por causa deles.
 - **Status:** TODO
+
+### E012 — a rubrica do T17 contradiz a decisão de produto
+- **Origem:** rodada da Fase B de 14/09 contra o evento. A rubrica do T17 pergunta *"o **TOM**
+  difere entre as personas e o conteúdo permanece completo?"* — mas em 10/09 o Breno decidiu que
+  **o Professor não tem persona** e que a explicação da trilha é **igual para todos**. A evidência
+  da rodada mostra DEBATER e BUDDY com a explicação idêntica, ou seja, o comportamento **correto**.
+- **O risco concreto:** quem revisar lendo a pergunta como está marca **FALHOU** justamente quando
+  o produto está certo. O teste offline foi invertido na época (`testa_explicacao_sem_persona.js`),
+  a rubrica da Fase B não.
+- **Escopo:** inverter a pergunta do T17 na `bateria_completa_b.js` — passa a ser "a explicação é
+  a MESMA entre as personas (o corpo revisado não foi adulterado)?" —, alinhada ao teste offline.
+- **Gate:** a pergunta nova bate com o que `testa_explicacao_sem_persona.js` exige; a evidência de
+  14/09 (explicações idênticas) passa a ser lida como PASSOU.
+- **Status:** TODO
