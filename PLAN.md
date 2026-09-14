@@ -779,4 +779,29 @@ questões** — não constrói caminho novo.
 - **Gate:** o guard ampliado reprova a versão atual do `teste_concorrencia.js`; varredura cobre
   todo o diretório; o script passa a apontar para o alvo do env.
 - **Depende de:** —
+- **Status:** DONE (2345836) — guard varre os 73 `.js` do `_teststand`; o verifier plantou duas
+  iscas e o guard pegou as duas. Dívidas declaradas: UID fixo e falta de limpeza
+
+### E009 — a Fase A contra o evento, quando o ambiente voltar
+- **Origem:** a Fase A foi disparada em 14/09 contra o fluxo do evento e **travou**: execuções
+  presas em `running`, nada concluído. A causa não é o produto — o **Docker Desktop não sobe**
+  (`WSL update required`), o container do Postgres está fora, e a porta 5433 responde só como
+  resíduo do proxy. O nó `Carregar Aluno` pendura esperando o banco.
+- **O que já está pronto:** workflow do evento publicado e ativo em modo ensaio
+  (`PCtzP8lk2qaqwZVd`, gatilho desabilitado, v7.4 intocado); ingress `iachat-test-evento`
+  respondendo; rótulo `evento` na transcrição; parcial da T032 em disco para `--continuar`.
+- **Escopo:** com o ambiente de pé, retomar a Fase A (`IACHAT_TEST_PATH=iachat-test-evento`) e
+  publicar o placar. Depois, a Fase B em blocos.
+- **Precisa de ambiente** (Docker/Postgres) — e é do Breno subir.
+- **Status:** BLOCKED — ambiente
+
+### E010 — a checagem de ambiente mente: porta aberta não é banco vivo
+- **Origem:** achado de 14/09. Eu conferi o ambiente pela porta (`5433 ABERTA`) e dei como pronto;
+  o banco estava morto e só o proxy do Docker respondia. A bateria travou 15 minutos até o
+  diagnóstico. O handoff §7 descreve o caso do Docker travado, mas a checagem que usamos não
+  distingue "porta aberta" de "banco respondendo".
+- **Escopo:** a checagem de ambiente passa a fazer uma **query real** (`SELECT 1` com timeout
+  curto) e, para o n8n, a conferir que uma execução **conclui**, não só que o `/healthz` responde.
+  Vale também expor execuções presas em `running` há mais de N minutos, que foi o sintoma.
+- **Gate:** o teste reprova quando o banco não responde (simulável com porta errada/timeout).
 - **Status:** TODO

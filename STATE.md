@@ -1,9 +1,9 @@
 # Estado do loop
 
-- **Tarefa atual:** E008 (teste_concorrencia bate em PRODUCAO). E001-E004 e E007 DONE. E005/E006 precisam de ambiente + autorizacao de publicacao. EVENTO EM 22/09/2026
+- **Tarefa atual:** E009 BLOCKED por ambiente (Docker fora). E001-E004, E007, E008 DONE. Evento publicado em modo ensaio (PCtzP8lk2qaqwZVd). EVENTO EM 22/09/2026
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
 - **Tentativas na atual:** 0/3
-- **Bloqueios:** nenhum no fluxo de tarefas. T010 e T030 ADIADOS por decisao do Breno (seguem bloqueando o LANCAMENTO, nao o loop). Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
+- **Bloqueios:** AMBIENTE — Docker Desktop nao sobe ("WSL update required"), Postgres fora, Fase A travada. T010 e T030 ADIADOS por decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
 
@@ -283,3 +283,10 @@
 - 2026-09-13 ACHADO GRAVE, confirmado pelo verifier: `teste_concorrencia.js:25` tem `BASE + '/webhook/iachat-test'` CRAVADO — ignora IACHAT_TEST_PATH e bate no v7.4 EM PRODUCAO, escrevendo no Postgres com uid 993960001. E a armadilha nº 21 viva num script fora do gate.
 - 2026-09-13 E O GUARD NAO ALCANCAVA: `testa_alvo_bateria_a.js` assere "nenhuma URL /webhook/ cravada em **bateria_completa_a.js**" — so esse arquivo. A varredura do verifier confirmou que o teste_concorrencia e o UNICO com path cravado hoje, mas o guard precisa varrer o diretorio, senao o proximo passa igual.
 - 2026-09-13 EU IA SUGERIR RODAR ESSE TESTE. O X5 (mesmo usuario tocando rapido em varios botoes) e justamente o que faz sentido para um evento com gente ansiosa — e rodar como esta teria disparado trafego no bot real. Virou E008, antes de qualquer uso.
+- 2026-09-14 EVENTO PUBLICADO EM MODO ENSAIO a pedido do Breno: `publica_evento.js` novo criou o workflow **PCtzP8lk2qaqwZVd**, ATIVO, com o Gatilho Telegram forcado a disabled SO NA COPIA ENVIADA — o arranjo do v8, que nao disputa o webhookId. v7.4 active=true o tempo todo. O arquivo local segue com o gatilho HABILITADO, que e o que vai ao ar no dia.
+- 2026-09-14 CORRECAO TECNICA QUE MUDOU O PLANO: workflow INATIVO nao registra webhook no n8n. "Publicar inativo e testar" nao existe — a bateria bateria numa porta fechada e o 404 viraria falso defeito. Por isso o modo ensaio e ATIVO+gatilho desabilitado.
+- 2026-09-14 A FASE A TRAVOU e NAO foi executada. Sintoma: POST devolve 200 ("Workflow was started"), execucao e criada e fica presa em `running` — 6 delas, ate 17 min. Nao e do evento: uma execucao do v8 tambem travou.
+- 2026-09-14 CAUSA RAIZ: o **Postgres nao responde**. Conexao direta com o DATABASE_URL da `timeout expired` em 8 s, e `docker ps` devolve "Docker Desktop is unable to start: WSL update required". O container esta fora; a porta 5433 aceita TCP so como residuo do proxy. O `Carregar Aluno` pendura esperando o banco e a execucao nunca fecha.
+- 2026-09-14 LICAO QUE VIROU TAREFA (E010): EU CONFERI O AMBIENTE PELA PORTA e dei como pronto. "porta 5433 ABERTA" nao prova banco vivo — e o handoff §7 descreve o Docker travado, mas a checagem que usamos nao distingue os dois casos. Custou 15 min de bateria travada ate o diagnostico. A checagem passa a exigir query real e execucao que CONCLUI.
+- 2026-09-14 DUAS COISAS SE PROVARAM NA PRATICA, por acidente: o rotulo `evento` da E007 apareceu certo no cabecalho da transcricao, e o parcial da T032 (`.parcial_tr_bateria_a_evento.jsonl`) ficou no disco para `--continuar`. A transcricao de 2 linhas foi commitada como evidencia da rodada INTERROMPIDA — "nao executado" nao vira "passou".
+- 2026-09-14 ALERTA PARA O EVENTO (22/09, 8 dias): a infra do banco esta QUEBRADA hoje. O Breno precisa rodar `wsl --update` e reiniciar o Docker Desktop. Nao tentei subir nada — e regra do CLAUDE.md.
