@@ -819,7 +819,9 @@ questões** — não constrói caminho novo.
   **Não** remover os casos: no v7.4 e no v8 eles continuam valendo integralmente.
 - **Gate:** a Fase A contra o v8 continua com os mesmos vereditos de hoje (nada de N/A lá); contra
   o evento, B1/B3/B5 saem como N/A e o código de saída deixa de ser 1 por causa deles.
-- **Status:** TODO
+- **Status:** DONE (6b84325) — placar do evento vira `14 passaram · 3 não se aplicam`. **ERRO DE
+  RÉGUA** sai 1 se os N/A marcados não baterem com os declarados: o verifier colou `A8` no mapa
+  para calar um vermelho e foi pego. Formato de 04/09 byte a byte quando não há N/A
 
 ### E012 — a rubrica do T17 contradiz a decisão de produto
 - **Origem:** rodada da Fase B de 14/09 contra o evento. A rubrica do T17 pergunta *"o **TOM**
@@ -833,4 +835,6 @@ questões** — não constrói caminho novo.
   a MESMA entre as personas (o corpo revisado não foi adulterado)?" —, alinhada ao teste offline.
 - **Gate:** a pergunta nova bate com o que `testa_explicacao_sem_persona.js` exige; a evidência de
   14/09 (explicações idênticas) passa a ser lida como PASSOU.
-- **Status:** TODO
+- **Status:** DONE (c/ E012) — virou **veredito automático**: idêntico → PASSOU, adulterado →
+  FALHOU, vindo do LLM → REVISAR (nunca PASSOU). As duas réguas conferidas lado a lado contra a
+  saída real e cinco adulterações, sem divergência

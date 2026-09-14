@@ -1,6 +1,6 @@
 # Estado do loop
 
-- **Tarefa atual:** E011 e E012 (as duas sao regua desatualizada). Fase A e Fase B RODADAS contra o evento. Falta: jornada continua e o ensaio do corte (E006). EVENTO EM 22/09/2026
+- **Tarefa atual:** nenhuma offline. E001-E004, E007, E008, E011, E012 DONE. Falta o ENSAIO DO CORTE (E006) e a leitura dos 11 REVISAR — os dois sao do Breno. EVENTO EM 22/09/2026
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum. Ambiente restabelecido em 14/09 (Breno reiniciou Docker e subiu o n8n). T010 e T030 ADIADOS por decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
@@ -307,3 +307,11 @@
 - 2026-09-14 A E004 APARECE NA AJUDA: `/help` lista "/nivel — escolher outro nivel", e a mensagem de comando desconhecido tambem. Nao foi so o roteador: os textos de sistema acompanharam.
 - 2026-09-14 A CONVERSA FAZ O QUE PROMETE no A2: "i like play video games" -> "We say 'I like TO play', not 'I like play'" (reparo EXPLICITO, que e o que falha em B2/C1), e "nao entendi" foi respondido com paciencia, sem repreender.
 - 2026-09-14 RESUMO DO DIA CONTRA O FLUXO DO EVENTO: 17 testes offline verdes + Fase A (14/2/1, as 3 nao-aprovacoes sao o nivelamento removido) + Fase B (16 PASSOU, 1 FALHOU de regua, 11 REVISAR, 0 vazios) + jornada completa. O que falta antes de 22/09: leitura humana dos 11 REVISAR, E011/E012 (reguas desatualizadas) e o ENSAIO DO CORTE (E006), que e do Breno.
+- 2026-09-14 E011 DONE (6b84325), verificada. No alvo evento, B1/B3/B5 saem como N/A DECLARADO com motivo, e o placar vira "14 passaram · 3 nao se aplicam". O alvo vem de `rotuloDe(TEST_PATH)`, nao de nome de arquivo. Os casos NAO foram removidos — voltam inteiros quando o evento acabar.
+- 2026-09-14 O VERIFIER TENTOU BURLAR A E011 e foi pego: colou `A8` no mapa de N/A para calar um vermelho legitimo, e o ERRO DE REGUA acusou ("o mapa declara exatamente B1, B3 e B5"). Tambem conferiu que com N/A=0 o console e o Resumo sao byte a byte os de 04/09, em 5 cenarios x 3 alvos.
+- 2026-09-14 E012 DONE, verificada. O T17 virou VEREDITO AUTOMATICO em vez de rubrica: corpo identico -> PASSOU; adulterado por persona -> FALHOU com a primeira divergencia; vindo do LLM -> REVISAR, NUNCA PASSOU; uma persona so ou corpo vazio -> INCONCLUSIVO. O feedback do engine e removido antes de comparar (varia por nivel/nome/streak, nao por persona).
+- 2026-09-14 O DEFEITO QUE A E012 CONSERTOU ERA DUAS REGUAS PEDINDO COISAS OPOSTAS: a rubrica da Fase B perguntava se o TOM DIFERE, o teste offline exigia que fosse IGUAL. O verifier rodou as duas lado a lado contra a saida real do no e contra cinco adulteracoes (prefixo, sufixo, maiuscula, vazamento no meio) — nenhuma divergencia restante.
+- 2026-09-14 A FIXTURE DA E012 VEIO DA EVIDENCIA REAL (tr_bateria_b_evento_2026-09-14-3.md, linhas 58-103), nao de texto inventado. Teste alimentado com texto do proprio autor tende a se auto-aprovar.
+- 2026-09-14 LIMITACAO REGISTRADA pelo verifier: texto adulterado formatado EXATAMENTE como rotulo do digest (`
+[buddy] ...` em inicio de linha) seria engolido pelo parser de blocos. Nao e alcancavel com conteudo real (o corpo do banco e HTML) e nenhum no de producao emite essa sintaxe.
+- 2026-09-14 NOTA DE AMBIENTE, ja mordeu dois agentes hoje: o heredoc do Bash nesta maquina COME um nivel de barra invertida. Patch com escapes de JS sai corrompido por esse caminho — use Write, nao heredoc.
