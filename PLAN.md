@@ -719,7 +719,10 @@ questões** — não constrói caminho novo.
   montar o teste, essa porta some: a regressão vai **reprovar alto** (não em silêncio), mas a
   cobertura do motor no evento precisará de outra porta explícita — decida e declare, não remende.
 - **Depende de:** E002
-- **Status:** TODO
+- **Status:** DONE (e715ef6) — `/nivel` reabre a escolha em todos os sete estados sem montar
+  questão; perfil preservado (conferido no SQL); os seis gatilhos órfãos respondem. Achou de
+  quebra que `ans_*` caía na conversa. Motor adaptativo segue coberto por chamada direta,
+  decisão declarada em comentário — 73 checks nos dois arquivos
 
 ### E005 — a prova ponta a ponta, sem Telegram
 - **Escopo:** `fluxos/_teststand/vivo_evento.js` — percorre a jornada inteira do participante pelo

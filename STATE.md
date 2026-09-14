@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** E004 (rotas orfas + /nivel). E001, E002 e E003 DONE. Bloco do evento: E004-E006 pela frente
-- **Última concluída:** E003 (8de8c6c) — textos e botoes do evento, aprovados pelo Breno na leitura
+- **Tarefa atual:** nenhuma offline. E001-E004 DONE. **E005 e E006 PRECISAM DE AMBIENTE** e de janela do Breno — o loop para aqui
+- **Última concluída:** E004 (e715ef6) — nenhum gatilho do evento fica mudo, /nivel reabre a escolha
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum no fluxo de tarefas. T010 e T030 ADIADOS por decisao do Breno (seguem bloqueando o LANCAMENTO, nao o loop). Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
@@ -270,3 +270,9 @@
 - 2026-09-11 `testa_arquivo_evento.js` ganhou `PARAMETRO_PODE_DIFERIR` para declarar divergencia FORA de jsCode (texto de no Telegram, teclado). Sao 7 divergencias declaradas entre evento e v8, cada uma cobrada por EXISTENCIA. O verifier injetou 6 violacoes (inclusive em nos nao declarados e "voltou ao valor do v8") e todas reprovaram.
 - 2026-09-11 DOIS REPAROS DE REDACAO que passaram por mim E pelo Breno, achados pelo verifier lendo como participante: (i) "da pra trocar depois" e cheque sem fundo — o unico caminho e `/nivel`, que no evento ainda MONTA O TESTE, contradizendo o "nao e prova"; (ii) "Falta so o estilo do seu tutor" e FALSO, porque depois da persona vem os interesses, e e redundante com o "Nivel anotado" anterior. Os dois entram na E004.
 - 2026-09-11 LICAO: assert de texto prova ausencia de palavra proibida, nao COERENCIA entre mensagens consecutivas nem promessa cumprida pelo fluxo. Quem revisa texto de produto tem de ler a sequencia inteira como participante — foi assim que os dois reparos apareceram.
+- 2026-09-11 E004 DONE (e715ef6), verificada. `/nivel` -> `onboarding:relevel`, reusando o MESMO no de convite da E003 (fonte unica de texto). Nao monta questao em NENHUM dos sete estados de onboarding, e quem esta `done` troca de nivel continuando `done` — o SQL grava so level e profile.level, sem tocar persona, interesses, modo ou teacher_state.
+- 2026-09-11 DEFEITO QUE A TAREFA ACHOU E EU NAO TINHA LISTADO: `ans_*` caia na CONVERSA no arquivo anterior — o gatilho de resposta do teste ia para o LLM como se fosse fala do aluno. Num evento, alguem tocando num botao antigo mandaria "ans_A" para o modelo.
+- 2026-09-11 DIVIDA DA E002 RESOLVIDA E DECLARADA: o ramo `restart` (motor adaptativo inteiro) FICA no Placement Engine do evento, mas nenhum gatilho do produto chega nele. A cobertura B1/B2/B3/B6 e oficialmente a chamada DIRETA com subroute='restart', declarada em comentario no regressao_v7.4.js. Nenhum caso removido — 73 checks nos dois arquivos, lado a lado.
+- 2026-09-11 LIMITES DECLARADOS PELO VERIFIER (nao reprovam, ficam registrados): (a) `/nivel` durante awaiting_name/awaiting_age pula o cadastro e grava placement_intro com nome/idade nulos — a conversa tem fallback 'student', e o estado nao esta coberto por teste; (b) trocar de nivel NAO mexe em teacher_state, entao quem tivesse trilha em curso continuaria na trilha do nivel antigo; (c) `resultText` do Placement Engine ficou sem consumidor no evento, inofensivo.
+- 2026-09-11 BLOCO DO EVENTO: 4 de 6 fechadas, todas offline e verificadas. E005 (jornada ponta a ponta pelo ingress) e E006 (runbook do corte, ENSAIADO com o bot real) precisam de ambiente e de janela do Breno. O loop para aqui por regra, nao por falta de trabalho.
+- 2026-09-11 PERGUNTAS ABERTAS PARA O BRENO: data do evento e quantas pessoas usarao o bot AO MESMO TEMPO. A segunda importa: o teste L2 do catalogo registra que o n8n ja caiu em rajada de execucoes simultaneas, e isso nunca foi reavaliado.
