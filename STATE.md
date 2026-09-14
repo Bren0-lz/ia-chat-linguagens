@@ -1,6 +1,6 @@
 # Estado do loop
 
-- **Tarefa atual:** nenhuma offline. E001-E004 DONE. **E005 e E006 PRECISAM DE AMBIENTE** e de janela do Breno — o loop para aqui
+- **Tarefa atual:** nenhuma offline. E001-E004 DONE. **E005 e E006 PRECISAM DE AMBIENTE.** EVENTO EM 22/09/2026 — 9 dias
 - **Última concluída:** E004 (e715ef6) — nenhum gatilho do evento fica mudo, /nivel reabre a escolha
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum no fluxo de tarefas. T010 e T030 ADIADOS por decisao do Breno (seguem bloqueando o LANCAMENTO, nao o loop). Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
@@ -276,3 +276,5 @@
 - 2026-09-11 LIMITES DECLARADOS PELO VERIFIER (nao reprovam, ficam registrados): (a) `/nivel` durante awaiting_name/awaiting_age pula o cadastro e grava placement_intro com nome/idade nulos — a conversa tem fallback 'student', e o estado nao esta coberto por teste; (b) trocar de nivel NAO mexe em teacher_state, entao quem tivesse trilha em curso continuaria na trilha do nivel antigo; (c) `resultText` do Placement Engine ficou sem consumidor no evento, inofensivo.
 - 2026-09-11 BLOCO DO EVENTO: 4 de 6 fechadas, todas offline e verificadas. E005 (jornada ponta a ponta pelo ingress) e E006 (runbook do corte, ENSAIADO com o bot real) precisam de ambiente e de janela do Breno. O loop para aqui por regra, nao por falta de trabalho.
 - 2026-09-11 PERGUNTAS ABERTAS PARA O BRENO: data do evento e quantas pessoas usarao o bot AO MESMO TEMPO. A segunda importa: o teste L2 do catalogo registra que o n8n ja caiu em rajada de execucoes simultaneas, e isso nunca foi reavaliado.
+- 2026-09-13 DATA DO EVENTO: **22/09/2026** (o Breno disse "uma semana e dois dias" em 13/09). Carga: POUCOS usuarios simultaneos.
+- 2026-09-13 CONSEQUENCIA DA CARGA BAIXA: o risco L2 (n8n caindo em rajada de execucoes) sai do caminho critico — nao vale gastar o tempo que resta montando teste de carga. O que CONTINUA valendo e o X5, que ja tem instrumento (`teste_concorrencia.js`): mesmo usuario tocando rapido em varios botoes, que num evento acontece por ansiedade. O detector e o toggle de interesses, que faz leitura-modificacao-escrita e se sobrescreve.

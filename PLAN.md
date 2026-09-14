@@ -635,6 +635,10 @@ foi **adiado por decisão dele** — sai da lista de bloqueio imediato.
 
 ## Bloco do EVENTO — o IAChat sem teste de nivelamento
 
+> **Data do evento: 22/09/2026** (informada pelo Breno em 13/09 como "uma semana e dois dias").
+> **Carga esperada: poucos usuários simultâneos** — o risco L2 (n8n caindo em rajada) fica baixo,
+> mas o X5 (mesmo usuário tocando rápido em vários botões) continua valendo num evento.
+
 O IAChat vai ser apresentado num evento com **usuários reais**, que usam o bot e depois respondem
 um formulário. O teste adaptativo de 10 questões é longo demais para esse formato: o aluno passa a
 **escolher o próprio nível** e cai direto em personalidade → interesses → modos.
