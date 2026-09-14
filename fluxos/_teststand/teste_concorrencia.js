@@ -17,12 +17,18 @@
 // Usa só rotas determinísticas — nenhuma chamada ao LLM, então não consome cota
 // da Groq e o resultado não depende do modelo.
 //
-//   N8N_API_KEY=... node teste_concorrencia.js
+// ALVO (E008): o ingress vem do harness, que o deriva de IACHAT_TEST_PATH. Ate 14/09 a
+// URL era CRAVADA aqui (`BASE + '/webhook/iachat-test'`): o teste batia no v7.4, o bot NO
+// AR atendendo usuarios reais, e ainda escrevia no Postgres. E a armadilha no 21 do handoff.
+// O harness calcula o WEBHOOK em TEMPO DE CARGA (handoff §10): quem quiser outro alvo tem de
+// setar IACHAT_TEST_PATH no ambiente ANTES deste processo (nao adianta setar depois do require).
+// Sem a env o default continua `iachat-test`, que e o v7.4 — passe o alvo de proposito:
+//
+//   IACHAT_TEST_PATH=iachat-test-v8 N8N_API_KEY=... node teste_concorrencia.js
 require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.env') });
 const { Client } = require('pg');
+const { WEBHOOK } = require('./harness');
 
-const BASE = process.env.N8N_URL || 'http://localhost:5678';
-const WEBHOOK = BASE + '/webhook/iachat-test';
 const CICLOS = Number(process.env.CICLOS || 3);
 const UID = Number(process.env.UID || 993960001);
 // 4 interesses distintos: se serializado, os 4 sobrevivem
@@ -78,9 +84,10 @@ async function interesses() {
   return r.rows[0] ? r.rows[0].i : [];
 }
 
-(async () => {
+async function main() {
   if (!TEST_SECRET) { console.error('IACHAT_TEST_SECRET ausente'); process.exit(1); }
   console.log('X5 — concorrência por usuário | user ' + UID);
+  console.log('alvo: ' + WEBHOOK);
   console.log('detector: ' + ALVOS.length + ' toggles de interesse simultâneos (read-modify-write)');
   console.log('rotas determinísticas — nenhuma chamada ao LLM\n');
 
@@ -124,4 +131,11 @@ async function interesses() {
   console.log('\n' + (perdas === 0
     ? 'PASSOU  X5 — nenhuma escrita perdida sob concorrência'
     : 'FALHOU  X5 — ' + perdas + ' escrita(s) perdida(s) de ' + esperado + ': last-write-wins confirmado'));
-})().catch(e => { console.error('erro', e.message); process.exit(1); });
+}
+
+module.exports = { WEBHOOK };
+
+// So vai a rede quando executado direto. Importado (pelo guard do alvo), nao dispara nada.
+if (require.main === module) {
+  main().catch(e => { console.error('erro', e.message); process.exit(1); });
+}
