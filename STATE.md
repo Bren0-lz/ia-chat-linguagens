@@ -315,3 +315,5 @@
 - 2026-09-14 LIMITACAO REGISTRADA pelo verifier: texto adulterado formatado EXATAMENTE como rotulo do digest (`
 [buddy] ...` em inicio de linha) seria engolido pelo parser de blocos. Nao e alcancavel com conteudo real (o corpo do banco e HTML) e nenhum no de producao emite essa sintaxe.
 - 2026-09-14 NOTA DE AMBIENTE, ja mordeu dois agentes hoje: o heredoc do Bash nesta maquina COME um nivel de barra invertida. Patch com escapes de JS sai corrompido por esse caminho — use Write, nao heredoc.
+- 2026-09-14 DECISAO DEFINITIVA DO BRENO: **"nunca desligue os comandos de DEV, preciso dele"**. `DEV_COMMANDS` fica ligado PERMANENTEMENTE — `/reset` e `/resetfull` abertos a qualquer usuario, inclusive no evento. Nao e divida tecnica.
+- 2026-09-14 REGISTRADO EM TRES LUGARES para nenhum agente futuro "consertar": CLAUDE.md (lista do que nunca fazer), HANDOFF §2 (deixou de ser item de atencao com "DESLIGAR ANTES DO LANCAMENTO" e virou decisao) e PLAN (T030 CANCELADA). O handoff dizia o contrario, entao toda sessao nova ia propor desligar na primeira leitura.

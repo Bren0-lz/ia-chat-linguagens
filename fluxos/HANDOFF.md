@@ -85,7 +85,7 @@ aviso de que ativar uma derruba a outra; multiplicar arquivos recria esse proble
 | | |
 |---|---|
 | 🔴 **Camada 2 da validação de nome não autentica** | `Validar Nome (IA)` recebe `Authorization failed` da Vertex, o `Veredito IA` cai no **fail-open** e **`asdfgh` vira nome de aluno, sem nada no log**. Provado em 4 execuções (`testa_nome_camada2_vivo.js`). Hipótese: a credencial `mKfC2ANkOKHfbKal` não tem `scopes` preenchido — os nós LangChain montam `cloud-platform` sozinhos, o `httpRequest` genérico usa o campo da credencial. **Decisão do Breno:** corrigir os scopes ou criar `googlePalmApi` com API key do AI Studio |
-| ⚠️ **`DEV_COMMANDS = true`** | `/reset` e `/resetfull` funcionam **para qualquer usuário**. **DESLIGAR ANTES DO LANÇAMENTO** |
+| ✅ **`DEV_COMMANDS = true`** | `/reset` e `/resetfull` para qualquer usuário. **DECISÃO DO BRENO (14/09): fica ligado, sempre — ele usa.** Não é dívida, não propor desligar |
 | ⚠️ **60 `.md` sem revisão humana** | o gate confere forma, cobertura e idioma — **não se o texto ensina**. Está medido: um arquivo que nunca enuncia a regra **passa** |
 
 ### Como retomar numa sessão nova

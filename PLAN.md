@@ -406,7 +406,7 @@ a versão anterior.
 ### Fora deste bloco, mas ainda bloqueiam o lançamento
 Não viraram tarefa aqui porque **dependem do Breno**, não de código:
 - **T010** — camada 2 da validação de nome não autentica (lixo digitado vira nome de aluno)
-- **`DEV_COMMANDS = true`** — `/reset` e `/resetfull` abertos a qualquer usuário
+- ~~`DEV_COMMANDS = true`~~ — **decidido em 14/09: fica ligado, não é pendência**
 - **Revisão humana dos 60 `.md`** — o gate confere forma, não se o texto ensina
 - **6 testes ainda sem automação** — `A7 B2 C8 L2 S2 S3` (o R7 sai com o T020)
 
@@ -483,9 +483,9 @@ no fim desta seção, sem ID — o loop não executa, o Breno roda entre blocos.
 - **Gate:** a definir com o método; nas duas hipóteses é offline, extraindo o `Roteador Mestre` e
   exigindo que ID real caia em comando desconhecido.
 - **Depende de:** decisão do Breno
-- **Status:** ADIADO por decisão do Breno (11/09) — o `/resetfull` fica como está. Continua na
-  lista de itens que bloqueiam o lançamento (§2 do handoff), não no fluxo de tarefas. Reabrir
-  quando o lançamento entrar em pauta
+- **Status:** **CANCELADA (14/09)** — decisão do Breno: *"nunca desligue os comandos de DEV,
+  preciso dele"*. `DEV_COMMANDS` fica ligado permanentemente; **não é dívida** e sai da lista de
+  bloqueio do lançamento. Quem reabrir isto está contrariando decisão do dono do produto
 
 ### T031 — transcrição que não sobrescreve evidência
 - **Origem:** achado de 10/09. `fluxos/_teststand/alvo.js` deriva o nome do ingress
@@ -528,7 +528,7 @@ O loop não executa nada daqui; o Breno roda entre blocos.
 - **Aperto de formato em B1+**: a hipótese que sobra para o gerúndio 0/12; mexe em C8 e no
   contrato de naturalidade, mais de uma variável se feito de uma vez
 - **Jornada refeita com a máquina folgada**: "não executado" não vira "passou"
-- **T010, revisão humana dos 60 `.md`, `DEV_COMMANDS`**: dependem do Breno, não de código
+- **T010 e revisão humana dos 60 `.md`**: dependem do Breno, não de código (o `DEV_COMMANDS` foi decidido: fica)
 
 ### Dívida aberta pelo bloco 4 (candidatas, ainda sem ID)
 - **`testa_bateria_b_n3.js` dá falso vermelho desde a T031** e **não está no `npm run gate`**:
@@ -669,7 +669,7 @@ questões** — não constrói caminho novo.
    jornada não rodou. Por isso o ensaio completo antes do evento não é opcional.
 4. **Infra local:** Docker/Postgres, n8n e ngrok. URL do ngrok trocada = 404 em tudo com
    `active: true` (handoff §7).
-5. **`DEV_COMMANDS = true`**: `/reset` aberto a qualquer participante. Mantido por ora, declarado.
+5. **`DEV_COMMANDS = true`**: `/reset` aberto a qualquer participante. **Decisão do Breno em 14/09: fica ligado, sempre.** Registrado como escolha consciente, não como risco pendente.
 
 ### E001 — nascer o `IAChat_Telegram_evento.json`
 - **Escopo:** cópia fiel do `v8.json` (107 nós) por script Node, com duas diferenças:
@@ -751,7 +751,7 @@ questões** — não constrói caminho novo.
 
 ### Fora deste bloco, por decisão
 - **`/avaliar` com o link do formulário** dentro do bot — não foi pedido; vira E007 se quiser
-- **Desligar `DEV_COMMANDS`** — segue ligado, declarado no risco 5
+- ~~Desligar `DEV_COMMANDS`~~ — **decidido: fica ligado, sempre** (14/09)
 - **Migrar o bot para o v8 em definitivo** — o evento é temporário e volta para o v7.4
 
 ### E007 — o ingress do evento ganha rótulo
