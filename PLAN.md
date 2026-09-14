@@ -753,3 +753,30 @@ questões** — não constrói caminho novo.
 - **`/avaliar` com o link do formulário** dentro do bot — não foi pedido; vira E007 se quiser
 - **Desligar `DEV_COMMANDS`** — segue ligado, declarado no risco 5
 - **Migrar o bot para o v8 em definitivo** — o evento é temporário e volta para o v7.4
+
+### E007 — o ingress do evento ganha rótulo
+- **Origem:** o `iachat-test-evento` não estava no `ROTULOS` do `alvo.js`, então toda transcrição
+  da bateria contra o evento nasceria como `tr_bateria_a_iachat-test-evento.md` — path cru no
+  lugar do nome da versão (armadilha nº 23).
+- **Escopo:** mapear o rótulo sem tocar nos nomes históricos (v7.4 sem sufixo, v8 com `_v8`).
+- **Gate:** ampliação do `testa_alvo_bateria_a.js`, reprovando a versão anterior.
+- **Depende de:** E001
+- **Status:** DONE (6f59c6f) — reprova o `alvo.js` anterior por 8 falhas; `existe` e `agora`
+  injetados, sem disco e sem relógio. **Contraste com a T036b**, corretamente bloqueada: lá o
+  ingress não existia; aqui existe e é por onde a bateria entra
+
+### E008 — `teste_concorrencia.js` bate em PRODUÇÃO
+- **Origem:** achado de passagem na E007 e **confirmado pelo verifier**:
+  `fluxos/_teststand/teste_concorrencia.js:25` tem `const WEBHOOK = BASE + '/webhook/iachat-test'`
+  — ignora `IACHAT_TEST_PATH` e manda tráfego para o **v7.4 que atende usuários reais**, além de
+  escrever no Postgres. É a armadilha nº 21 sobrevivendo: o guard existe
+  (`testa_alvo_bateria_a.js`), mas só cobre `bateria_completa_a.js`.
+- **Urgência:** o X5 (mesmo usuário tocando rápido em vários botões) é o teste de concorrência que
+  faz sentido para o evento. Enquanto isso não for consertado, **rodá-lo dispara no bot real**.
+- **Escopo:** o alvo passa a derivar de `IACHAT_TEST_PATH` como todo o resto (reusar o `WEBHOOK`
+  do `harness.js`, que já é agnóstico). E **ampliar o guard** para varrer todos os scripts do
+  `_teststand`, não só a Fase A — se um sobreviveu, o próximo também sobreviverá.
+- **Gate:** o guard ampliado reprova a versão atual do `teste_concorrencia.js`; varredura cobre
+  todo o diretório; o script passa a apontar para o alvo do env.
+- **Depende de:** —
+- **Status:** TODO

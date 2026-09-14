@@ -1,7 +1,7 @@
 # Estado do loop
 
-- **Tarefa atual:** nenhuma offline. E001-E004 DONE. **E005 e E006 PRECISAM DE AMBIENTE.** EVENTO EM 22/09/2026 — 9 dias
-- **Última concluída:** E004 (e715ef6) — nenhum gatilho do evento fica mudo, /nivel reabre a escolha
+- **Tarefa atual:** E008 (teste_concorrencia bate em PRODUCAO). E001-E004 e E007 DONE. E005/E006 precisam de ambiente + autorizacao de publicacao. EVENTO EM 22/09/2026
+- **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum no fluxo de tarefas. T010 e T030 ADIADOS por decisao do Breno (seguem bloqueando o LANCAMENTO, nao o loop). Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
@@ -278,3 +278,8 @@
 - 2026-09-11 PERGUNTAS ABERTAS PARA O BRENO: data do evento e quantas pessoas usarao o bot AO MESMO TEMPO. A segunda importa: o teste L2 do catalogo registra que o n8n ja caiu em rajada de execucoes simultaneas, e isso nunca foi reavaliado.
 - 2026-09-13 DATA DO EVENTO: **22/09/2026** (o Breno disse "uma semana e dois dias" em 13/09). Carga: POUCOS usuarios simultaneos.
 - 2026-09-13 CONSEQUENCIA DA CARGA BAIXA: o risco L2 (n8n caindo em rajada de execucoes) sai do caminho critico — nao vale gastar o tempo que resta montando teste de carga. O que CONTINUA valendo e o X5, que ja tem instrumento (`teste_concorrencia.js`): mesmo usuario tocando rapido em varios botoes, que num evento acontece por ansiedade. O detector e o toggle de interesses, que faz leitura-modificacao-escrita e se sobrescreve.
+- 2026-09-13 BATERIA OFFLINE CONTRA O FLUXO DO EVENTO: 17 testes apontados para `IAChat_Telegram_evento.json`, TODOS exit 0 — inclusive os que nunca tinham sido apontados para ele (cadastro, nome camada 1, abre-alas, explicacao do banco, lang, civilidade, persona, markdown, HTML da correcao, topico uma vez) + valida_track. O gate so rodava contra o evento a regressao e os testes do bloco E.
+- 2026-09-13 E007 DONE (6f59c6f), verificada. `iachat-test-evento` -> `evento` no ROTULOS. Nomes historicos intactos nas tres bases. Teste AMPLIADO no testa_alvo_bateria_a.js (a casa dos asserts de rotulo) em vez de virar comando novo — gate segue em 29.
+- 2026-09-13 ACHADO GRAVE, confirmado pelo verifier: `teste_concorrencia.js:25` tem `BASE + '/webhook/iachat-test'` CRAVADO — ignora IACHAT_TEST_PATH e bate no v7.4 EM PRODUCAO, escrevendo no Postgres com uid 993960001. E a armadilha nº 21 viva num script fora do gate.
+- 2026-09-13 E O GUARD NAO ALCANCAVA: `testa_alvo_bateria_a.js` assere "nenhuma URL /webhook/ cravada em **bateria_completa_a.js**" — so esse arquivo. A varredura do verifier confirmou que o teste_concorrencia e o UNICO com path cravado hoje, mas o guard precisa varrer o diretorio, senao o proximo passa igual.
+- 2026-09-13 EU IA SUGERIR RODAR ESSE TESTE. O X5 (mesmo usuario tocando rapido em varios botoes) e justamente o que faz sentido para um evento com gente ansiosa — e rodar como esta teria disparado trafego no bot real. Virou E008, antes de qualquer uso.
