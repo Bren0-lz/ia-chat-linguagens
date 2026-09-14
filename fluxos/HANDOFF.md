@@ -410,15 +410,16 @@ URL corrente em `http://localhost:4040/api/tunnels`.
 | `mede_correcao_nivel_alto.js` | **T024** — correção de erro fora da lista em B2/C1 |
 | `testa_nome_camada2_vivo.js` | camada 2 da validação de nome; distingue recusa de fail-open |
 | `vivo_duvida_markdown.js` | **T029/T033** — a rota da dúvida no fluxo publicado: prova que `Formatar Dúvida` rodou (se não rodou, o v8 no ar é o velho) e que o texto chega sem markdown |
-| `testa_arquivo_evento.js` | **E001–E004** — lista FECHADA das **10** divergências entre `IAChat_Telegram_evento.json` e o v8 (`name`, ingress `iachat-test-evento`, `Gatilho Telegram` habilitado, o `jsCode` de `Placement Engine`, `Etapa de Cadastro`, `Roteador Mestre`, `Mensagem Sistema` e `Após Gabarito`, o `text` do `Enviar Pergunta Persona` e o `inlineKeyboard` do `Enviar Pergunta Nível`); os outros 26 nós de código têm de ser idênticos byte a byte, cada divergência declarada tem de **existir de fato**, e o v8 **continua** com o gatilho desabilitado |
+| `testa_arquivo_evento.js` | **E001–E004, E013** — lista FECHADA das **15** divergências entre `IAChat_Telegram_evento.json` e o v8 (`name`, ingress `iachat-test-evento`, `Gatilho Telegram` habilitado, o `jsCode` de `Placement Engine`, `Etapa de Cadastro`, `Roteador Mestre`, `Mensagem Sistema` e `Após Gabarito`, o dos cinco `Prompt Conversa A2/B1/B2/C1/C2` (E013), o `text` do `Enviar Pergunta Persona` e o `inlineKeyboard` do `Enviar Pergunta Nível`); os outros 21 nós de código têm de ser idênticos byte a byte, cada divergência declarada tem de **existir de fato**, e o v8 **continua** com o gatilho desabilitado |
 | `testa_rotas_sem_teste_evento.js` | **E004** — os seis gatilhos que sobraram sem teste no arquivo do evento (`/nivel`, `/pausa`, `/continuar`, `pl_pause`, `pl_resume`, `ans_*`): rota registrada, resposta **nao vazia** e nenhum deles montando questao; `/nivel` reabrindo a escolha com o **mesmo** convite e os seis botoes; e a troca de nivel preservando persona, interesses, modo e `onboarding='done'` |
 | `testa_textos_evento.js` | **E003** — o que o participante do evento lê: o convite de nível sem promessa de teste, a abertura da persona sem "resultado" (lida do JSON — armadilha nº 14), os **seis** `pl_start_*` em duas colunas, e a confirmação do atalho rodando `Placement Engine` + `Dividir Gabarito` (sem cair no "Gabarito indisponível") |
+| `testa_idioma_niveis_evento.js` | **E013** — a escada de idioma do evento, medida no `systemMessage` **montado** (o nó é executado, não lido): A1/A2 com a linha 🇧🇷 traduzindo a mensagem inteira e a REGRA DE OURO, B1 com a linha 🇧🇷 **só da pergunta final**, B2/C1/C2 em inglês integral sem apoio padrão, e **nenhum** dos seis proibindo ajudar sob pedido ("mesmo que ele peça", "ou peça", "peça explicação em português", "em nenhuma hipótese") — o detector é provado nas duas direções contra os quatro textos de antes da E013 |
 | `testa_bateria_b_n3.js` | **T015/T036/E012** — instrumento da Fase B: alvo, N por teste, turno perdido, a **familia** de nomes de transcricao (canonico ou datado pelo `caminhoLivre`) e o **veredito do T17** nas duas direcoes — aprova explicacoes iguais, reprova diferentes, e concorda com `testa_explicacao_sem_persona.js` sobre a saida real do no `Explicação do Banco` |
 | `testa_html_correcao.js` | **T035** — o `Professor Engine` interpolando gabarito/nome/tópico em HTML: moldura `<b>` intacta, conteúdo escapado |
 | `analisa_latencia.js` | L1 por rota (union de intervalos, baldes disjuntos) |
 | `conteudo/md_para_pdf.js` | `.md` → HTML → Chrome headless. Sem pandoc, sem puppeteer, sem instalar nada |
 
-**No `npm run gate`** (offline, ~3 s medidos em 11/09, **29 comandos**): `regressao_v7.4` ·
+**No `npm run gate`** (offline, ~3 s medidos em 11/09, **30 comandos**): `regressao_v7.4` ·
 `testa_cadastro_nome` · `testa_nome_camada1` · `testa_abre_alas_professor` ·
 `testa_explicacao_do_banco` · `testa_decompoe_latencia` · `testa_alvo_bateria_a` ·
 `testa_alvo_jornada` · `testa_transcricao_sem_sobrescrita` · `testa_parcial_retomada` ·
@@ -427,7 +428,7 @@ URL corrente em `http://localhost:4040/api/tunnels`.
 `simula_vazamento` · `testa_idioma_professor` · `testa_saida_fase_a` · `testa_detector_controle` ·
 `testa_html_correcao` · `testa_bateria_b_n3` · `testa_arquivo_evento` ·
 `regressao_v7.4` **no arquivo do evento** · `testa_atalho_nivel_evento` · `testa_textos_evento` ·
-`testa_rotas_sem_teste_evento` · e o `git diff --quiet` do congelado.
+`testa_idioma_niveis_evento` · `testa_rotas_sem_teste_evento` · e o `git diff --quiet` do congelado.
 
 ---
 
