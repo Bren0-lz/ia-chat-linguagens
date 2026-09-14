@@ -9,7 +9,12 @@
 // resolve isso e o `caminhoLivre`, abaixo. Este modulo continua PURO de proposito:
 // nada de `fs`, nada de relogio. Quem tem o disco e o relogio injeta ("armadilha no 12:
 // teste que sorteia a propria condicao mede sorte").
-const ROTULOS = { 'iachat-test': 'v7.4', 'iachat-test-v8': 'v8' };
+//
+// So entra aqui ingress que EXISTE de fato num `TEST Ingress` de arquivo de fluxo -- uma
+// tentativa anterior de mapear "v8.1" foi bloqueada porque o ingress nunca existiu (eram
+// copias manuais). `iachat-test-evento` esta no IAChat_Telegram_evento.json e e por onde a
+// bateria do evento entra.
+const ROTULOS = { 'iachat-test': 'v7.4', 'iachat-test-v8': 'v8', 'iachat-test-evento': 'evento' };
 
 function rotuloDe(testPath) {
   return ROTULOS[testPath] || String(testPath);
