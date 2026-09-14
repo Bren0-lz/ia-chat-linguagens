@@ -255,6 +255,88 @@ function soConversa(d) {
 // contrato do `LANG` do fluxo em vez de cravar a politica aqui (ver T013).
 function contaPalavras(t) { return String(t || '').trim().split(/\s+/).filter(Boolean).length; }
 
+// ---------------------------------------------------------------------------
+// T17 — a explicacao da trilha e a MESMA para todas as personas (E012)
+// ---------------------------------------------------------------------------
+// Ate 14/09 a rubrica perguntava "o TOM difere entre as personas?" e o veredito era sempre
+// REVISAR. A pergunta CONTRADIZIA a decisao de produto de 10/09 (handoff §5.2): o modo
+// Professor NAO tem persona, a explicacao vem do banco, e ser igual para todos e o
+// comportamento DESEJADO. Com a rubrica velha, quem lesse a transcricao de 14/09 -- DEBATER
+// e BUDDY com o corpo identico, ou seja, o produto CERTO -- era induzido a marcar FALHOU.
+// O teste offline foi invertido na epoca (`testa_explicacao_sem_persona.js`, que exige
+// texto identico entre as 5 personas); a regua da Fase B ficou para tras. As duas agora
+// pedem a mesma coisa.
+//
+// A comparacao e objetiva, entao o T17 deixou de ser REVISAR e virou veredito AUTOMATICO
+// (§5.4 — determinismo ganha de rubrica sempre que couber). Fica FORA do veredito o que
+// legitimamente varia e so leitura humana julga: o feedback do engine (interface, do tipo
+// "📚 Modo Professor — nivel B2. Vamos comecar a trilha!") e a qualidade pedagogica do
+// corpo, que e o T1.
+//
+// Quando a explicacao NAO vem do banco (o no `Explicação do Banco` nao rodou e quem
+// escreveu o texto foi o LLM), exigir igualdade byte a byte seria falso vermelho: o
+// veredito cai para REVISAR com o motivo na linha. REVISAR nao e aprovacao nem reprovacao.
+const RUBRICA_T17 = 'A explicacao da trilha e a MESMA para todas as personas? '
+  + 'APROVA corpo IDENTICO entre DEBATER e BUDDY — o Professor nao tem persona (decisao de 10/09) '
+  + 'e o corpo revisado vem do banco; REPROVA corpo adulterado aluno a aluno. '
+  + 'O feedback do engine e interface e NAO entra no veredito.';
+
+const NO_BANCO = 'Explicação do Banco';
+
+// O corpo da explicacao dentro do `reply` do digest: apenas os trechos rotulados
+// [PROFESSOR], sem o feedback do engine que o proprio no prefixa ao corpo.
+function corpoProfessor(reply) {
+  const texto = String(reply || '');
+  const re = /^\[([A-Za-z][\w.]*)\][ \t]*/gm;
+  const blocos = [];
+  let m, atual = null;
+  while ((m = re.exec(texto))) {
+    if (atual) atual.corpo = texto.slice(atual.ini, m.index);
+    atual = { rot: m[1], ini: re.lastIndex };
+    blocos.push(atual);
+  }
+  if (atual) atual.corpo = texto.slice(atual.ini);
+  let corpo = blocos.filter((b) => b.rot === 'PROFESSOR').map((b) => b.corpo.trim()).join('\n').trim();
+  for (const fb of blocos.filter((b) => b.rot === 'prof.feedback').map((b) => b.corpo.trim())) {
+    if (fb && corpo.startsWith(fb)) corpo = corpo.slice(fb.length).trim();
+  }
+  return corpo;
+}
+
+function primeiraDivergencia(a, b) {
+  let i = 0;
+  while (i < a.length && i < b.length && a[i] === b[i]) i++;
+  return 'char ' + i + ': ' + JSON.stringify(a.slice(i, i + 60)) + ' vs ' + JSON.stringify(b.slice(i, i + 60));
+}
+
+// saidas: { persona: { reply, ran } }. Devolve { ok, detalhe } no contrato do `reg`:
+// true = PASSOU, false = FALHOU, 'revisar' = leitura humana, null = INCONCLUSIVO.
+function vereditoT17(saidas) {
+  const ids = Object.keys(saidas || {});
+  if (ids.length < 2) {
+    return { ok: null, detalhe: 'INCONCLUSIVO — o T17 COMPARA personas e chegou(aram) ' + ids.length + ' saida(s) (nao e aprovacao)' };
+  }
+  const semBanco = ids.filter((p) => !(((saidas[p] || {}).ran) || []).includes(NO_BANCO));
+  if (semBanco.length) {
+    return { ok: 'revisar', detalhe: RUBRICA_T17
+      + ' [veredito automatico NAO se aplica: a explicacao nao veio do banco em ' + semBanco.join(', ')
+      + ' — texto escrito pelo LLM varia por natureza. Leia o corpo e confira se o conteudo esta completo.]' };
+  }
+  const corpos = {};
+  for (const p of ids) corpos[p] = corpoProfessor((saidas[p] || {}).reply);
+  const vazios = ids.filter((p) => !corpos[p]);
+  if (vazios.length) {
+    return { ok: null, detalhe: 'INCONCLUSIVO — nao consegui isolar o corpo da explicacao em ' + vazios.join(', ') + ' (nao e aprovacao)' };
+  }
+  const distintos = Array.from(new Set(ids.map((p) => corpos[p])));
+  if (distintos.length === 1) {
+    return { ok: true, detalhe: 'as ' + ids.length + ' personas (' + ids.join(', ') + ') receberam o MESMO corpo, '
+      + distintos[0].length + ' chars, servido do banco — o Professor nao tem persona, e e isso que o produto quer' };
+  }
+  return { ok: false, detalhe: 'corpo DIFERENTE entre as personas (' + distintos.length + ' versoes em ' + ids.length
+    + '): o corpo revisado esta sendo adulterado aluno a aluno. ' + primeiraDivergencia(distintos[0], distintos[1]) };
+}
+
 const RUBRICA = {
   C9: 'Acolhe? Ritmo lento? Nao sobrecarrega o iniciante absoluto?',
   C10: 'Ha reciprocidade (divide algo proprio + gancho) ou virou interrogatorio?',
@@ -263,7 +345,7 @@ const RUBRICA = {
   T2: 'A questao cobra APENAS o que a explicacao ensinou?',
   T8: 'Pediu esclarecimento em vez de inventar a duvida?',
   T9: 'Respondeu a duvida fora do topico sem forcar caber no topico atual?',
-  T17: 'O TOM difere entre as personas e o CONTEUDO permanece completo?',
+  T17: RUBRICA_T17,
   R4: 'Nao repreendeu? Redirecionou com leveza?',
 };
 
@@ -628,7 +710,7 @@ async function umaRodada() {
       rotulo + ': gabarito=' + JSON.stringify(q.expectedAnswer) + ' enviado=' + JSON.stringify(transformar(q.expectedAnswer)) + ' aceitou=' + aceitou);
   }
 
-  // T17: mesma explicacao, personas diferentes
+  // T17: a explicacao da trilha e a MESMA para todas as personas (E012 — veredito automatico)
   if (!pular('T17')) {
     const saidas = {};
     let ok = true;
@@ -636,11 +718,13 @@ async function umaRodada() {
       const u = novoUid();
       const d = await entrarProfessor(u, 'P5', { persona: pid });
       if (!llmRespondeu(d, 'T17')) { ok = false; break; }
-      saidas[pid] = String(d.reply || '');
+      saidas[pid] = { reply: String(d.reply || ''), ran: (d && d.ran) || [] };
     }
     if (ok) {
-      reg('T17', 'revisar', RUBRICA.T17,
-        '--- DEBATER ---\n' + (saidas.debater || '').slice(0, 800) + '\n\n--- BUDDY ---\n' + (saidas.buddy || '').slice(0, 800));
+      const v = vereditoT17(saidas);
+      reg('T17', v.ok, v.detalhe,
+        '--- DEBATER ---\n' + ((saidas.debater || {}).reply || '').slice(0, 800)
+        + '\n\n--- BUDDY ---\n' + ((saidas.buddy || {}).reply || '').slice(0, 800));
     }
   }
 
@@ -712,7 +796,7 @@ async function principal() {
   if (!cotaEstourada) DIARIO.concluir();
 }
 
-module.exports = { llmRespondeu, agregar, DETERMINISTICOS, N_POR_TESTE, TR, ALVO, turnos };
+module.exports = { llmRespondeu, agregar, DETERMINISTICOS, N_POR_TESTE, TR, ALVO, turnos, vereditoT17, corpoProfessor, RUBRICA_T17, RUBRICA };
 
 if (require.main === module) {
   principal().catch((e) => { console.error('FATAL', e); process.exit(1); });

@@ -232,5 +232,145 @@ const B = require('./bateria_completa_b');
     'inconclusivo fica fora da media, mas aparece na contagem', JSON.stringify(p));
 }
 
+// ---- 5. T17: a regua pergunta o que o produto decidiu (E012) ------------------------
+// Ate 14/09 o T17 perguntava "o TOM difere entre as personas?" e saia sempre REVISAR. A
+// pergunta contradizia a decisao de 10/09 (handoff §5.2 — o Professor NAO tem persona) e a
+// propria regua offline (`testa_explicacao_sem_persona.js`, que exige texto IDENTICO entre as
+// 5 personas). Na rodada de 14/09 o produto fez a coisa certa (DEBATER e BUDDY com o corpo
+// identico) e a transcricao induzia quem lesse a marcar FALHOU.
+//
+// Duas coisas sao conferidas aqui, nas DUAS direcoes (§5.6): o veredito APROVA corpo igual e
+// REPROVA corpo diferente; e ele concorda com `testa_explicacao_sem_persona.js` rodando sobre
+// a saida do no de producao — as duas reguas nao podem pedir coisas opostas.
+(function t17() {
+  // Sem o veredito exportado — que e o caso da versao ANTERIOR da Fase B, onde o T17 saia
+  // 'revisar' cravado — nao ha o que medir aqui: uma reprovacao limpa vale mais que um
+  // TypeError no meio da suite.
+  if (typeof B.vereditoT17 !== 'function' || typeof B.corpoProfessor !== 'function'
+      || !B.RUBRICA_T17 || !B.RUBRICA) {
+    ok(false, 'a Fase B expoe o veredito automatico do T17 (vereditoT17, corpoProfessor, RUBRICA_T17)',
+      'versao anterior: T17 = REVISAR cravado, com a rubrica invertida (E012)');
+    return;
+  }
+  ok(true, 'a Fase B expoe o veredito automatico do T17 (E012)');
+
+  const NO_BANCO = 'Explicação do Banco';
+  const RAN_BANCO = ['TEST Ingress', 'Carregar Aluno', 'Professor Engine', NO_BANCO];
+  const FB = '📚 Modo Professor — nível B2. Vamos começar a trilha!';
+  // Corpo copiado da evidencia de 14/09 (tr_bateria_b_evento_2026-09-14-3.md).
+  const CORPO = [
+    '<b>O QUE É E QUANDO USAR</b>',
+    'Usamos o <i>Present Perfect Continuous</i> para falar de uma ação que começou no passado.',
+    '',
+    '<b>AS FORMAS</b>',
+    'A estrutura é sempre <i>sujeito + have/has + been + verbo-ING</i>.',
+  ].join('\n');
+  // O `reply` do digest: [prof.feedback] + [PROFESSOR], e o proprio no prefixa o feedback ao corpo.
+  const replyDe = (corpo, fb) => '[prof.feedback] ' + (fb === undefined ? FB : fb)
+    + '\n[PROFESSOR] ' + (fb === undefined ? FB : fb) + '\n\n' + corpo;
+  const saidaDe = (corpo, opts) => ({
+    reply: replyDe(corpo, (opts || {}).fb),
+    ran: (opts || {}).ran || RAN_BANCO,
+  });
+
+  // 5a. a pergunta que fica na transcricao
+  // A pergunta velha so pode sobreviver em COMENTARIO (a memoria do defeito): o que conta e
+  // a rubrica que vai para a transcricao e o codigo que a usa.
+  ok(!/TOM difere/i.test(B.RUBRICA_T17) && !/TOM difere/i.test(linhasCodigo.join('\n')),
+    'a rubrica do T17 nao pergunta mais se o TOM difere entre as personas',
+    String(B.RUBRICA_T17).slice(0, 80));
+  ok(/MESMA/.test(B.RUBRICA_T17) && /APROVA/.test(B.RUBRICA_T17) && /REPROVA/.test(B.RUBRICA_T17),
+    'a rubrica diz o que aprovar e o que reprovar, em vez de so fazer uma pergunta',
+    String(B.RUBRICA_T17).slice(0, 120));
+  ok(B.RUBRICA.T17 === B.RUBRICA_T17, 'o mapa RUBRICA usa a mesma string (uma regua so)');
+
+  // 5b. veredito automatico: aprova igual, reprova diferente
+  const iguais = { debater: saidaDe(CORPO), buddy: saidaDe(CORPO) };
+  const vIguais = B.vereditoT17(iguais);
+  ok(vIguais.ok === true, 'explicacoes IGUAIS (a evidencia de 14/09) -> PASSOU', JSON.stringify(vIguais));
+  ok(/MESMO corpo/.test(vIguais.detalhe), 'a linha do PASSOU diz que o corpo foi o mesmo');
+
+  const adulterado = CORPO.replace('<b>O QUE É E QUANDO USAR</b>',
+    'Fala, parceiro! Bora nessa 😎\n<b>O QUE É E QUANDO USAR</b>');
+  const vDif = B.vereditoT17({ debater: saidaDe(CORPO), buddy: saidaDe(adulterado) });
+  ok(vDif.ok === false, 'corpo adulterado por persona -> FALHOU', JSON.stringify(vDif).slice(0, 140));
+  ok(/adulterado aluno a aluno/.test(vDif.detalhe) && /char \d+/.test(vDif.detalhe),
+    'a linha do FALHOU diz o que houve e onde divergiu');
+
+  // 5c. o que NAO entra no veredito: o feedback do engine e interface e pode variar
+  const vFb = B.vereditoT17({
+    debater: saidaDe(CORPO, { fb: '📚 Modo Professor — nível B2. Vamos começar a trilha!' }),
+    buddy: saidaDe(CORPO, { fb: '📚 Tópico 3/10 — Present perfect continuous' }),
+  });
+  ok(vFb.ok === true, 'feedback do engine diferente, corpo igual -> ainda PASSOU', JSON.stringify(vFb).slice(0, 120));
+
+  // 5d. explicacao que NAO veio do banco: texto do LLM varia por natureza, entao REVISAR
+  const RAN_LLM = ['TEST Ingress', 'Carregar Aluno', 'Professor Engine', 'Agente Professor', 'Parse Professor'];
+  const vLlm = B.vereditoT17({
+    debater: saidaDe(CORPO, { ran: RAN_LLM }),
+    buddy: saidaDe(adulterado, { ran: RAN_LLM }),
+  });
+  ok(vLlm.ok === 'revisar', 'explicacao escrita pelo LLM -> REVISAR, nao FALHOU', JSON.stringify(vLlm.ok));
+  ok(/nao veio do banco/.test(vLlm.detalhe), 'e o motivo do REVISAR fica na linha');
+  const vLlmIgual = B.vereditoT17({ debater: saidaDe(CORPO, { ran: RAN_LLM }), buddy: saidaDe(CORPO, { ran: RAN_LLM }) });
+  ok(vLlmIgual.ok !== true, 'REVISAR nunca vira PASSOU nem quando os textos coincidem', JSON.stringify(vLlmIgual.ok));
+
+  // 5e. ausencia de medida nao e aprovacao (armadilha n.1)
+  ok(B.vereditoT17({ debater: saidaDe(CORPO) }).ok === null, 'uma persona so -> INCONCLUSIVO');
+  ok(B.vereditoT17({}).ok === null, 'nenhuma saida -> INCONCLUSIVO');
+  const vVazio = B.vereditoT17({
+    debater: { reply: '[prof.feedback] ' + FB, ran: RAN_BANCO },
+    buddy: { reply: '[prof.feedback] ' + FB, ran: RAN_BANCO },
+  });
+  ok(vVazio.ok === null, 'sem corpo para comparar -> INCONCLUSIVO, nao PASSOU', JSON.stringify(vVazio.ok));
+
+  // 5f. o corpo isolado e mesmo o corpo: o feedback prefixado sai, o resto fica
+  const corpoIsolado = B.corpoProfessor(replyDe(CORPO));
+  ok(corpoIsolado === CORPO, 'corpoProfessor() devolve o corpo sem o feedback do engine',
+    JSON.stringify(corpoIsolado.slice(0, 50)));
+
+  // 5g. COERENCIA COM `testa_explicacao_sem_persona.js`: as duas reguas sobre a MESMA saida
+  // do no de producao. Se uma aprovar o que a outra reprova, o defeito da E012 voltou.
+  const fluxo = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'IAChat_Telegram_v8.json'), 'utf8'));
+  const noBanco = fluxo.nodes.find((n) => n.name === NO_BANCO);
+  ok(!!noBanco, 'o no "' + NO_BANCO + '" existe no v8 (e quem serve o corpo revisado)');
+  const rodaNo = (persona, corpo) => {
+    const eng = { persona, topicNum: 1, topicTot: 10, name: 'Yuki', topicTitle: 'Present perfect continuous', feedback: FB };
+    const $ = (n) => ({ first: () => ({ json: n === 'Professor Engine' ? eng : {} }) });
+    const $input = { first: () => ({ json: { body: corpo } }) };
+    return new Function('$', '$input', noBanco.parameters.jsCode)($, $input)[0].json.finalText;
+  };
+  const PERSONAS = ['buddy', 'coach', 'comedian', 'debater', 'formal'];
+  // Regua do testa_explicacao_sem_persona.js: um unico texto distinto entre as personas.
+  const reguaOffline = (textos) => new Set(textos).size === 1;
+  const fonteOffline = fs.readFileSync(path.join(__dirname, 'testa_explicacao_sem_persona.js'), 'utf8');
+  ok(/distintos === 1/.test(fonteOffline) && /MESMA explicacao/.test(fonteOffline),
+    'a regua offline continua exigindo UMA unica versao (e o que esta secao espelha)');
+
+  const reais = PERSONAS.map((p) => rodaNo(p, CORPO));
+  const saidasReais = {};
+  PERSONAS.forEach((p, i) => {
+    saidasReais[p] = { reply: '[prof.feedback] ' + FB + '\n[PROFESSOR] ' + reais[i], ran: RAN_BANCO };
+  });
+  ok(reguaOffline(reais) === true && B.vereditoT17(saidasReais).ok === true,
+    'produto de hoje: as duas reguas APROVAM a saida real do no',
+    'offline=' + reguaOffline(reais) + ' T17=' + JSON.stringify(B.vereditoT17(saidasReais).ok));
+
+  const adulteradas = PERSONAS.map((p) => rodaNo(p, 'Oi, ' + p + '! ' + CORPO));
+  const saidasAdulteradas = {};
+  PERSONAS.forEach((p, i) => {
+    saidasAdulteradas[p] = { reply: '[prof.feedback] ' + FB + '\n[PROFESSOR] ' + adulteradas[i], ran: RAN_BANCO };
+  });
+  ok(reguaOffline(adulteradas) === false && B.vereditoT17(saidasAdulteradas).ok === false,
+    'corpo variando por aluno: as duas reguas REPROVAM',
+    'offline=' + reguaOffline(adulteradas) + ' T17=' + JSON.stringify(B.vereditoT17(saidasAdulteradas).ok));
+
+  // 5h. a versao anterior da Fase B reprova isto: ela nao tinha veredito nenhum para o T17
+  // (era `reg('T17', 'revisar', ...)` cravado) e a rubrica pedia o oposto do que o produto quer.
+  ok(!/reg\('T17', 'revisar'/.test(src),
+    'o T17 nao registra mais REVISAR cravado — o veredito sai da comparacao');
+  ok(/vereditoT17\(saidas\)/.test(src), 'o bloco T17 da bateria usa o veredito automatico');
+})();
+
 console.log(fails === 0 ? '\nOK — instrumento da Fase B: alvo, N por teste e turno perdido' : '\n' + fails + ' falha(s)');
 process.exit(fails ? 1 : 0);
