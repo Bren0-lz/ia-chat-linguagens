@@ -1,6 +1,6 @@
 # Estado do loop
 
-- **Tarefa atual:** E013 (escada de idioma por nivel). O EVENTO ESTA NO AR atendendo o Telegram desde 14/09. Bloco de acessibilidade: E013, E014, E015
+- **Tarefa atual:** E014 (rede de seguranca sob pedido). E013 DONE, NAO PUBLICADA. O EVENTO ESTA NO AR — o bot ainda responde com a politica ANTIGA ate publicarmos
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum. Ambiente restabelecido em 14/09 (Breno reiniciou Docker e subiu o n8n). T010 e T030 ADIADOS por decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
@@ -325,3 +325,9 @@
 - 2026-09-14 DECISOES DO BRENO: apoio como linha 🇧🇷 no fim (o formato que o A1 ja usa) · pedido explicito de ajuda SEMPRE atendido, em qualquer nivel · evento primeiro, v8 depois.
 - 2026-09-14 SEGUNDO DEFEITO ACHADO NA MESMA INVESTIGACAO: o no `Enviar Explicacao Modos` — que TODO participante ve antes de escolher o modo — ainda diz "/nivel — refazer o teste de nivel". A E004 corrigiu o /help e o comando desconhecido, mas essa tela ficou. Virou E015.
 - 2026-09-14 PUBLICAR MUDOU DE NATUREZA: o evento agora E o bot. O `publica_evento.js` (modo ensaio, gatilho desligado) TIRARIA O BOT DO AR — nao usar. Atualizar o que esta no ar e o procedimento do corte, com segundos de indisponibilidade e aval do Breno a cada vez. Por isso: as tres tarefas offline, verificacao pelo ingress de teste, e UMA publicacao no fim.
+- 2026-09-14 E013 DONE (097d8fa), verificada — mas **NAO PUBLICADA**: o bot ao vivo ainda tem a politica antiga. A2 e B1 ganharam a linha 🇧🇷 no molde EXATO do A1 (clausula palavra por palavra, REGRA DE OURO byte a byte — o detector bilingue do historico continua casando, conferido pelo verifier).
+- 2026-09-14 ERRO MEU, CONFIRMADO PELO VERIFIER LENDO O ARQUIVO ANTERIOR: eu afirmei ao Breno e escrevi no PLAN que o C1 NAO tinha clausula de idioma. TINHA — e era a mais dura das seis: "NUNCA escreva uma palavra em portugues, mesmo que o aluno ... peca explicacao em portugues ou pareca inseguro". Meu grep procurava a clausula num formato que nao casou. O diagnostico correto e PIOR do que o que eu relatei: nao era ausencia de regra, era proibicao explicita de ajudar quem esta inseguro.
+- 2026-09-14 O IMPLEMENTER CONTRARIOU MINHA INSTRUCAO COM RAZAO: eu disse "C2 fica como esta", mas o C2 trazia "NUNCA escreva em portugues, em nenhuma hipotese" — incompativel com a decisao do Breno de que pedido explicito e sempre atendido. Ele tirou so o bloqueio; nativo culto e teto de 60 ficaram. Minha instrucao e que estava desatualizada em relacao a decisao do dono.
+- 2026-09-14 A PROIBICAO DE AJUDAR SOB PEDIDO existia em QUATRO niveis (B1, B2, C1, C2), nao em dois como eu havia mapeado. O teste novo varre as variacoes de redacao ("mesmo que peca", "em nenhuma hipotese", "ou peca", "peca explicacao").
+- 2026-09-14 RESSALVA DO VERIFIER sobre o teto do A2 (30 -> 40): o A2 passa a ter o MESMO teto de ingles do B1, achatando a progressao A2 < B1. Sugeriu 32-35. Decisao de produto do Breno, registrada, nao alterada.
+- 2026-09-14 CORRIGIDO de passagem: a linha do `gate:evento` no CLAUDE.md dizia "as 7 diferencas declaradas" e ja estava velha quando eram 10. Agora aponta para a lista fechada em vez de cravar numero.

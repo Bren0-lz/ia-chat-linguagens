@@ -854,7 +854,7 @@ A causa é a política escrita nos prompts, não o modelo desobedecendo. A escad
 | A2 | inglês; **no máximo UMA expressão** entre parênteses |
 | B1 | 100% inglês — *"NUNCA traduza … **mesmo que ele peça**"* |
 | B2 | 100% inglês, sem tradução |
-| C1 | **sem cláusula de idioma** |
+| C1 | ~~sem cláusula~~ → **ERRO MEU (14/09):** tinha sim, e era a **mais dura** — proibia português *"mesmo que o aluno peça explicação em português ou pareça inseguro"* |
 | C2 | 100% inglês de nativo culto |
 
 **Decisões do Breno (14/09):** apoio como **linha `🇧🇷` no fim** (o formato que o A1 já usa) ·
@@ -864,14 +864,17 @@ A causa é a política escrita nos prompts, não o modelo desobedecendo. A escad
 - **Escopo:** reescrever a cláusula `IDIOMA` de `Prompt Conversa A2/B1/B2/C1` no arquivo do evento
   (A1 e C2 ficam): **A2** ganha a linha `🇧🇷` traduzindo a mensagem inteira; **B1** ganha a linha
   `🇧🇷` **só da pergunta final** e perde o "nem que ele peça"; **B2** fica em inglês integral com
-  apoio sob pedido; **C1** ganha cláusula explícita igual à do B2 — hoje não tem nenhuma, e isso é
-  buraco, não liberdade.
+  apoio sob pedido; **C1** troca a proibição por cláusula equivalente à do B2 — **correção de
+  14/09: o C1 TINHA cláusula**, e era a mais dura das seis; o buraco era a proibição de ajudar
+  quem "pareça inseguro", não a ausência de regra.
 - **Reuso:** copie o padrão do A1 (a "REGRA DE OURO: a linha 🇧🇷 é SEMPRE a última"); o detector
   bilíngue dos testes C1/C7 já sabe medir esse formato.
 - **Gate:** teste offline sobre os seis prompts (política por nível; nenhum com "mesmo que ele
   peça") + verificação ao vivo por nível. Reprova o arquivo de hoje.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE (097d8fa) — A2 e B1 com linha 🇧🇷 no molde exato do A1 (intocado); B2/C1/C2 em
+  inglês integral; **a proibição de ajudar sob pedido caiu nos quatro níveis que a tinham**,
+  inclusive no C2, que eu havia mandado preservar. Reprova o arquivo anterior por 14 falhas
 
 ### E014 — a rede de segurança que só o A1 tinha
 - **Escopo:** em **todos** os níveis, pedido explícito ("não entendi", "traduz", "o que significa
