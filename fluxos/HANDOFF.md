@@ -401,7 +401,7 @@ URL corrente em `http://localhost:4040/api/tunnels`.
 | `registra_urls.js` | preload que grava toda URL de `fetch`: prova para onde o teste foi |
 | `publica_v8.js` | **único** caminho autorizado de publicação; alvo cravado no v8 |
 | `gate_vivo_v8.js` | gate ao vivo — uma mensagem pelo ingress (**só cobre onboarding**) |
-| `bateria_completa_a.js` | Fase A — 17 determinísticos (sai 1 em reprovação, 2 em inconclusivo) |
+| `bateria_completa_a.js` | Fase A — 17 determinísticos (sai 1 em reprovação, 2 em inconclusivo). **E011:** no alvo `evento` (ingress `iachat-test-evento`), B1/B3/B5 saem **N/A** com o motivo na linha — o fluxo do evento não tem teste de nivelamento (E002); placar esperado `14 passaram · 3 não se aplicam`, qualquer outra coisa é defeito. N/A **não** é aprovação: marcado em v8/v7.4, ou diferente do declarado no evento, sai **1** |
 | `bateria_completa_b.js` | Fase B — 29 dependentes do LLM (`--only=` para blocos) |
 | `jornada_usuario.js` | jornada contínua, sem semear estado — achou os dois P0 |
 | `idioma_professor.js` | contrato de idioma **derivado do `LANG` do fluxo** + `soEnunciado()` |

@@ -19,6 +19,7 @@
 //   1  ao menos um FALHOU            (reprovacao de produto)
 //   2  nenhuma falha, mas ha INCONCLUSIVO / nao executado  (o teste nao rodou; nao e aprovacao)
 //   1  erro fatal (o `.catch` do fim)
+//   1  N/A fora do declarado (E011): N/A e categoria, nao atalho de aprovacao -- ver abaixo
 // O relatorio impresso e o `tr_bateria_a.md` NAO mudaram de formato: quem compara com a rodada
 // de 04/09 continua comparando a mesma coisa.
 require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.env') });
@@ -35,6 +36,25 @@ const { matchQuestion } = require('./seed');
 // requisicao sem header para producao, e o relatorio dizia v8. Armadilha no 13 do handoff.
 // Agora TODO request sai pelo WEBHOOK do harness, que respeita IACHAT_TEST_PATH.
 const ALVO = rotuloDe(TEST_PATH);
+
+// E011 -- NAO SE APLICA (N/A). O fluxo do evento removeu o teste de nivelamento: o
+// participante escolhe o proprio nivel (E002). B1, B3 e B5 medem exatamente as 10 questoes
+// que ali nao existem mais. Marca-los FALHOU cria um placar em que "2 falharam" e normal e
+// a pessoa precisa saber DE COR quais ignorar -- que e como um vermelho de verdade passa
+// despercebido depois (handoff §11). Entao eles saem como N/A, com o motivo na linha.
+//
+// Os casos NAO sao removidos: sao a cobertura do motor adaptativo, que volta quando o
+// evento acabar. "Teste descartado e divida, nao escopo resolvido."
+//
+// O alvo vem do ingress via `rotuloDe` (alvo.js), nunca de nome de arquivo.
+const NAO_SE_APLICA_EVENTO = {
+  B1: 'o fluxo do evento nao tem teste de nivelamento (E002)',
+  B3: 'o fluxo do evento nao tem teste de nivelamento (E002)',
+  B5: 'o fluxo do evento nao tem teste de nivelamento (E002)',
+};
+// Devolve o motivo quando o caso nao se aplica ao alvo corrente; null quando ele TEM de rodar.
+const pulaNoAlvo = (id) => (ALVO === 'evento' && NAO_SE_APLICA_EVENTO[id]) ? NAO_SE_APLICA_EVENTO[id] : null;
+
 // T031: nunca sobrescrever. Se o nome da versao ja estiver ocupado, a rodada nova ganha
 // data (e desempate); o disco e o relogio entram INJETADOS no caminhoLivre.
 // T032: cada resultado e persistido assim que fecha, num diario parcial. Se o processo
@@ -88,9 +108,10 @@ function reg(id, ok, detalhe) {
   DIARIO.registrar(r); // ANTES da consolidacao: se morrer no teste seguinte, este ja esta no disco
   const j = resultados.findIndex(x => x.id === id);
   if (j >= 0) resultados[j] = r; else resultados.push(r);
-  const tag = ok === true ? 'PASSOU  ' : ok === false ? 'FALHOU  ' : 'INCONCL.';
+  const tag = ok === true ? 'PASSOU  ' : ok === false ? 'FALHOU  ' : ok === 'na' ? 'N/A     ' : 'INCONCL.';
   console.log('  ' + tag + id + ' — ' + detalhe);
-  fs.appendFileSync(TR, '- **' + id + '**: ' + (ok === true ? 'PASSOU' : ok === false ? 'FALHOU' : 'INCONCLUSIVO') + ' — ' + detalhe + '\n');
+  const rotulo = ok === true ? 'PASSOU' : ok === false ? 'FALHOU' : ok === 'na' ? 'NÃO SE APLICA' : 'INCONCLUSIVO';
+  fs.appendFileSync(TR, '- **' + id + '**: ' + rotulo + ' — ' + detalhe + '\n');
 }
 async function db(fn) {
   const c = new Client({ connectionString: process.env.DATABASE_URL });
@@ -272,14 +293,16 @@ async function semear(uid, campos) {
   }
 
   // B1: piso
-  {
+  if (pulaNoAlvo('B1')) reg('B1', 'na', pulaNoAlvo('B1'));
+  else {
     const u = novoUid();
     const r = await jornadaPlacement(u, () => false);
     reg('B1', r.final === 'A1', 'errando tudo -> nível ' + r.final + ' (' + r.perguntas + ' questões)');
   }
 
   // B3: oscilação
-  {
+  if (pulaNoAlvo('B3')) reg('B3', 'na', pulaNoAlvo('B3'));
+  else {
     const u = novoUid();
     const r = await jornadaPlacement(u, (i) => i % 4 < 2);   // 2 certas, 2 erradas
     const distintos = [...new Set(r.niveis)];
@@ -287,7 +310,8 @@ async function semear(uid, campos) {
   }
 
   // B5: pausa e retomada
-  {
+  if (pulaNoAlvo('B5')) reg('B5', 'na', pulaNoAlvo('B5'));
+  else {
     const u = novoUid();
     await msg(u, 'oi'); await msg(u, NOME_VALIDO); await msg(u, '20');
     await cb(u, 'pl_start_A1');
@@ -418,10 +442,24 @@ async function semear(uid, campos) {
   const p = resultados.filter(r => r.ok === true).length;
   const f = resultados.filter(r => r.ok === false).length;
   const i = resultados.filter(r => r.ok === null).length;
-  console.log('\n===== FASE A: ' + p + ' passaram, ' + f + ' falharam, ' + i + ' inconclusivos =====');
-  for (const r of resultados.filter(x => x.ok !== true)) console.log('  ATENÇÃO ' + r.id + ': ' + r.detalhe);
-  fs.appendFileSync(TR, '\n**Resumo:** ' + p + ' passaram, ' + f + ' falharam, ' + i + ' inconclusivos\n');
+  // E011: N/A e categoria propria -- nao e aprovacao nem reprovacao, e nao entra em ATENÇÃO.
+  const nas = resultados.filter(r => r.ok === 'na');
+  // A regua confere o que ela mesma dispensou: no alvo evento os N/A tem de ser EXATAMENTE
+  // os declarados; em qualquer outro alvo nao pode existir N/A nenhum. Sem isso, marcar N/A
+  // seria uma forma silenciosa de aprovar teste que devia ter rodado.
+  const naEsperados = (ALVO === 'evento' ? Object.keys(NAO_SE_APLICA_EVENTO) : []).slice().sort().join(',');
+  const naMarcados = nas.map(r => r.id).slice().sort().join(',');
+  const naSufixo = nas.length ? ', ' + nas.length + ' não se aplicam' : '';
+  console.log('\n===== FASE A: ' + p + ' passaram, ' + f + ' falharam, ' + i + ' inconclusivos' + naSufixo + ' =====');
+  for (const r of resultados.filter(x => x.ok !== true && x.ok !== 'na')) console.log('  ATENÇÃO ' + r.id + ': ' + r.detalhe);
+  for (const r of nas) console.log('  N/A ' + r.id + ': ' + r.detalhe);
+  fs.appendFileSync(TR, '\n**Resumo:** ' + p + ' passaram, ' + f + ' falharam, ' + i + ' inconclusivos' + naSufixo + '\n');
+  for (const r of nas) fs.appendFileSync(TR, '- **' + r.id + '** não se aplica ao alvo ' + ALVO + ': ' + r.detalhe + '\n');
   console.log('\ntranscrição: ' + TR);
+  if (naMarcados !== naEsperados) {
+    console.log('ERRO DE RÉGUA: N/A no alvo ' + ALVO + ' — marcados [' + naMarcados + '], esperados [' + naEsperados + ']');
+    process.exit(1);
+  }
   // 1 = reprovou · 2 = so inconclusivo/nao executado · 0 = tudo passou (ver cabecalho)
   process.exit(f > 0 ? 1 : (i > 0 ? 2 : 0));
 })().catch(e => { console.error('ERRO FATAL:', e.message); process.exit(1); });
