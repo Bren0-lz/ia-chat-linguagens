@@ -838,3 +838,69 @@ questões** — não constrói caminho novo.
 - **Status:** DONE (c/ E012) — virou **veredito automático**: idêntico → PASSOU, adulterado →
   FALHOU, vindo do LLM → REVISAR (nunca PASSOU). As duas réguas conferidas lado a lado contra a
   saída real e cinco adulterações, sem divergência
+
+---
+
+## Bloco de ACESSIBILIDADE — o inglês na medida certa por nível
+
+Aberto em 14/09, depois que o Breno testou o bot no ar: escolheu **A2** e a primeira pergunta veio
+**100% em inglês**. Num evento com público, é a diferença entre tentar e desistir.
+
+A causa é a política escrita nos prompts, não o modelo desobedecendo. A escada tem um penhasco:
+
+| nível | hoje |
+|---|---|
+| A1 | inglês + linha `🇧🇷` traduzindo tudo, teto de 18 palavras |
+| A2 | inglês; **no máximo UMA expressão** entre parênteses |
+| B1 | 100% inglês — *"NUNCA traduza … **mesmo que ele peça**"* |
+| B2 | 100% inglês, sem tradução |
+| C1 | **sem cláusula de idioma** |
+| C2 | 100% inglês de nativo culto |
+
+**Decisões do Breno (14/09):** apoio como **linha `🇧🇷` no fim** (o formato que o A1 já usa) ·
+**pedido explícito de ajuda sempre atendido, em qualquer nível** · **evento primeiro**, v8 depois.
+
+### E013 — a escada de idioma vira rampa
+- **Escopo:** reescrever a cláusula `IDIOMA` de `Prompt Conversa A2/B1/B2/C1` no arquivo do evento
+  (A1 e C2 ficam): **A2** ganha a linha `🇧🇷` traduzindo a mensagem inteira; **B1** ganha a linha
+  `🇧🇷` **só da pergunta final** e perde o "nem que ele peça"; **B2** fica em inglês integral com
+  apoio sob pedido; **C1** ganha cláusula explícita igual à do B2 — hoje não tem nenhuma, e isso é
+  buraco, não liberdade.
+- **Reuso:** copie o padrão do A1 (a "REGRA DE OURO: a linha 🇧🇷 é SEMPRE a última"); o detector
+  bilíngue dos testes C1/C7 já sabe medir esse formato.
+- **Gate:** teste offline sobre os seis prompts (política por nível; nenhum com "mesmo que ele
+  peça") + verificação ao vivo por nível. Reprova o arquivo de hoje.
+- **Depende de:** —
+- **Status:** TODO
+
+### E014 — a rede de segurança que só o A1 tinha
+- **Escopo:** em **todos** os níveis, pedido explícito ("não entendi", "traduz", "o que significa
+  X", "pode falar em português") é atendido em português, e o inglês volta no turno seguinte.
+  Generalizar a regra que o A1 já tem, não criar outra.
+- **Precedência (handoff §5.3):** declarar a regra como **prioritária sobre a cláusula de idioma do
+  nível**. Diretiva solta perde para diretiva marcada como obrigatória — foi o que aconteceu com a
+  reciprocidade no T022, e o "NUNCA traduza" do B1/B2 engoliria esta em silêncio.
+- **Gate:** probe "não entendi" em A2, B1, B2 e C1 — apoio em português na resposta, inglês no
+  turno seguinte. Reprova a versão de hoje, onde B1/B2 recusam por desenho.
+- **Depende de:** E013
+- **Status:** TODO
+
+### E015 — a tela de modos ainda promete o teste de nivelamento
+- **Origem:** achado na investigação de 14/09. O nó `Enviar Explicação Modos`, que **todo
+  participante** vê antes de escolher o modo, diz `/nivel — refazer o teste de nível`. A E004
+  corrigiu o `/help` e o comando desconhecido; esta tela ficou para trás.
+- **Escopo:** alinhar o texto ao que o `/nivel` faz hoje, e **varrer os demais textos estáticos**
+  atrás de outras promessas do teste — se um sobreviveu, outros podem ter sobrevivido.
+- **Gate:** o `testa_textos_evento.js` passa a varrer o texto estático de **todos** os nós Telegram,
+  não só os três de hoje. Reprova o arquivo atual.
+- **Depende de:** —
+- **Status:** TODO
+
+### Publicar mudou de natureza — o evento AGORA é o bot
+- `publica_evento.js` **não serve mais**: força o gatilho desligado e tiraria o bot do ar.
+- Atualizar o que está no ar é o procedimento do corte (`corta_para_evento.js`): desativa → salva
+  com o gatilho ligado → ativa. O n8n **recusa salvar** workflow ativo com webhook em conflito
+  (`There is a conflict with one of the webhooks`) — descoberto na primeira tentativa de corte.
+- Logo: segundos de indisponibilidade por publicação, e aval do Breno a cada vez. Fazer as três
+  tarefas offline, verificar pelo ingress de teste (responde mesmo com o gatilho ligado) e
+  **publicar uma vez só**, no fim.

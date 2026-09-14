@@ -1,6 +1,6 @@
 # Estado do loop
 
-- **Tarefa atual:** nenhuma offline. E001-E004, E007, E008, E011, E012 DONE. Falta o ENSAIO DO CORTE (E006) e a leitura dos 11 REVISAR — os dois sao do Breno. EVENTO EM 22/09/2026
+- **Tarefa atual:** E013 (escada de idioma por nivel). O EVENTO ESTA NO AR atendendo o Telegram desde 14/09. Bloco de acessibilidade: E013, E014, E015
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum. Ambiente restabelecido em 14/09 (Breno reiniciou Docker e subiu o n8n). T010 e T030 ADIADOS por decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
@@ -317,3 +317,11 @@
 - 2026-09-14 NOTA DE AMBIENTE, ja mordeu dois agentes hoje: o heredoc do Bash nesta maquina COME um nivel de barra invertida. Patch com escapes de JS sai corrompido por esse caminho — use Write, nao heredoc.
 - 2026-09-14 DECISAO DEFINITIVA DO BRENO: **"nunca desligue os comandos de DEV, preciso dele"**. `DEV_COMMANDS` fica ligado PERMANENTEMENTE — `/reset` e `/resetfull` abertos a qualquer usuario, inclusive no evento. Nao e divida tecnica.
 - 2026-09-14 REGISTRADO EM TRES LUGARES para nenhum agente futuro "consertar": CLAUDE.md (lista do que nunca fazer), HANDOFF §2 (deixou de ser item de atencao com "DESLIGAR ANTES DO LANCAMENTO" e virou decisao) e PLAN (T030 CANCELADA). O handoff dizia o contrario, entao toda sessao nova ia propor desligar na primeira leitura.
+- 2026-09-14 **O CORTE FOI FEITO E O EVENTO ESTA NO AR**: v7.4 active=false, evento (PCtzP8lk2qaqwZVd) active=true com o Gatilho Telegram LIGADO. O Breno confirmou no Telegram: a tela de niveis aparece. Volta: `node fluxos/_teststand/corta_para_evento.js --voltar`.
+- 2026-09-14 A PRIMEIRA TENTATIVA DE CORTE FALHOU e o rollback automatico devolveu o v7.4 ao ar. Causa: o n8n RECUSA SALVAR (PUT) workflow ATIVO com webhook em conflito — "There is a conflict with one of the webhooks", HTTP 400. Ordem correta, agora no script: desativa quem sai -> DESATIVA QUEM ENTRA -> salva com o gatilho ligado -> ativa.
+- 2026-09-14 ARMADILHA NOVA: um PUT que devolve 400 no n8n PODE ter gravado assim mesmo. Depois do PUT de diagnostico (400), o evento apareceu com o gatilho LIGADO no snapshot seguinte. Nao confie no codigo de erro para concluir que nada mudou — releia o estado.
+- 2026-09-14 DEFEITO ACHADO PELO BRENO NO BOT AO VIVO, que nenhum teste pegou: escolheu A2 e a primeira pergunta veio 100% EM INGLES. A causa esta na politica dos prompts: o A1 e bilingue obrigatorio, mas o A2 manda "no maximo UMA expressao entre parenteses, o resto so em ingles". O salto A1->A2 e um penhasco.
+- 2026-09-14 A ESCADA INTEIRA, levantada na investigacao: A1 bilingue total · A2 uma expressao · B1 "NUNCA traduza, MESMO QUE ELE PECA" · B2 ingles integral · **C1 SEM CLAUSULA DE IDIOMA** · C2 ingles de nativo. Tres defeitos: o penhasco, a proibicao de ajudar sob pedido, e o buraco do C1.
+- 2026-09-14 DECISOES DO BRENO: apoio como linha 🇧🇷 no fim (o formato que o A1 ja usa) · pedido explicito de ajuda SEMPRE atendido, em qualquer nivel · evento primeiro, v8 depois.
+- 2026-09-14 SEGUNDO DEFEITO ACHADO NA MESMA INVESTIGACAO: o no `Enviar Explicacao Modos` — que TODO participante ve antes de escolher o modo — ainda diz "/nivel — refazer o teste de nivel". A E004 corrigiu o /help e o comando desconhecido, mas essa tela ficou. Virou E015.
+- 2026-09-14 PUBLICAR MUDOU DE NATUREZA: o evento agora E o bot. O `publica_evento.js` (modo ensaio, gatilho desligado) TIRARIA O BOT DO AR — nao usar. Atualizar o que esta no ar e o procedimento do corte, com segundos de indisponibilidade e aval do Breno a cada vez. Por isso: as tres tarefas offline, verificacao pelo ingress de teste, e UMA publicacao no fim.
