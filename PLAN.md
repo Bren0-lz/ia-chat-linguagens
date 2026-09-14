@@ -793,7 +793,9 @@ questões** — não constrói caminho novo.
 - **Escopo:** com o ambiente de pé, retomar a Fase A (`IACHAT_TEST_PATH=iachat-test-evento`) e
   publicar o placar. Depois, a Fase B em blocos.
 - **Precisa de ambiente** (Docker/Postgres) — e é do Breno subir.
-- **Status:** BLOCKED — ambiente
+- **Status:** DONE (14/09) — **14 passaram · 2 falharam · 1 inconclusivo**. As três não-aprovações
+  são B1, B3 e B5, todas dependentes das 10 questões que o evento removeu; o Breno mandou
+  ignorá-las. Nenhuma outra falhou. Transcrição: `tr_bateria_a_evento_2026-09-14.md`
 
 ### E010 — a checagem de ambiente mente: porta aberta não é banco vivo
 - **Origem:** achado de 14/09. Eu conferi o ambiente pela porta (`5433 ABERTA`) e dei como pronto;
@@ -804,4 +806,17 @@ questões** — não constrói caminho novo.
   curto) e, para o n8n, a conferir que uma execução **conclui**, não só que o `/healthz` responde.
   Vale também expor execuções presas em `running` há mais de N minutos, que foi o sintoma.
 - **Gate:** o teste reprova quando o banco não responde (simulável com porta errada/timeout).
+- **Status:** TODO
+
+### E011 — a régua da Fase A não conhece o fluxo do evento
+- **Origem:** rodada de 14/09. B1, B3 e B5 reprovam **por desenho** no fluxo do evento: medem o
+  teste de 10 questões, que ali não existe. Hoje isso obriga quem lê o placar a saber de cor
+  quais falhas são esperadas — e "falha que a gente ignora" é como um vermelho de verdade passa
+  despercebido depois.
+- **Escopo:** a Fase A declara, para o alvo `evento`, que B1/B3/B5 são **N/A** (não aplicável),
+  com o motivo escrito, em vez de FALHOU/INCONCLUSIVO. O placar do evento passa a ser
+  `14 passaram · 3 não se aplicam`, e qualquer coisa fora disso é defeito de verdade.
+  **Não** remover os casos: no v7.4 e no v8 eles continuam valendo integralmente.
+- **Gate:** a Fase A contra o v8 continua com os mesmos vereditos de hoje (nada de N/A lá); contra
+  o evento, B1/B3/B5 saem como N/A e o código de saída deixa de ser 1 por causa deles.
 - **Status:** TODO

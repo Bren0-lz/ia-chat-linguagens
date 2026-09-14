@@ -1,9 +1,9 @@
 # Estado do loop
 
-- **Tarefa atual:** E009 BLOCKED por ambiente (Docker fora). E001-E004, E007, E008 DONE. Evento publicado em modo ensaio (PCtzP8lk2qaqwZVd). EVENTO EM 22/09/2026
+- **Tarefa atual:** E011 (regua da Fase A nao conhece o evento). E009 DONE: Fase A rodou 14/2/1. Proximo grande passo: Fase B em blocos e o ensaio do corte. EVENTO EM 22/09/2026
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
 - **Tentativas na atual:** 0/3
-- **Bloqueios:** AMBIENTE — Docker Desktop nao sobe ("WSL update required"), Postgres fora, Fase A travada. T010 e T030 ADIADOS por decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
+- **Bloqueios:** nenhum. Ambiente restabelecido em 14/09 (Breno reiniciou Docker e subiu o n8n). T010 e T030 ADIADOS por decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
 
@@ -290,3 +290,9 @@
 - 2026-09-14 LICAO QUE VIROU TAREFA (E010): EU CONFERI O AMBIENTE PELA PORTA e dei como pronto. "porta 5433 ABERTA" nao prova banco vivo — e o handoff §7 descreve o Docker travado, mas a checagem que usamos nao distingue os dois casos. Custou 15 min de bateria travada ate o diagnostico. A checagem passa a exigir query real e execucao que CONCLUI.
 - 2026-09-14 DUAS COISAS SE PROVARAM NA PRATICA, por acidente: o rotulo `evento` da E007 apareceu certo no cabecalho da transcricao, e o parcial da T032 (`.parcial_tr_bateria_a_evento.jsonl`) ficou no disco para `--continuar`. A transcricao de 2 linhas foi commitada como evidencia da rodada INTERROMPIDA — "nao executado" nao vira "passou".
 - 2026-09-14 ALERTA PARA O EVENTO (22/09, 8 dias): a infra do banco esta QUEBRADA hoje. O Breno precisa rodar `wsl --update` e reiniciar o Docker Desktop. Nao tentei subir nada — e regra do CLAUDE.md.
+- 2026-09-14 AMBIENTE DE VOLTA: o Breno reiniciou o Docker e subiu o n8n. Conferido do jeito certo desta vez — query real no Postgres (413 ms, 2 contas) e os tres workflows ativos, inclusive o v7.4.
+- 2026-09-14 ERREI O INSTRUMENTO DE NOVO, e registro porque foi no mesmo dia: minha "prova de execucao concluida" exigia `finished === true`. No teststand o envio ao Telegram SEMPRE falha (chat_id sintetico), entao o n8n marca `finished:false, status:error` mesmo quando o fluxo percorreu tudo. Dei o ambiente como quebrado por 1 minuto ate abrir o runData e ver os 14 nos rodados. Criterio certo: a execucao SAIU de `running`.
+- 2026-09-14 FASE A CONTRA O EVENTO: **14 passaram, 2 falharam, 1 inconclusivo** (tr_bateria_a_evento_2026-09-14.md). As tres nao-aprovacoes sao B1, B3 e B5 — todas dependem das 10 questoes que o evento removeu. O Breno mandou ignora-las. NENHUMA outra falhou.
+- 2026-09-14 O QUE PASSOU E IMPORTA PARA O EVENTO: onboarding 7/7 (inclusive recusa de nome invalido e reenvio do mesmo update_id); X2 (perfil de 7 dias atras preservado — nivel, modo, interesses); X3 ao vivo (entrada com & < > sem erro de no: a correcao do T035 confirmada no fluxo do evento); S1 (ingress sem header devolve 403); B6 (texto fora de contexto nao avanca questao).
+- 2026-09-14 DOIS INSTRUMENTOS SE PROVARAM SOZINHOS NA MESMA RODADA: a transcricao saiu como `tr_bateria_a_evento_2026-09-14.md` — rotulo `evento` (E007) e datacao automatica (T031), porque o nome base ja estava ocupado pela rodada interrompida de mais cedo. Evidencia nova sem apagar a velha.
+- 2026-09-14 E011 CRIADA: "falha que a gente ignora" e como um vermelho de verdade passa despercebido depois. A Fase A passa a declarar B1/B3/B5 como N/A no alvo evento, com motivo escrito — sem remover os casos, que seguem valendo no v7.4 e no v8.
