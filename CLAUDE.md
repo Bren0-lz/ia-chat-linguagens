@@ -31,7 +31,7 @@ Por isso publicar/ativar exige pedido explícito do Breno, sempre.
 
 | Comando | Tempo | Cobre |
 |---|---|---|
-| `npm run gate` | ~3 s | **28 comandos** em sequência — os quatro abaixo são só os mais usados à parte |
+| `npm run gate` | ~3 s | **29 comandos** em sequência — os quatro abaixo são só os mais usados à parte |
 | `npm run gate:regressao` | ~1 s | placement, roteador, anti-spoiler, interesses + sintaxe dos 31 nós de código |
 | `npm run gate:cadastro` | ~1 s | Triagem de Nome → Etapa de Cadastro |
 | `npm run gate:nome` | ~1 s | 77 casos da camada 1 da validação de nome |

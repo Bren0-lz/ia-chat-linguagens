@@ -6,8 +6,8 @@
 // Por isso este teste guarda duas coisas ao mesmo tempo:
 //
 //   1. o evento nao diverge do v8 por acidente — depois de normalizar os campos DECLARADOS
-//      (name do workflow, path do TEST Ingress, disabled do Gatilho Telegram e o jsCode do
-//      `Placement Engine`/`Etapa de Cadastro` e os textos da E003) os dois JSON tem de ser
+//      (name do workflow, path do TEST Ingress, disabled do Gatilho Telegram, o jsCode dos
+//      cinco nos declarados abaixo e os dois textos da E003/E004) os dois JSON tem de ser
 //      IGUAIS byte a byte. Cada divergencia entre evento e v8 e uma decisao explicita
 //      registrada AQUI; qualquer outra e deriva silenciosa e reprova;
 //   2. ninguem copiou na direcao errada — o v8 tem de continuar com o gatilho
@@ -28,7 +28,7 @@ const PATH_EVENTO = 'iachat-test-evento';
 let fails = 0;
 function ok(cond, msg) { if (!cond) { fails++; console.log('  ✗ ' + msg); } else console.log('  ✓ ' + msg); }
 function fim() {
-  console.log('\n' + (fails ? 'REPROVOU: ' + fails + ' falha(s)' : 'PASSOU: arquivo do evento e o v8 com as 7 diferencas declaradas'));
+  console.log('\n' + (fails ? 'REPROVOU: ' + fails + ' falha(s)' : 'PASSOU: arquivo do evento e o v8 com as 10 diferencas declaradas'));
   process.exit(fails ? 1 : 0);
 }
 
@@ -70,10 +70,20 @@ ok(ev.name !== v8.name, 'evento: name do workflow difere do v8');
 //   TEST Ingress.path           — E001
 //   Gatilho Telegram.disabled   — E001
 //   Placement Engine.jsCode     — E002 (o atalho: escolher o nivel leva direto a persona)
+//                                 E004 (a troca de nivel de quem ja concluiu o onboarding)
 //   Etapa de Cadastro.jsCode    — E003 (o convite de nivel para de prometer teste de 10 questoes)
+//                                 E004 (o ramo `relevel`, do /nivel, e o convite em fonte unica)
+//   Roteador Mestre.jsCode      — E004 (/nivel reabre a escolha; /pausa, /continuar, pl_pause,
+//                                 pl_resume e ans_* respondem "nao ha teste"; pl_start_* vale
+//                                 tambem com onboarding='done')
+//   Mensagem Sistema.jsCode     — E004 (o texto `no_test`, e a ajuda sem o teste de nivelamento)
+//   Após Gabarito.jsCode        — E004 (na troca de nivel a cadeia para antes de reperguntar
+//                                 a personalidade)
 //   Enviar Pergunta Persona.text        — E003 (sai o "Esse e o seu resultado!")
+//                                         E004 (sai o falso "falta so o estilo do seu tutor")
 //   Enviar Pergunta Nível.inlineKeyboard — E003 (os seis niveis, em duas colunas)
-const CODIGO_PODE_DIFERIR = ['Placement Engine', 'Etapa de Cadastro'];
+const CODIGO_PODE_DIFERIR = ['Placement Engine', 'Etapa de Cadastro', 'Roteador Mestre',
+                             'Mensagem Sistema', 'Após Gabarito'];
 // Divergencias fora do jsCode: <no, parametro>. Mesma regra — declarar aqui e decisao de
 // projeto, divergir sem declarar reprova, e declarar sem divergir tambem reprova.
 const PARAMETRO_PODE_DIFERIR = [
@@ -98,7 +108,7 @@ function normaliza(f) {
 }
 const nv8 = JSON.stringify(normaliza(v8));
 const nev = JSON.stringify(normaliza(ev));
-ok(nv8 === nev, 'evento == v8 depois de normalizar as 7 divergencias declaradas');
+ok(nv8 === nev, 'evento == v8 depois de normalizar as 10 divergencias declaradas');
 
 if (nv8 !== nev) {
   // diagnostico: onde divergiu

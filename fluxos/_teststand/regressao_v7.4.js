@@ -37,9 +37,15 @@ function pl(sub, extra, ps) {
   return run('Placement Engine', { refs: { 'Roteador Mestre': rm }, input: exam, item: exam[0] });
 }
 // No arquivo do EVENTO (E002) o `start` e um ATALHO: grava o nivel escolhido e passa a vez
-// para a persona, sem montar questao. O motor do teste continua inteiro no no e e alcancado
-// por `restart` — usamos essa porta ali para nao perder a cobertura de B1/B2/B3/B6.
-// Quem prova que o atalho existe e `testa_atalho_nivel_evento.js`.
+// para a persona, sem montar questao. O motor do teste continua inteiro no no, no ramo
+// `restart` — e e por ele que B1/B2/B3/B6 continuam cobertos aqui.
+// DECISAO DECLARADA NA E004: desde que o `/nivel` do evento passou a REABRIR a escolha de
+// nivel, NENHUM gatilho do produto roteia para `restart`. A cobertura do motor adaptativo no
+// arquivo do evento e, por decisao explicita, esta CHAMADA DIRETA ao `Placement Engine` com
+// `subroute='restart'` — nao depende de um comando que o evento nao expoe mais, e nenhum caso
+// de teste foi removido (o evento e temporario; o teste de nivelamento volta depois).
+// Quem prova que o atalho existe e `testa_atalho_nivel_evento.js`; quem prova a outra ponta
+// (nenhum gatilho monta questao) e `testa_rotas_sem_teste_evento.js`.
 const ATALHO_EVENTO = /evento/i.test(path.basename(FLOW));
 function plStart(level, ps) {
   return ATALHO_EVENTO
