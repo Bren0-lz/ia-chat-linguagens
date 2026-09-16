@@ -3,6 +3,11 @@
 Leia `fluxos/HANDOFF.md` antes de qualquer trabalho: é o documento único do projeto (produto,
 estado, plano). **Responda sempre em pt-BR.**
 
+> ⚠️ **Desde 14/09 quem atende o Telegram é o FLUXO DO EVENTO** (`fluxos/IAChat_Telegram_evento.json`,
+> workflow `PCtzP8lk2qaqwZVd`), não o v7.4, que está **desativado**. A tabela "Duas versões, uma no ar"
+> abaixo descreve o arranjo anterior. **Comece pelo §0 do `HANDOFF.md`**: ele tem o estado atual, o que
+> está publicado, como publicar agora (o `publica_v8.js` não serve para o evento) e a fila.
+
 ## O que é o código aqui
 
 O produto é um workflow n8n. O código de produção mora dentro de um JSON —

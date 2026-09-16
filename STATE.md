@@ -1,8 +1,8 @@
 # Estado do loop
 
-- **Tarefa atual:** E014b — REPROVADA na T1 SO PELO PROBE (fluxo correto). Aval do Breno para publicar+probe RECEBIDO e SEGURADO ate o probe ser consertado. E015 DONE nao publicada. EVENTO EM 22/09/2026
+- **Tarefa atual:** E014b — REPROVADA na T2, de novo so pelo probe (fluxo correto), guardada na branch `wip/e014b-t2`. Sessao encerrada por contexto; **retomar pelo §0 do HANDOFF**. EVENTO EM 22/09/2026
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
-- **Tentativas na atual:** 1/3
+- **Tentativas na atual:** 2/3
 - **Bloqueios:** nenhum. Ambiente restabelecido em 16/09 (Breno reiniciou o Docker). Duas quedas do Docker em tres dias — maior risco do dia 22. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
@@ -368,3 +368,8 @@
 - 2026-09-16 O DEFEITO DO PROBE: detector de MAO UNICA em A2/B1. O criterio "mais portugues que no turno 1" aprova uma resposta que IGNORA o "nao entendi", muda de assunto e faz pergunta nova — porque no A2 a traducao da mensagem inteira JA e o formato padrao, e qualquer resposta mais longa passa. O verifier passou duas saidas erradas pelo julgaAjuda e as duas voltaram aprovadas.
 - 2026-09-16 POR ISSO NAO PUBLIQUEI MESMO COM O AVAL: o aval foi "publicar E rodar o probe". Rodar esse probe me daria um PASSOU falso justamente em A2 e B1 — os niveis que originaram todo o bloco — e eu entregaria esse falso positivo ao Breno como prova. E a armadilha mais cara do projeto (instrumento aprovando errado). O conserto e pequeno e so no instrumento.
 - 2026-09-16 DEVOLVIDO com escopo minimo: exigir em A2/B1 algo que o formato normal nao produz (marca de EXPLICACAO e/ou CONTINUIDADE do assunto), as duas saidas erradas passando a reprovar no --autoteste, e — lembrado explicitamente — sem tentar reconhecer toda parafrase possivel, que foi o erro da E014.
+- 2026-09-16 E014b T2 REPROVADA, de novo SO PELO PROBE. O verifier (que parou no meio por limite de gasto da API e foi retomado) inventou 14 saidas erradas em A2/B1: o julgaAjuda ainda aprova 3 (marca "quer dizer"/"eu disse" + troca de assunto que reusa uma palavra como "friends", "games", "work") e reprova 5 de 9 certas. O fluxo continua aprovado.
+- 2026-09-16 RECOMENDACAO DO VERIFIER, endossada: rebaixar o criterio de A2/B1 a SINAL PARA LEITURA HUMANA OBRIGATORIA, sem veredito automatico. Deteccao por sobreposicao de palavras sempre deixa passar algo — e a mesma licao da E014: para comportamento de LLM, regex nao da veredito.
+- 2026-09-16 SESSAO ENCERRADA POR CONTEXTO, a pedido do Breno. Estado deixado: main LIMPA com E001-E004, E007, E008, E011-E013 publicadas e E015 commitada NAO publicada; E014b T2 guardada na branch local `wip/e014b-t2` (a E014 original segue em `wip/e014-rede-de-seguranca`). Nada pushado.
+- 2026-09-16 HANDOFF.md ganhou o §0 "RETOME AQUI" no topo, com o que mudou de natureza (o evento e o bot), o que esta publicado, como publicar agora, as decisoes que nao se reabrem, o risco do Docker, 9 armadilhas novas (25-33) e a fila. CLAUDE.md ganhou aviso no topo: quem atende o Telegram e o evento, nao o v7.4.
+- 2026-09-16 AVAL DO BRENO JA DADO para publicar E014b+E015 e rodar o probe ao vivo — vale para quando o probe estiver corrigido e verificado.

@@ -1,6 +1,6 @@
 # HANDOFF — IAChat
 
-> **Estado em 10/09/2026.** Este é o **único** handoff do projeto: em vez de criar um arquivo
+> **Estado em 16/09/2026 — comece pelo §0.** Este é o **único** handoff do projeto: em vez de criar um arquivo
 > datado por sessão, atualize este. A proliferação de handoffs datados foi justamente o que
 > gerou documentos contraditórios em julho e agosto.
 >
@@ -12,6 +12,149 @@
 >
 > Roteiro dos testes: `TESTES_DIAGNOSTICOS.md`. Última medição completa:
 > `RELATORIO_DIAGNOSTICO_v8.md` (+ PDF), com as três colunas v7.4 · v8 · v8.1.
+
+---
+
+## 0. RETOME AQUI — estado em 16/09/2026
+
+> Esta seção foi escrita ao fim de uma sessão longa (11–16/09) e **prevalece sobre o §2** onde os
+> dois divergirem. Leia inteira antes de tocar em qualquer coisa. O §2 em diante continua valendo
+> como histórico e método.
+
+### O que mudou de natureza: há um EVENTO, e ele JÁ ESTÁ NO AR
+
+**O IAChat será apresentado num evento em 22/09/2026**, com usuários reais que respondem um
+formulário de avaliação depois. Poucos usuários simultâneos.
+
+Para o evento, o **teste de nivelamento foi removido**: o participante escolhe o próprio nível e cai
+direto em personalidade → interesses → modos. Isso vive num fluxo à parte:
+
+| | |
+|---|---|
+| **`fluxos/IAChat_Telegram_evento.json`** | o fluxo do evento — **é ele que atende o Telegram desde 14/09** |
+| **workflow n8n `PCtzP8lk2qaqwZVd`** | ativo, **Gatilho Telegram LIGADO** |
+| **v7.4 (`9MA0o1XJjD33BnKc`)** | **DESATIVADO** — o bot antigo não atende mais |
+| **v8 (`PbwEf7L9xEXhJaCg`)** | ativo, gatilho desligado (só ingress de teste) |
+
+**Isso contradiz o CLAUDE.md**, que ainda descreve o v7.4 como "a versão ativa". O CLAUDE.md não
+foi reescrito nesse ponto — confie nesta seção e confira no n8n.
+
+**Voltar o bot ao v7.4** (se algo der muito errado): `node fluxos/_teststand/corta_para_evento.js --voltar`
+
+### O que está publicado, o que não está
+
+| | onde está | no bot? |
+|---|---|---|
+| E001–E004, E007, E008, E011, E012 | main | sim |
+| **E013** — escada de idioma (A2/B1 ganham linha 🇧🇷) | main | **sim, verificada ao vivo** |
+| **E015** — `/menu` e tela de modos param de prometer "refazer o teste" | main (`18aceb8`) | **NÃO** |
+| **E014b** — ajuda sob pedido | branch **`wip/e014b-t2`** | **NÃO** |
+
+### A tarefa em aberto: E014b (tentativa 2 de 3 reprovada)
+
+**O fluxo está correto e aprovado; o que reprovou foi o instrumento.** Na branch `wip/e014b-t2`:
+- a regra `AJUDA SOB PEDIDO` nos seis `Prompt Conversa`, com **precedência universal** (vence todas
+  as regras do prompt, inclusive "obrigatórias" e "regra dura") — aprovada em 36 prompts montados;
+- gatilhos incluem "hã?"/"what?"; "ok"/"sim"/"yes" **não** são gatilho; o inglês volta no turno seguinte;
+- A1 com REGRA DE OURO e cláusula bilíngue byte a byte; E015 preservada.
+
+**O que reprovou:** o probe `vivo_ajuda_sob_pedido_evento.js`, em A2/B1, ainda **aprova 3 de 14**
+saídas erradas (marca "quer dizer" + troca de assunto que reusa uma palavra como "friends") e
+reprova 5 de 9 certas. **Recomendação do verifier, que eu endosso:** rebaixar o critério de A2/B1 a
+**sinal para leitura humana obrigatória**, sem veredito automático — detector por sobreposição de
+palavras sempre deixa passar algo. B2/C1 e o controle "ok ok ok" funcionam.
+
+**Próximo passo concreto:** na branch, trocar o veredito automático de A2/B1 por "LER A TRANSCRIÇÃO"
+→ verifier → trazer para a main → publicar **E014b + E015 juntas** → rodar o probe ao vivo e **ler
+as transcrições de A2/B1**. O **Breno já deu aval** para publicar e rodar o probe (16/09).
+
+### Como publicar agora — MUDOU
+
+O evento **é** o bot. Publicar deixou de ser inócuo:
+- **`publica_evento.js` NÃO SERVE MAIS**: ele força o gatilho desligado e **tiraria o bot do ar**.
+- **`publica_v8.js` não publica o evento** (alvo cravado no v8).
+- **Republicar o evento = `node fluxos/_teststand/corta_para_evento.js`** (sem `--voltar`): desativa →
+  salva com gatilho ligado → ativa, com rollback automático. Segundos de indisponibilidade.
+- **Aval do Breno a cada publicação.** O `deny` do `.claude/settings.local.json` bloqueia
+  `publica_v8.js`; o harness não deixa o agente afrouxar as próprias permissões.
+
+### Decisões do Breno que NÃO se reabrem
+
+- **`DEV_COMMANDS` fica ligado, sempre** — ele usa `/reset` e `/resetfull`. Não é dívida.
+- **T010 adiado** — lixo digitado ainda vira nome; "foco nas interações".
+- **Política de idioma (E013):** A1/A2 linha 🇧🇷 com a mensagem inteira; B1 só a pergunta; B2/C1/C2
+  inglês integral. **Pedido explícito de ajuda é sempre atendido, em qualquer nível.**
+- Teto do A2: 40 palavras de inglês, linha 🇧🇷 fora da conta (o verifier notou que iguala o B1).
+- O Professor **não** tem persona (10/09).
+
+### O maior risco do dia 22 não é código — é o Docker
+
+**O Docker Desktop caiu duas vezes em três dias** (14/09 "WSL update required"; 16/09 sem resposta),
+e na segunda **deixou o bot ao vivo sem banco**. Antes de qualquer trabalho:
+1. **Confira o banco com query real, nunca pela porta.** "5433 ABERTA" já mentiu: o proxy do Docker
+   responde TCP com o banco morto. Tarefa **E010** (TODO) formaliza isso.
+2. Execução "concluída" no teststand é a que **sai de `running`** — não `finished === true`, porque o
+   envio ao Telegram sempre falha com `chat_id` sintético.
+3. Subida: Docker → query no banco → n8n **na mesma janela** com `WEBHOOK_URL`/`N8N_PROTOCOL`/`N8N_HOST`
+   (§7) → conferir os workflows → **o Breno confere no Telegram**.
+4. Para o dia: desligar a suspensão da máquina.
+
+### Armadilhas novas desta sessão (somam-se ao §6)
+
+25. **O n8n recusa SALVAR um workflow ATIVO com webhook em conflito** ("There is a conflict with one
+    of the webhooks", HTTP 400). Quem vai receber o gatilho tem de estar **desativado** na hora do PUT.
+26. **Um PUT que devolve 400 no n8n pode ter gravado assim mesmo.** Releia o estado; não confie no código.
+27. **Workflow INATIVO não registra webhook.** "Publicar inativo para testar" não existe.
+28. **O heredoc do Bash nesta máquina come um nível de barra invertida.** Patch com regex/escapes por
+    heredoc sai corrompido — use o Write para criar o script.
+29. **Detector de linguagem natural por regex é inalcançável nas duas direções.** A E014 bloqueou três
+    vezes exigindo "reconhecer qualquer diretiva que proíba português, em qualquer redação". Para
+    comportamento de LLM, o critério real é o **probe ao vivo + leitura humana**, não regex.
+30. **Fixture com `interests: []` esconde regras.** O `GANCHO OBRIGATÓRIO` só entra no prompt com
+    interesses preenchidos — testes antigos nunca o montavam.
+31. **O prompt tem várias regras que se declaram obrigatórias/prioritárias** (GESTO DE ASSINATURA,
+    GANCHO, RECIPROCIDADE "PRECEDENCIA NESTE TURNO", BREVIDADE "regra dura", AJUSTE DINÂMICO,
+    ECONOMIA DE TELA). Precedência nomeada uma a uma é corrida sem fim; use **precedência universal**.
+32. **Guard criado para o caso que apareceu, não para a classe** — o de URL cravada só olhava
+    `bateria_completa_a.js` e deixou o `teste_concorrencia.js` mandando tráfego à produção. Aconteceu
+    três vezes; quando escrever guard, pergunte "qual é a classe?".
+33. **O verifier derruba o orquestrador também.** Nesta sessão eu afirmei que o C1 não tinha cláusula
+    de idioma (tinha — a mais dura), que um detector era "por classe" (eram 5 frases fixas) e que o
+    título do tópico aparecia duas vezes (era o corpo da explicação). **Não repita relato de agente
+    como fato.**
+
+### Fila, em ordem
+
+1. **E014b** — fechar como descrito acima, publicar com a E015, probe ao vivo, ler transcrições.
+2. **E010** — checagem de ambiente que não mente (query real + execução que sai de `running`).
+3. **Leitura humana dos 11 REVISAR** da Fase B de 14/09 — principalmente **C10** (o bot interroga em
+   vez de conversar) e **R4** (respondeu "calling it 'useless' seems a bit harsh").
+4. **Dívidas registradas:** `teste_concorrencia.js` com UID fixo e sem limpeza; o `v8.json` não
+   recebeu E013/E014/E015 ("evento primeiro, v8 depois"); `CLAUDE.md` ainda descreve o v7.4 como ativo.
+5. **Antes de 22/09:** rodar de novo Fase A, Fase B em blocos e a jornada contra o evento **depois** de
+   publicar E014b+E015.
+
+### Instrumentos novos desta sessão (em `fluxos/_teststand/`)
+
+| script | para quê |
+|---|---|
+| `corta_para_evento.js` | troca quem atende o Telegram (e `--voltar`); com rollback |
+| `publica_evento.js` | **obsoleto** para o evento no ar (modo ensaio, gatilho desligado) |
+| `vivo_idioma_niveis_evento.js` | o que cada nível recebe no primeiro turno (E013) — **passou ao vivo** |
+| `vivo_duvida_markdown.js` / `vivo_topico_uma_vez.js` | rota da dúvida e par cabeçalho+feedback do Professor |
+| `vivo_ajuda_sob_pedido_evento.js` | probe da E014b — **só na branch**, com o defeito descrito acima |
+| `parcial.js` | a bateria sobrevive à morte do processo (`--continuar`) |
+
+Transcrições do evento (evidência, não apagar): `tr_bateria_a_evento_2026-09-14.md` (Fase A: 14
+passaram, 3 N/A), `tr_bateria_b_evento*.md` (Fase B: 16 PASSOU, 1 FALHOU de régua, 11 REVISAR, 0
+vazios), `tr_jornada_evento.md` (completa, 26 turnos, nenhum vazio).
+
+### Contexto operacional
+
+- **Limite de gasto da API:** em 16/09 um verifier parou no meio por "monthly spend limit". Se um
+  agente sumir sem veredito, confira o disco antes de assumir qualquer coisa e retome o mesmo agente.
+- O loop autodev (`/next`, `/loop /next`) funciona; as regras de parada salvaram o dia várias vezes.
+  Três reprovações = BLOCKED e chamar o Breno.
 
 ---
 
