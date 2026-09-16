@@ -1,8 +1,8 @@
 # Estado do loop
 
-- **Tarefa atual:** E014 — REPROVADA na tentativa 2, devolvida para a TERCEIRA E ULTIMA. E013 DONE, NAO PUBLICADA. O EVENTO ESTA NO AR com a politica ANTIGA
+- **Tarefa atual:** **E014 BLOCKED** (3 reprovacoes) — decisao do Breno pendente. E013 DONE, NAO PUBLICADA. O EVENTO ESTA NO AR com a politica ANTIGA
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
-- **Tentativas na atual:** 2/3
+- **Tentativas na atual:** 3/3 — BLOCKED
 - **Bloqueios:** nenhum. Ambiente restabelecido em 14/09 (Breno reiniciou Docker e subiu o n8n). T010 e T030 ADIADOS por decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
@@ -342,3 +342,8 @@
 - 2026-09-16 QUARTA DIRETIVA CONCORRENTE, achada pelo verifier: a BREVIDADE ("regra dura") diz "Nunca repita a mesma ideia (nem traduzida nem reescrita)", e a AJUDA SOB PEDIDO manda "repita a MESMA ideia de um jeito mais simples". Colidem ao pe da letra; no A1 o teto de 18 palavras aperta a explicacao de socorro. Nao estava nomeada na precedencia.
 - 2026-09-16 RISCO SO MEDIVEL AO VIVO, registrado pelo verifier: o AJUSTE DINAMICO descreve "o aluno parece inseguro" e a AJUDA tem o gatilho "claramente travado". O modelo pode ler um como o outro e responder em portugues depois de "ok ok ok", que NAO e pedido de ajuda. So um probe ao vivo em B2 com tres "ok" resolve.
 - 2026-09-16 DEVOLVIDO PARA A TERCEIRA E ULTIMA TENTATIVA com escopo estreito: detector generico (negacao perto de "portugues" + exclusividade do ingles) provado contra as sete injecoes e contra casos permissivos; BREVIDADE nomeada na precedencia; nada do que foi aprovado refatorado. Se falhar de novo, a E014 vira BLOCKED e volta para o Breno.
+- 2026-09-16 **E014 BLOCKED APOS A TERCEIRA REPROVACAO.** O verifier injetou 16 proibicoes de portugues INEDITAS, dentro do jsCode do Contexto Conversa (todas chegaram ao systemMessage de A1, B2, C2): o gate reprovou so 2. E de 8 frases permissivas ineditas, acusou 5 — inclusive "nao responda so em ingles quando o aluno pedir ajuda", que e A FAVOR da regra.
+- 2026-09-16 SEGUNDO BUG DO DETECTOR, achado na T3: `soltas()` confere o rotulo com `indexOf` (substring). Uma diretiva rotulada "INGLES" conta como nomeada porque cabe dentro de "INCENTIVO AO INGLES"; "TELA" cabe em "ECONOMIA DE TELA".
+- 2026-09-16 DIAGNOSTICO QUE MUDA A DECISAO, e e contra mim: o problema NAO e o implementer errando tres vezes. O CRITERIO QUE EU ESCREVI e inalcancavel por construcao — "reconhecer qualquer diretiva que proiba portugues, em qualquer redacao" e linguagem natural, e regex nao resolve nas duas direcoes ao mesmo tempo. Uma quarta tentativa na mesma linha daria o mesmo FAIL com outras frases. E a mesma licao do T005c: a regra e o texto que a mede nao podem nascer da mesma cabeca, e metrica sobre linguagem natural precisa ser validada contra redacoes que ninguem escolheu.
+- 2026-09-16 PROBLEMA ESTRUTURAL POR TRAS, visivel so com interests preenchidos (as fixtures usavam interests: []): o prompt montado tem VARIAS regras que se declaram obrigatorias ou prioritarias e nao se citam — "GANCHO OBRIGATORIO DESTE TURNO ... se a pergunta final nao for sobre esse tema, o turno falhou" colide com "nao troque de assunto"; e a RECIPROCIDADE em short_streak>=2 ("ha?", gatilho da propria ajuda) traz "PRECEDENCIA NESTE TURNO". Nomear concorrentes uma a uma e corrida sem fim.
+- 2026-09-16 ESTADO DO DISCO: o evento.json no working tree tem E013 (commitada) + E014 T3 (NAO commitada), e o testa_idioma_niveis_evento.js tambem esta modificado. Nada disso foi commitado porque nao passou. Publicar so a E013 exige descartar a E014 do working tree antes.

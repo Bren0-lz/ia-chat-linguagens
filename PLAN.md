@@ -886,7 +886,12 @@ A causa é a política escrita nos prompts, não o modelo desobedecendo. A escad
 - **Gate:** probe "não entendi" em A2, B1, B2 e C1 — apoio em português na resposta, inglês no
   turno seguinte. Reprova a versão de hoje, onde B1/B2 recusam por desenho.
 - **Depende de:** E013
-- **Status:** TODO
+- **Status:** **BLOCKED (16/09) — 3 reprovações.** Não por erro do implementer: o critério do gate é
+  **inalcançável por construção**. Pedi um detector de "qualquer diretiva que proíba português, em
+  qualquer redação" — problema de linguagem natural que regex não resolve. T3 medida pelo verifier:
+  de 16 proibições inéditas pegou **2**; de 8 frases permissivas acusou **5**. E o problema de fundo
+  é estrutural: o prompt tem várias regras que se declaram obrigatórias/prioritárias (gancho de
+  interesses, reciprocidade) — nomear uma a uma é corrida sem fim. **Decisão do Breno pendente.**
 
 ### E015 — a tela de modos ainda promete o teste de nivelamento
 - **Origem:** achado na investigação de 14/09. O nó `Enviar Explicação Modos`, que **todo
