@@ -1,6 +1,6 @@
 # Estado do loop
 
-- **Tarefa atual:** E015 (em curso), depois E014b (redesenhada). Uma publicacao no fim, com aval do Breno. E013 PUBLICADA E VERIFICADA AO VIVO. EVENTO EM 22/09/2026
+- **Tarefa atual:** E014b (redesenhada). E015 DONE, NAO PUBLICADA. Uma publicacao no fim (E014b + E015), com aval do Breno. E013 PUBLICADA E VERIFICADA AO VIVO. EVENTO EM 22/09/2026
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum. Ambiente restabelecido em 16/09 (Breno reiniciou o Docker). Duas quedas do Docker em tres dias — maior risco do dia 22. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
@@ -359,3 +359,7 @@
 - 2026-09-16 O SCRIPT AO VIVO E A COBERTURA QUE FALTAVA: a Fase B media o A1 como bilingue e B2/C1 para correcao, mas ninguem media o primeiro turno de A2/B1. Foi a lacuna por onde o defeito do Breno passou.
 - 2026-09-16 O Breno pediu "roda a E014 redesenhada e a E015". Escopo da E014b escrito no PLAN antes de delegar: clausula de prioridade UNIVERSAL no lugar da precedencia nomeada uma a uma, SEM o detector de linha solta (inalcancavel), e o criterio real passa a ser o probe AO VIVO — incluindo o controle "ok ok ok" em B2, que nao pode virar portugues.
 - 2026-09-16 ORDEM: E015 primeiro, E014b depois, SEQUENCIAL — as duas editam o evento.json e a lista fechada do testa_arquivo_evento.js, e edicao concorrente ali daria conflito. Uma publicacao no fim.
+- 2026-09-16 E015 DONE (18aceb8) em 2 tentativas, NAO PUBLICADA. A varredura dos 32 nos Telegram achou um SEGUNDO texto com o defeito: o `/menu` (`Enviar Menu`) tambem dizia "/nivel — refazer o teste". Os dois agora dizem "/nivel — escolher outro nivel", como o /help.
+- 2026-09-16 E015 T1 REPROVADA: os textos estavam certos, mas o detector afrouxou a lista PROMESSAS sem motivo declarado — tirou "nota", "avaliar", "ajuda externa" e a contagem de questoes, e o verifier provou que recoloca-los nao gerava alarme falso algum. Escopo da T2 deliberadamente ESTREITO: devolver o que saiu sem motivo e declarar cada exclusao — e NAO tentar pegar toda redacao possivel, a exigencia que tornou a E014 impossivel.
+- 2026-09-16 EXCECAO NOVA APROVADA PELO VERIFIER: os botoes "Pausar"/"Continuar" ficam liberados SO nos 3 nos do motor de teste, lista fechada e cobrada por existencia. Ele injetou "Teste pausado" e "Sao 10 questoes" nesses nos e os dois foram acusados — a excecao nao vaza. Quem garante que o motor segue inalcancavel e o testa_rotas_sem_teste_evento.js (um check dele procura a string literal subroute='restart', ponto fragil registrado).
+- 2026-09-16 RESSALVA FECHADA NO BANCO: o verifier da E015 T1 levantou que um aluno ANTIGO com teste aberto ainda veria "voce esta no meio do teste". Conferido com query so de leitura: as 2 contas reais tem placement_state NULL. Risco inexistente hoje.

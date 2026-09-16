@@ -904,7 +904,10 @@ A causa é a política escrita nos prompts, não o modelo desobedecendo. A escad
 - **Gate:** o `testa_textos_evento.js` passa a varrer o texto estático de **todos** os nós Telegram,
   não só os três de hoje. Reprova o arquivo atual.
 - **Depende de:** —
-- **Status:** TODO
+- **Status:** DONE (18aceb8), em 2 tentativas — **NÃO PUBLICADA** (sai com a E014b). A varredura achou
+  um segundo texto: o `/menu` também dizia "refazer o teste". T1 reprovada por afrouxar o detector sem
+  motivo; T2 aprovada com cada exclusão declarada. Exceção dos botões de pausa nos 3 nós do motor
+  aprovada pelo verifier após mutações
 
 ### Publicar mudou de natureza — o evento AGORA é o bot
 - `publica_evento.js` **não serve mais**: força o gatilho desligado e tiraria o bot do ar.
