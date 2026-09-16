@@ -1,8 +1,8 @@
 # Estado do loop
 
-- **Tarefa atual:** E014b (redesenhada). E015 DONE, NAO PUBLICADA. Uma publicacao no fim (E014b + E015), com aval do Breno. E013 PUBLICADA E VERIFICADA AO VIVO. EVENTO EM 22/09/2026
+- **Tarefa atual:** E014b — REPROVADA na T1 SO PELO PROBE (fluxo correto). Aval do Breno para publicar+probe RECEBIDO e SEGURADO ate o probe ser consertado. E015 DONE nao publicada. EVENTO EM 22/09/2026
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
-- **Tentativas na atual:** 0/3
+- **Tentativas na atual:** 1/3
 - **Bloqueios:** nenhum. Ambiente restabelecido em 16/09 (Breno reiniciou o Docker). Duas quedas do Docker em tres dias — maior risco do dia 22. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
@@ -363,3 +363,8 @@
 - 2026-09-16 E015 T1 REPROVADA: os textos estavam certos, mas o detector afrouxou a lista PROMESSAS sem motivo declarado — tirou "nota", "avaliar", "ajuda externa" e a contagem de questoes, e o verifier provou que recoloca-los nao gerava alarme falso algum. Escopo da T2 deliberadamente ESTREITO: devolver o que saiu sem motivo e declarar cada exclusao — e NAO tentar pegar toda redacao possivel, a exigencia que tornou a E014 impossivel.
 - 2026-09-16 EXCECAO NOVA APROVADA PELO VERIFIER: os botoes "Pausar"/"Continuar" ficam liberados SO nos 3 nos do motor de teste, lista fechada e cobrada por existencia. Ele injetou "Teste pausado" e "Sao 10 questoes" nesses nos e os dois foram acusados — a excecao nao vaza. Quem garante que o motor segue inalcancavel e o testa_rotas_sem_teste_evento.js (um check dele procura a string literal subroute='restart', ponto fragil registrado).
 - 2026-09-16 RESSALVA FECHADA NO BANCO: o verifier da E015 T1 levantou que um aluno ANTIGO com teste aberto ainda veria "voce esta no meio do teste". Conferido com query so de leitura: as 2 contas reais tem placement_state NULL. Risco inexistente hoje.
+- 2026-09-16 O BRENO AUTORIZOU PUBLICAR E RODAR O PROBE antes de o verifier da E014b voltar. Segurei a publicacao ate o veredito: publicar no bot ao vivo algo que so o autor conferiu e o que a E014 original mostrou, tres vezes, ser arriscado. Enquanto isso, ambiente conferido com query real: pronto.
+- 2026-09-16 E014b REPROVADA NA T1 — mas SO PELO PROBE AO VIVO. O verifier aprovou o fluxo inteiro: E015 intacta (igual ao 18aceb8), precedencia universal inequivoca em 36 prompts montados COM interesses (6 niveis x 3 estados x 2 personas), fronteira "ha?" x "ok" funcionando com mutacoes, detector inalcancavel removido, A1 byte a byte.
+- 2026-09-16 O DEFEITO DO PROBE: detector de MAO UNICA em A2/B1. O criterio "mais portugues que no turno 1" aprova uma resposta que IGNORA o "nao entendi", muda de assunto e faz pergunta nova — porque no A2 a traducao da mensagem inteira JA e o formato padrao, e qualquer resposta mais longa passa. O verifier passou duas saidas erradas pelo julgaAjuda e as duas voltaram aprovadas.
+- 2026-09-16 POR ISSO NAO PUBLIQUEI MESMO COM O AVAL: o aval foi "publicar E rodar o probe". Rodar esse probe me daria um PASSOU falso justamente em A2 e B1 — os niveis que originaram todo o bloco — e eu entregaria esse falso positivo ao Breno como prova. E a armadilha mais cara do projeto (instrumento aprovando errado). O conserto e pequeno e so no instrumento.
+- 2026-09-16 DEVOLVIDO com escopo minimo: exigir em A2/B1 algo que o formato normal nao produz (marca de EXPLICACAO e/ou CONTINUIDADE do assunto), as duas saidas erradas passando a reprovar no --autoteste, e — lembrado explicitamente — sem tentar reconhecer toda parafrase possivel, que foi o erro da E014.
