@@ -1,8 +1,8 @@
 # Estado do loop
 
-- **Tarefa atual:** E014b — REPROVADA na T2, de novo so pelo probe (fluxo correto), guardada na branch `wip/e014b-t2`. Sessao encerrada por contexto; **retomar pelo §0 do HANDOFF**. EVENTO EM 22/09/2026
-- **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
-- **Tentativas na atual:** 2/3
+- **Tarefa atual:** publicar E014b + E015 no evento (corta_para_evento.js) e rodar o probe ao vivo; ler a LEITURA OBRIGATORIA de A2/B1. EVENTO EM 22/09/2026
+- **Última concluída:** E014b (3643969) — ajuda sob pedido com precedencia universal; probe com leitura humana em A2/B1
+- **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum. Ambiente restabelecido em 16/09 (Breno reiniciou o Docker). As "quedas" de 14/09 e 16/09 eram o Docker Desktop nao iniciado (Breno, 16/09) — nao e risco do evento; banco fora = pedir ao Breno para iniciar o Docker. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
@@ -373,3 +373,4 @@
 - 2026-09-16 SESSAO ENCERRADA POR CONTEXTO, a pedido do Breno. Estado deixado: main LIMPA com E001-E004, E007, E008, E011-E013 publicadas e E015 commitada NAO publicada; E014b T2 guardada na branch local `wip/e014b-t2` (a E014 original segue em `wip/e014-rede-de-seguranca`). Nada pushado.
 - 2026-09-16 HANDOFF.md ganhou o §0 "RETOME AQUI" no topo, com o que mudou de natureza (o evento e o bot), o que esta publicado, como publicar agora, as decisoes que nao se reabrem, o risco do Docker, 9 armadilhas novas (25-33) e a fila. CLAUDE.md ganhou aviso no topo: quem atende o Telegram e o evento, nao o v7.4.
 - 2026-09-16 AVAL DO BRENO JA DADO para publicar E014b+E015 e rodar o probe ao vivo — vale para quando o probe estiver corrigido e verificado.
+- 2026-09-16 (sessao nova) E014b T3 APROVADA pelo verifier. O probe deixou de dar veredito automatico ao socorro em A2/B1: junta sinais, grava o par na secao LEITURA OBRIGATORIA de tr_ajuda_sob_pedido_evento*.md e sai 2 com leitura pendente. Autoteste novo reprova o detector da T2 (16 asserts; 21 com adaptador de formato). Evento.json identico ao da T2. Branch trazida para a main por fast-forward. Ressalva do verifier: o turno 1 nao e julgado (vazio em B2/C1 passa despercebido) — conferir na transcricao.

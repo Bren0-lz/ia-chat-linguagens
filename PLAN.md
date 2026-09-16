@@ -941,7 +941,7 @@ A causa é a política escrita nos prompts, não o modelo desobedecendo. A escad
   vira português — risco levantado pelo verifier, porque o AJUSTE DINÂMICO trata monossílabos como
   insegurança.
 - **Depende de:** E013 (publicada)
-- **Status:** TODO
+- **Status:** DONE (3643969), em 3 tentativas — o fluxo aprovado desde a T1; a T3 tirou o veredito automatico de A2/B1 do probe (leitura humana obrigatoria). **Publicacao junto com a E015 e probe ao vivo: pendentes.**
 
 ### Execução combinada de E014b + E015
 Sequencial (as duas editam o mesmo arquivo e a mesma lista fechada), offline, com **uma**
