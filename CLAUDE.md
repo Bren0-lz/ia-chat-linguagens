@@ -89,7 +89,7 @@ erro fatal — reprovação de teste sai 0.
 - apagar evidência: `documentos/`, `MEDICOES_*.md`, `tr_*.md`, `_teststand/backup_*.json`
 - editar `fluxos/IAChat_Telegram_v7.4.json` ou qualquer versão anterior
 - **desligar ou restringir `DEV_COMMANDS`** (`Roteador Mestre`) — decisão do Breno em 14/09:
-  `/reset` e `/resetfull` ficam abertos, **sempre**. Ele usa. Não é dívida técnica e não deve ser
+  `/reset` e `/resetfull` ficam abertos **até o Breno mandar desligar**. Ele usa. Não é dívida técnica e não deve ser
   proposto como conserto
 
 ### Convenções

@@ -669,7 +669,7 @@ questões** — não constrói caminho novo.
    jornada não rodou. Por isso o ensaio completo antes do evento não é opcional.
 4. **Infra local:** Docker/Postgres, n8n e ngrok. URL do ngrok trocada = 404 em tudo com
    `active: true` (handoff §7).
-5. **`DEV_COMMANDS = true`**: `/reset` aberto a qualquer participante. **Decisão do Breno em 14/09: fica ligado, sempre.** Registrado como escolha consciente, não como risco pendente.
+5. **`DEV_COMMANDS = true`**: `/reset` aberto a qualquer participante. **Decisão do Breno em 14/09 (reconfirmada 16/09): fica ligado até ele mandar desligar.** Registrado como escolha consciente, não como risco pendente.
 
 ### E001 — nascer o `IAChat_Telegram_evento.json`
 - **Escopo:** cópia fiel do `v8.json` (107 nós) por script Node, com duas diferenças:
@@ -751,7 +751,7 @@ questões** — não constrói caminho novo.
 
 ### Fora deste bloco, por decisão
 - **`/avaliar` com o link do formulário** dentro do bot — não foi pedido; vira E007 se quiser
-- ~~Desligar `DEV_COMMANDS`~~ — **decidido: fica ligado, sempre** (14/09)
+- ~~Desligar `DEV_COMMANDS`~~ — **decidido: fica ligado até o Breno mandar desligar** (14/09, reconfirmado 16/09)
 - **Migrar o bot para o v8 em definitivo** — o evento é temporário e volta para o v7.4
 
 ### E007 — o ingress do evento ganha rótulo

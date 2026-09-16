@@ -80,19 +80,22 @@ O evento **é** o bot. Publicar deixou de ser inócuo:
 
 ### Decisões do Breno que NÃO se reabrem
 
-- **`DEV_COMMANDS` fica ligado, sempre** — ele usa `/reset` e `/resetfull`. Não é dívida.
+- **`DEV_COMMANDS` fica ligado até o Breno mandar desligar** — ele usa `/reset` e `/resetfull`.
+  Não é dívida e não se propõe desligar (reconfirmado em 16/09).
 - **T010 adiado** — lixo digitado ainda vira nome; "foco nas interações".
 - **Política de idioma (E013):** A1/A2 linha 🇧🇷 com a mensagem inteira; B1 só a pergunta; B2/C1/C2
-  inglês integral. **Pedido explícito de ajuda é sempre atendido, em qualquer nível.**
+  inglês integral. **Pedido explícito de ajuda é sempre atendido, em qualquer nível.** Mantida
+  (reconfirmado em 16/09).
 - Teto do A2: 40 palavras de inglês, linha 🇧🇷 fora da conta (o verifier notou que iguala o B1).
 - O Professor **não** tem persona (10/09).
 
-### O maior risco do dia 22 não é código — é o Docker
+### Subida do ambiente
 
-**O Docker Desktop caiu duas vezes em três dias** (14/09 "WSL update required"; 16/09 sem resposta),
-e na segunda **deixou o bot ao vivo sem banco**. Antes de qualquer trabalho:
+As "quedas do Docker" de 14/09 e 16/09 foram **o Docker Desktop não ter sido iniciado** — não é
+instabilidade nem risco do evento (esclarecido pelo Breno em 16/09). Se o banco não responder, avise
+o Breno para iniciar o Docker; não trate como incidente. Antes de qualquer trabalho:
 1. **Confira o banco com query real, nunca pela porta.** "5433 ABERTA" já mentiu: o proxy do Docker
-   responde TCP com o banco morto. Tarefa **E010** (TODO) formaliza isso.
+   responde TCP com o banco fora. Tarefa **E010** (TODO) formaliza isso.
 2. Execução "concluída" no teststand é a que **sai de `running`** — não `finished === true`, porque o
    envio ao Telegram sempre falha com `chat_id` sintético.
 3. Subida: Docker → query no banco → n8n **na mesma janela** com `WEBHOOK_URL`/`N8N_PROTOCOL`/`N8N_HOST`
@@ -228,7 +231,7 @@ aviso de que ativar uma derruba a outra; multiplicar arquivos recria esse proble
 | | |
 |---|---|
 | 🔴 **Camada 2 da validação de nome não autentica** | `Validar Nome (IA)` recebe `Authorization failed` da Vertex, o `Veredito IA` cai no **fail-open** e **`asdfgh` vira nome de aluno, sem nada no log**. Provado em 4 execuções (`testa_nome_camada2_vivo.js`). Hipótese: a credencial `mKfC2ANkOKHfbKal` não tem `scopes` preenchido — os nós LangChain montam `cloud-platform` sozinhos, o `httpRequest` genérico usa o campo da credencial. **Decisão do Breno:** corrigir os scopes ou criar `googlePalmApi` com API key do AI Studio |
-| ✅ **`DEV_COMMANDS = true`** | `/reset` e `/resetfull` para qualquer usuário. **DECISÃO DO BRENO (14/09): fica ligado, sempre — ele usa.** Não é dívida, não propor desligar |
+| ✅ **`DEV_COMMANDS = true`** | `/reset` e `/resetfull` para qualquer usuário. **DECISÃO DO BRENO (14/09, reconfirmada 16/09): fica ligado até ele mandar desligar — ele usa.** Não é dívida, não propor desligar |
 | ⚠️ **60 `.md` sem revisão humana** | o gate confere forma, cobertura e idioma — **não se o texto ensina**. Está medido: um arquivo que nunca enuncia a regra **passa** |
 
 ### Como retomar numa sessão nova

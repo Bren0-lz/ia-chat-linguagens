@@ -3,7 +3,7 @@
 - **Tarefa atual:** E014b — REPROVADA na T2, de novo so pelo probe (fluxo correto), guardada na branch `wip/e014b-t2`. Sessao encerrada por contexto; **retomar pelo §0 do HANDOFF**. EVENTO EM 22/09/2026
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
 - **Tentativas na atual:** 2/3
-- **Bloqueios:** nenhum. Ambiente restabelecido em 16/09 (Breno reiniciou o Docker). Duas quedas do Docker em tres dias — maior risco do dia 22. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
+- **Bloqueios:** nenhum. Ambiente restabelecido em 16/09 (Breno reiniciou o Docker). As "quedas" de 14/09 e 16/09 eram o Docker Desktop nao iniciado (Breno, 16/09) — nao e risco do evento; banco fora = pedir ao Breno para iniciar o Docker. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
 
