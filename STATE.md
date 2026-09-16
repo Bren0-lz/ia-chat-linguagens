@@ -1,8 +1,8 @@
 # Estado do loop
 
-- **Tarefa atual:** E014 — REPROVADA na tentativa 1, devolvida ao implementer. E013 DONE, NAO PUBLICADA. O EVENTO ESTA NO AR com a politica ANTIGA
+- **Tarefa atual:** E014 — REPROVADA na tentativa 2, devolvida para a TERCEIRA E ULTIMA. E013 DONE, NAO PUBLICADA. O EVENTO ESTA NO AR com a politica ANTIGA
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
-- **Tentativas na atual:** 1/3
+- **Tentativas na atual:** 2/3
 - **Bloqueios:** nenhum. Ambiente restabelecido em 14/09 (Breno reiniciou Docker e subiu o n8n). T010 e T030 ADIADOS por decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
@@ -336,3 +336,9 @@
 - 2026-09-16 E ELA ENTRA EXATAMENTE QUANDO O ALUNO ESTA TRAVADO: com pt_streak>=2 (segundo "nao entendi" em portugues) e TAMBEM SOZINHA com short_streak>=3 — tres "ha?" seguidos, que e um dos gatilhos da propria regra de ajuda. Ou seja, o gatilho da ajuda e o gatilho da proibicao sao o mesmo sinal.
 - 2026-09-16 E A §5.3 PELA TERCEIRA VEZ NESTE PROJETO: diretiva nao nomeada fica solta e ganha em silencio. O teste da tentativa 1 nao enxergava porque montava o prompt so a partir do `Prompt Conversa` — o AJUSTE DINAMICO vem de OUTRO no. Mesmo erro de escopo do instrumento que ja custou caro: julgar a string que e facil de montar, nao a que o modelo recebe.
 - 2026-09-16 DEVOLVIDO com tres pedidos: cobrir o AJUSTE DINAMICO (nomeando na precedencia ou ajustando o MOOD_LOW_ADV), VARRER o Contexto Conversa inteiro atras de outra proibicao escondida, e fazer o teste montar o prompt a partir do Contexto Conversa em tres estados (normal, pt_streak=2, short_streak=3).
+- 2026-09-16 E014 REPROVADA NA TENTATIVA 2 — mas a mudanca no PRODUTO esta correta: a precedencia nomeia o AJUSTE DINAMICO, vem na posicao certa e cobre o prompt montado de verdade. O que reprovou foi o DETECTOR do teste.
+- 2026-09-16 O DETECTOR PROMETIA PEGAR A CLASSE E SO CONHECIA CINCO FRASES: `soltas()` avalia so linhas que casam com a lista fixa PROIBE_PT. O verifier injetou SETE diretivas ineditas proibindo portugues no Contexto Conversa de uma copia (e confirmou que chegavam ao systemMessage) — o teste pegou DUAS. "nunca escreva em portugues, nem se o aluno pedir", "e proibido usar portugues", "nao use portugues em hipotese alguma" passaram VERDE. A autoverificacao passava porque usava justamente uma das cinco frases.
+- 2026-09-16 LICAO, e ela me pega de novo no mesmo dia: eu tinha acabado de elogiar ao Breno o detector "por classe, nao por caso". A promessa estava no comentario; a implementacao era lista fixa. Detector de classe se prova contra redacoes que NAO copiam as frases conhecidas — e com casos permissivos que nao podem reprovar.
+- 2026-09-16 QUARTA DIRETIVA CONCORRENTE, achada pelo verifier: a BREVIDADE ("regra dura") diz "Nunca repita a mesma ideia (nem traduzida nem reescrita)", e a AJUDA SOB PEDIDO manda "repita a MESMA ideia de um jeito mais simples". Colidem ao pe da letra; no A1 o teto de 18 palavras aperta a explicacao de socorro. Nao estava nomeada na precedencia.
+- 2026-09-16 RISCO SO MEDIVEL AO VIVO, registrado pelo verifier: o AJUSTE DINAMICO descreve "o aluno parece inseguro" e a AJUDA tem o gatilho "claramente travado". O modelo pode ler um como o outro e responder em portugues depois de "ok ok ok", que NAO e pedido de ajuda. So um probe ao vivo em B2 com tres "ok" resolve.
+- 2026-09-16 DEVOLVIDO PARA A TERCEIRA E ULTIMA TENTATIVA com escopo estreito: detector generico (negacao perto de "portugues" + exclusividade do ingles) provado contra as sete injecoes e contra casos permissivos; BREVIDADE nomeada na precedencia; nada do que foi aprovado refatorado. Se falhar de novo, a E014 vira BLOCKED e volta para o Breno.
