@@ -914,3 +914,33 @@ A causa é a política escrita nos prompts, não o modelo desobedecendo. A escad
 - Logo: segundos de indisponibilidade por publicação, e aval do Breno a cada vez. Fazer as três
   tarefas offline, verificar pelo ingress de teste (responde mesmo com o gatilho ligado) e
   **publicar uma vez só**, no fim.
+
+### E014b — a rede de segurança, redesenhada (substitui a E014 bloqueada)
+- **Origem:** a E014 bloqueou em 16/09 após três reprovações, e não por erro de implementação: o
+  critério era inalcançável. Pedi um detector que reconhecesse *qualquer* diretiva proibindo
+  português em *qualquer* redação — linguagem natural que regex não resolve (T3: pegou 2 de 16
+  proibições inéditas e acusou 5 de 8 frases permissivas). E o problema de fundo é estrutural: o
+  prompt tem várias regras que se declaram obrigatórias ou prioritárias (gancho de interesses,
+  reciprocidade), e nomeá-las uma a uma é corrida sem fim.
+- **Decisão do Breno (16/09):** cláusula de prioridade **universal** + probe **ao vivo** como
+  critério real.
+- **Ponto de partida:** a branch local `wip/e014-rede-de-seguranca` — o que ali foi **aprovado**
+  pelos verifiers se reusa: a regra AJUDA SOB PEDIDO nos seis níveis, os gatilhos, a retomada do
+  inglês no turno seguinte, e o A1 preservando REGRA DE OURO e cláusula bilíngue byte a byte.
+- **Escopo:** trocar a precedência nomeada por uma cláusula universal — a regra vence **todas** as
+  demais regras deste prompt, inclusive as marcadas como obrigatórias, prioritárias ou "regra dura"
+  —, e ajustar a CHECAGEM FINAL de acordo. **Não** manter o detector de "linha solta": ele sai.
+- **Gate offline:** exige, nos seis prompts montados a partir do `Contexto Conversa`, a regra com
+  os gatilhos, a cláusula universal, a retomada do inglês e a exceção na CHECAGEM FINAL. Reprova a
+  E013 publicada. Não tenta reconhecer diretivas concorrentes por redação.
+- **Gate ao vivo (o critério real, depois de publicar):** "não entendi" em A2, B1, B2 e C1 recebe
+  apoio em português; o turno seguinte volta ao inglês; e o **controle** "ok ok ok" em B2 **não**
+  vira português — risco levantado pelo verifier, porque o AJUSTE DINÂMICO trata monossílabos como
+  insegurança.
+- **Depende de:** E013 (publicada)
+- **Status:** TODO
+
+### Execução combinada de E014b + E015
+Sequencial (as duas editam o mesmo arquivo e a mesma lista fechada), offline, com **uma**
+publicação no fim — com aval do Breno, porque o evento é o bot ao vivo — seguida do gate ao vivo
+das duas.

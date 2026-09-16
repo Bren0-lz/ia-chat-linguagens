@@ -1,8 +1,8 @@
 # Estado do loop
 
-- **Tarefa atual:** E014 a redesenhar (clausula de prioridade universal + probe ao vivo), depois E015. **E013 PUBLICADA E VERIFICADA AO VIVO.** EVENTO EM 22/09/2026
+- **Tarefa atual:** E015 (em curso), depois E014b (redesenhada). Uma publicacao no fim, com aval do Breno. E013 PUBLICADA E VERIFICADA AO VIVO. EVENTO EM 22/09/2026
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
-- **Tentativas na atual:** 3/3 — BLOCKED
+- **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum. Ambiente restabelecido em 16/09 (Breno reiniciou o Docker). Duas quedas do Docker em tres dias — maior risco do dia 22. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
@@ -357,3 +357,5 @@
 - 2026-09-16 **VERIFICADA AO VIVO** com `vivo_idioma_niveis_evento.js` (novo), um aluno por nivel, frase neutra "hi! i like games", execs 4566-4570: A1 e A2 com a mensagem INTEIRA traduzida na linha 🇧🇷; B1 com SO a pergunta traduzida; B2 e C1 em ingles integral. Nas cinco a linha 🇧🇷 e a ULTIMA. PASSOU.
 - 2026-09-16 O CASO DO BRENO RESOLVIDO: o A2, que recebia 100% ingles, agora recebe "Hey Marina! ... What kind of games do you like to play? 😊 / 🇧🇷 Ei Marina! Que legal! Eu adoro jogos tambem. Que tipo de jogos voce gosta de jogar?".
 - 2026-09-16 O SCRIPT AO VIVO E A COBERTURA QUE FALTAVA: a Fase B media o A1 como bilingue e B2/C1 para correcao, mas ninguem media o primeiro turno de A2/B1. Foi a lacuna por onde o defeito do Breno passou.
+- 2026-09-16 O Breno pediu "roda a E014 redesenhada e a E015". Escopo da E014b escrito no PLAN antes de delegar: clausula de prioridade UNIVERSAL no lugar da precedencia nomeada uma a uma, SEM o detector de linha solta (inalcancavel), e o criterio real passa a ser o probe AO VIVO — incluindo o controle "ok ok ok" em B2, que nao pode virar portugues.
+- 2026-09-16 ORDEM: E015 primeiro, E014b depois, SEQUENCIAL — as duas editam o evento.json e a lista fechada do testa_arquivo_evento.js, e edicao concorrente ali daria conflito. Uma publicacao no fim.
