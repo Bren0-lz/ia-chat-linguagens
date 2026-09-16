@@ -1,9 +1,9 @@
 # Estado do loop
 
-- **Tarefa atual:** **E014 BLOCKED** (3 reprovacoes) — decisao do Breno pendente. E013 DONE, NAO PUBLICADA. O EVENTO ESTA NO AR com a politica ANTIGA
+- **Tarefa atual:** PUBLICAR A E013 — **BLOQUEADO POR AMBIENTE** (Docker Desktop fora de novo, Postgres com a porta fechada). E014 guardada em branch wip/e014-rede-de-seguranca para redesenho
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
 - **Tentativas na atual:** 3/3 — BLOCKED
-- **Bloqueios:** nenhum. Ambiente restabelecido em 14/09 (Breno reiniciou Docker e subiu o n8n). T010 e T030 ADIADOS por decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
+- **Bloqueios:** AMBIENTE (16/09) — Docker Desktop nao responde e o Postgres esta com a porta 5433 FECHADA. O bot AO VIVO esta sem banco. n8n e ngrok de pe. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
 
@@ -347,3 +347,8 @@
 - 2026-09-16 DIAGNOSTICO QUE MUDA A DECISAO, e e contra mim: o problema NAO e o implementer errando tres vezes. O CRITERIO QUE EU ESCREVI e inalcancavel por construcao — "reconhecer qualquer diretiva que proiba portugues, em qualquer redacao" e linguagem natural, e regex nao resolve nas duas direcoes ao mesmo tempo. Uma quarta tentativa na mesma linha daria o mesmo FAIL com outras frases. E a mesma licao do T005c: a regra e o texto que a mede nao podem nascer da mesma cabeca, e metrica sobre linguagem natural precisa ser validada contra redacoes que ninguem escolheu.
 - 2026-09-16 PROBLEMA ESTRUTURAL POR TRAS, visivel so com interests preenchidos (as fixtures usavam interests: []): o prompt montado tem VARIAS regras que se declaram obrigatorias ou prioritarias e nao se citam — "GANCHO OBRIGATORIO DESTE TURNO ... se a pergunta final nao for sobre esse tema, o turno falhou" colide com "nao troque de assunto"; e a RECIPROCIDADE em short_streak>=2 ("ha?", gatilho da propria ajuda) traz "PRECEDENCIA NESTE TURNO". Nomear concorrentes uma a uma e corrida sem fim.
 - 2026-09-16 ESTADO DO DISCO: o evento.json no working tree tem E013 (commitada) + E014 T3 (NAO commitada), e o testa_idioma_niveis_evento.js tambem esta modificado. Nada disso foi commitado porque nao passou. Publicar so a E013 exige descartar a E014 do working tree antes.
+- 2026-09-16 DECISAO DO BRENO sobre a E014 bloqueada: PUBLICAR A E013 AGORA e redesenhar a E014 depois — clausula de prioridade UNIVERSAL ("pedido de ajuda vence todas as regras deste prompt") e o probe ao vivo "nao entendi" como criterio real, no lugar do detector regex.
+- 2026-09-16 E014 GUARDADA sem se perder na branch local `wip/e014-rede-de-seguranca` (NAO pushada). A main voltou ao estado da E013: conferido que A2 e B1 tem a linha 🇧🇷, nenhum nivel tem proibicao sob pedido, e a AJUDA SOB PEDIDO nao esta presente. Gate verde.
+- 2026-09-16 **A PUBLICACAO DA E013 NAO FOI FEITA: O AMBIENTE CAIU DE NOVO.** A checagem com query real (a licao da E010) pegou: Postgres ECONNREFUSED com a porta 5433 FECHADA, e o Docker Desktop sem responder ("open //./pipe/dockerDesktopLinuxEngine: cannot find the file"). n8n (5678) e ngrok (4040) de pe.
+- 2026-09-16 CONSEQUENCIA IMEDIATA, mais grave que a publicacao: **O BOT AO VIVO ESTA SEM BANCO.** Quem mandar mensagem agora trava no "Carregar Aluno" e nao recebe resposta. E a segunda vez em tres dias (14/09 foi "WSL update required") — a 6 dias do evento, a infra local do Docker e o maior risco do dia 22, maior que qualquer defeito de prompt.
+- 2026-09-16 NAO tentei subir o Docker — e regra do CLAUDE.md. Nao publiquei com o banco fora — republicar com o Postgres morto nao mudaria nada para o participante e misturaria duas falhas.
