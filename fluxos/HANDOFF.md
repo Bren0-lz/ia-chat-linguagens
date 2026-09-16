@@ -47,8 +47,9 @@ foi reescrito nesse ponto — confie nesta seção e confira no n8n.
 |---|---|---|
 | E001–E004, E007, E008, E011, E012 | main | sim |
 | **E013** — escada de idioma (A2/B1 ganham linha 🇧🇷) | main | **sim, verificada ao vivo** |
-| **E015** — `/menu` e tela de modos param de prometer "refazer o teste" | main (`18aceb8`) | **NÃO** |
-| **E014b** — ajuda sob pedido | branch **`wip/e014b-t2`** | **NÃO** |
+| **E015** — `/menu` e tela de modos param de prometer "refazer o teste" | main (`18aceb8`) | **sim** (16/09) |
+| **E014b** — ajuda sob pedido | main (`3643969`) | **sim** (16/09); probe ao vivo saiu 2 — **leitura de A2/B1 pendente** em `tr_ajuda_sob_pedido_evento.md` |
+| **E016** — tradução como `inglês / linha em branco / 🇧🇷: tradução` | main (`fa6a041`) | **sim, verificada ao vivo** (18/18) |
 
 ### A tarefa em aberto: E014b (tentativa 2 de 3 reprovada)
 

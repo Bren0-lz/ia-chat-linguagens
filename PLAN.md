@@ -963,4 +963,4 @@ das duas.
 - **Gate offline:** o `Dividir Resposta` executado sobre as saídas reais (4585, 4587, baseline)
   entrega o formato; resposta sem 🇧🇷 sai intacta; reprova a versão publicada.
 - **Gate ao vivo:** `vivo_linha_br_evento.js` — formato em todos os turnos de A1/A2/B1.
-- **Status:** DONE (fa6a041), em 2 tentativas — a T1 partia a frase na primeira 🇧🇷 em qualquer nível; a T2 só normaliza em A1/A2/B1 e só a bandeira que abre tradução. Limite declarado: "Go Brazil! 🇧🇷 What city?" em A1/A2/B1. **NÃO PUBLICADA** (aguarda aval do Breno).
+- **Status:** DONE (fa6a041), em 2 tentativas — a T1 partia a frase na primeira 🇧🇷 em qualquer nível; a T2 só normaliza em A1/A2/B1 e só a bandeira que abre tradução. Limite declarado: "Go Brazil! 🇧🇷 What city?" em A1/A2/B1. **PUBLICADA em 16/09**; ao vivo formato 18/18 (antes 0/18), conferido pelo Breno no Telegram.

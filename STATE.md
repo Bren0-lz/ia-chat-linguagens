@@ -1,6 +1,6 @@
 # Estado do loop
 
-- **Tarefa atual:** nenhuma em execucao. E016 DONE e NAO publicada (aguarda aval do Breno); depois de publicar, rodar vivo_linha_br_evento.js e limpar usuarios de teste. EVENTO EM 22/09/2026
+- **Tarefa atual:** nenhuma em execucao. Pendentes do Breno: leitura dos socorros A2/B1 (tr_ajuda_sob_pedido_evento.md) e decidir tarefa para a correcao inventada no A1 ("I plays"). EVENTO EM 22/09/2026
 - **Última concluída:** E016 (fa6a041) — linha traduzida como ingles / linha em branco / 🇧🇷: traducao
 - **Tentativas na atual:** 0/3
 - **Bloqueios:** nenhum. Ambiente restabelecido em 16/09 (Breno reiniciou o Docker). As "quedas" de 14/09 e 16/09 eram o Docker Desktop nao iniciado (Breno, 16/09) — nao e risco do evento; banco fora = pedir ao Breno para iniciar o Docker. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
@@ -377,3 +377,4 @@
 - 2026-09-16 E014b + E015 PUBLICADAS no evento (corta_para_evento.js, exit 0; evento ativo com gatilho, v7.4 inativo). Probe ao vivo da E014b: saida 2 — parte automatica verde (B2, C1, controle ok x3); socorros de A2/B1 aguardam leitura do Breno em tr_ajuda_sob_pedido_evento.md.
 - 2026-09-16 RELATO DO BRENO (conta real, A1): turno 1 sem traducao; traducao so apos "não entendi" e colada ao ingles. Execucoes 4584/4585/4587 confirmaram; 4587 tambem "corrigiu" um I plays que ele nao escreveu (copia do exemplo do T012 — nao tratado, candidato a tarefa). Linha de base ao vivo: traduzida 18/18 sem pedir (o turno sem traducao nao se repetiu; o Breno confirmou que traduz), formato 0/18.
 - 2026-09-16 E016 T1 REPROVADA pelo verifier (bandeira-emoji no meio da frase quebrava a mensagem, em todos os niveis). T2 APROVADA: so A1/A2/B1, so a bandeira que abre traducao; as 18 saidas reais da linha de base viram o formato. Gate 31 comandos exit 0.
+- 2026-09-16 E016 PUBLICADA (corta_para_evento.js exit 0, banco conferido com query). Ao vivo (tr_linha_br_evento_pos_e016_2026-09-16.md): A1/A2/B1 traduzida 6/6 e formato 6/6 cada (antes: formato 0/18). O Breno conferiu no Telegram: formato certo. Usuarios de teste limpos.
