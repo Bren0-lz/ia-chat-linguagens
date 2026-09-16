@@ -145,7 +145,7 @@ o Breno para iniciar o Docker; não trate como incidente. Antes de qualquer trab
 | `publica_evento.js` | **obsoleto** para o evento no ar (modo ensaio, gatilho desligado) |
 | `vivo_idioma_niveis_evento.js` | o que cada nível recebe no primeiro turno (E013) — **passou ao vivo** |
 | `vivo_duvida_markdown.js` / `vivo_topico_uma_vez.js` | rota da dúvida e par cabeçalho+feedback do Professor |
-| `vivo_ajuda_sob_pedido_evento.js` | probe da E014b — **só na branch**, com o defeito descrito acima |
+| `vivo_ajuda_sob_pedido_evento.js` | **E014b ao vivo** (exige n8n, Postgres, LLM e o evento publicado; **não é gate**) — em A2, B1, B2 e C1: frase em inglês → "não entendi" → frase normal (volta ao inglês do nível); controle B2 "ok" ×3 sem português. **B2/C1:** veredito automático de apoio em português. **A2/B1: sem veredito automático sobre o socorro** — duas tentativas de detector (mais português; marca + sobreposição de palavras) erraram nas duas direções (armadilha nº 29); o probe só junta sinais e grava o par na seção **LEITURA OBRIGATÓRIA** da transcrição `tr_ajuda_sob_pedido_evento*.md` (nunca sobrescreve). Resposta vazia continua reprovando. Sai **1** em falha, **2** com a parte automática verde e leitura pendente (não é aprovação), **0** só sem nada a ler. Julga a saída do `Agente Conversa` no `runData` e exige a cláusula universal no `Prompt Conversa` publicado. `--autoteste` prova, offline, que nenhuma saída A2/B1 (certa ou errada) é aprovada automaticamente |
 | `parcial.js` | a bateria sobrevive à morte do processo (`--continuar`) |
 
 Transcrições do evento (evidência, não apagar): `tr_bateria_a_evento_2026-09-14.md` (Fase A: 14

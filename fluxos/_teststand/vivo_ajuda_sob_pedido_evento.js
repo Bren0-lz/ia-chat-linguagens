@@ -9,10 +9,9 @@
 // Roteiro, por aluno de teste novo:
 //   A2, B1, B2, C1 — (1) frase em ingles  (2) "não entendi"  (3) frase normal em ingles
 //     (2) tem de trazer apoio em portugues:
-//         B2/C1 -> portugues de verdade na resposta (o padrao do nivel e ingles integral);
-//         A2/B1 -> MAIS portugues que no turno (1), que ja tem a linha 🇧🇷 por padrao, E uma marca
-//                  de EXPLICACAO ("quer dizer", "eu perguntei"...) E continuidade do assunto da
-//                  resposta anterior (heuristicas declaradas junto de `julgaAjuda`).
+//         B2/C1 -> VEREDITO AUTOMATICO: portugues de verdade na resposta (o padrao do nivel e
+//                  ingles integral). A continuidade do assunto fica para a leitura da transcricao.
+//         A2/B1 -> SEM VEREDITO AUTOMATICO: LEITURA HUMANA OBRIGATORIA (ver `julgaAjuda`).
 //     (3) tem de voltar ao ingles do nivel:
 //         B2/C1 -> sem portugues e sem linha 🇧🇷;
 //         A2/B1 -> corpo em ingles e a linha 🇧🇷 como ULTIMA linha (o formato normal).
@@ -24,7 +23,11 @@
 // `conversa`, o texto e a saida do `Agente Conversa`, e o `Prompt Conversa <nivel>` executado tem de
 // ter a clausula universal (se nao tiver, o fluxo no ar e o velho — nao republicaram).
 // Resposta vazia NUNCA e aprovacao (armadilha nº 1). Turnos do mesmo aluno espacados em >=12 s
-// (armadilha nº 7). Imprime todas as respostas: abra a transcricao antes de reportar (nº 9).
+// (armadilha nº 7). Tudo vai para a transcricao `tr_ajuda_sob_pedido_evento*.md` (nome nunca
+// sobrescreve evidencia — armadilha nº 22), gravada turno a turno.
+//
+// Saida:  1 = alguma falha automatica · 2 = parte automatica verde, MAS a leitura humana de A2/B1
+//         esta pendente (nao e aprovacao — armadilha nº 24) · 0 = so quando nada ficou para ler.
 //
 // Escreve so em alunos de teste (faixa 990000000-999999999; `db/cleanup_test_users.js` apaga).
 // Uso:  node fluxos/_teststand/vivo_ajuda_sob_pedido_evento.js
@@ -49,23 +52,13 @@ function corpo(t) { return linhas(t).filter(l => !linhaBR(l)).join('\n'); }
 function temBR(t) { return linhas(t).some(linhaBR); }
 function ultimaBR(t) { const ls = linhas(t); return ls.length > 0 && linhaBR(ls[ls.length - 1]); }
 
-// A2/B1 — o formato padrao desses niveis JA traz portugues (a linha 🇧🇷), entao "mais portugues"
-// sozinho aprova qualquer resposta mais longa (tentativa 1, reprovada pelo verifier). O socorro
-// tem de mostrar duas coisas que o formato normal NAO produz — HEURISTICA declarada, nao
-// reconhecimento de toda parafrase (o erro que bloqueou a E014); a transcricao e lida por humano:
-//   (a) MARCA DE EXPLICACAO: uma lista curta e fechada de expressoes de quem explica o que disse,
-//       e nao so traduz ("quer dizer", "significa", "eu perguntei", "eu disse", "quis dizer",
-//       "ou seja", "em outras palavras", "estou perguntando"). Explicacao com outra redacao
-//       reprova aqui — falso vermelho possivel, e a transcricao decide.
-//   (b) CONTINUIDADE: a regra manda repetir a MESMA ideia do turno anterior, sem trocar de assunto.
-//       Mede-se por palavras de conteudo (>=4 letras, fora da lista de palavras vazias, plural
-//       reduzido) do corpo em INGLES da resposta anterior do bot que reaparecem no corpo em INGLES
-//       do socorro: exige ao menos UMA. Fraca por construcao (pergunta nova que reusa "friends"
-//       passa) — por isso vem junto com (a), e nao sozinha.
-// B2/C1 — (a) NAO se aplica: repetir a mesma ideia em portugues claro, sem "quer dizer", e socorro
-// valido pela regra. (b) NAO cabe sem criterio fragil: a resposta anterior esta em ingles e o
-// socorro em portugues, e casar assunto entre idiomas exigiria dicionario. Declarado: em B2/C1 a
-// continuidade fica para a leitura humana da transcricao.
+// A2/B1 — o formato padrao desses niveis JA traz portugues (a linha 🇧🇷). Duas tentativas de
+// veredito automatico reprovaram no verifier: "mais portugues" aprovava qualquer resposta mais
+// longa (T1); marca de explicacao + sobreposicao de palavras ainda aprovava 3 de 14 saidas erradas
+// (troca de assunto que reusa "friends") e reprovava 5 de 9 certas (T2). E a armadilha nº 29:
+// reconhecer "explicou a mesma ideia" e linguagem natural, regex nao alcanca nas duas direcoes.
+// Decisao (T3): em A2/B1 NAO ha veredito automatico sobre o socorro. O detector so produz SINAIS
+// para orientar quem le — nunca aprova e nunca reprova, exceto resposta vazia.
 const MARCA_EXPLICACAO = /quer\s+dizer|significa|eu\s+perguntei|perguntei\s+(?:se|que|qual|quais|o\s+que|sobre|como)|eu\s+disse|eu\s+falei|quis\s+dizer|ou\s+seja|em\s+outras\s+palavras|estou\s+perguntando/i;
 const EN_VAZIAS = new Set(('what with your you that this have like about would there they them their when where which '
   + 'also really just some more most very much from into then than been were will sure cool nice okay great '
@@ -75,25 +68,28 @@ function conteudoEN(t) {
   return new Set(palavras(corpo(t)).map(w => w.replace(/'s$/, '').replace(/s$/, ''))
     .filter(w => w.length >= 4 && !EN_VAZIAS.has(w) && !EN_VAZIAS.has(w + 's')));
 }
+const PERGUNTA_LEITURA = 'O socorro explica em portugues a MESMA ideia da resposta anterior (sem abrir pergunta nova nem trocar de assunto)?';
 
-// devolve a lista do que falhou; vazio = aprovado
+// { falhas: [...], sinais: [...], ler: bool }
+//   falhas vazias + ler=false -> aprovado automaticamente (so B2/C1)
+//   ler=true                  -> sem veredito: a transcricao decide (A2/B1)
 function julgaAjuda(nivel, texto, textoBase) {
-  const p = [];
-  if (!String(texto || '').trim()) return ['resposta VAZIA (vazio nao e aprovacao)'];
+  const r = { falhas: [], sinais: [], ler: false };
+  if (!String(texto || '').trim()) { r.falhas.push('resposta VAZIA (vazio nao e aprovacao)'); return r; }
   const n = contaPT(texto);
   if (nivel === 'B2' || nivel === 'C1') {
     const total = palavras(texto).length || 1;
-    if (n < 4 || n / total < 0.3) p.push('sem apoio em portugues (' + n + ' palavras PT de ' + total + ')');
-  } else {
-    if (n < 4) p.push('sem apoio em portugues (' + n + ' palavras PT)');
-    const nb = contaPT(textoBase);
-    if (!(n > nb)) p.push('nao ha MAIS portugues que no turno padrao (' + n + ' <= ' + nb + ')');
-    if (!MARCA_EXPLICACAO.test(texto)) p.push('sem marca de EXPLICACAO ("quer dizer", "eu perguntei"...): parece so o formato padrao');
-    const antes = conteudoEN(textoBase), agora = conteudoEN(texto);
-    const comuns = [...agora].filter(w => antes.has(w));
-    if (comuns.length < 1) p.push('trocou de assunto: nenhuma palavra de conteudo da resposta anterior (' + [...antes].join(',') + ') reaparece no ingles do socorro');
+    if (n < 4 || n / total < 0.3) r.falhas.push('sem apoio em portugues (' + n + ' palavras PT de ' + total + ')');
+    return r;
   }
-  return p;
+  r.ler = true;
+  const nb = contaPT(textoBase);
+  r.sinais.push('palavras PT: ' + n + ' no socorro x ' + nb + ' no turno anterior');
+  r.sinais.push('marca de explicacao ("quer dizer", "eu perguntei"...): ' + (MARCA_EXPLICACAO.test(texto) ? 'sim' : 'nao'));
+  const antes = conteudoEN(textoBase);
+  const comuns = [...conteudoEN(texto)].filter(w => antes.has(w));
+  r.sinais.push('palavras de conteudo em ingles repetidas da resposta anterior: ' + (comuns.join(', ') || 'nenhuma'));
+  return r;
 }
 function julgaVolta(nivel, texto) {
   const p = [];
@@ -114,9 +110,23 @@ function julgaControle(texto) {
   return p;
 }
 
+// bloco de LEITURA OBRIGATORIA da transcricao: o par inteiro, os sinais e a pergunta a responder
+function blocoLeitura(nivel, uid, textoBase, texto, sinais) {
+  const cita = (t) => String(t || '(VAZIO)').split('\n').map(l => '> ' + l).join('\n');
+  return '\n### LER — ' + nivel + ' (uid ' + uid + ')\n\n'
+    + '**Pergunta:** ' + PERGUNTA_LEITURA + '\n\n'
+    + '**Resposta anterior do bot:**\n\n' + cita(textoBase) + '\n\n'
+    + '**Aluno:** "não entendi"\n\n'
+    + '**Socorro:**\n\n' + cita(texto) + '\n\n'
+    + '**Sinais (nao sao veredito):**\n' + sinais.map(s => '- ' + s).join('\n') + '\n\n'
+    + '**Veredito humano:** ☐ SIM · ☐ NAO\n';
+}
+
 function autoteste() {
   let f = 0;
   const t = (c, m) => { if (!c) { f++; console.log('  ✗ ' + m); } else console.log('  ✓ ' + m); };
+  const semVeredito = (r) => !!r && r.ler === true && Array.isArray(r.falhas) && r.falhas.length === 0;
+  const aprovado = (r) => !!r && r.ler === false && Array.isArray(r.falhas) && r.falhas.length === 0;
   const EN_B2 = "Totally fair! Strategy games reward patience, and that's rare these days. Would you rather design a game or compete in one?";
   const PT_B2 = 'Sem problema! Eu perguntei se você prefere criar um jogo ou competir em um. É uma pergunta sobre o que você gosta mais de fazer.';
   const MISTO_B2 = 'No worries! I asked if you would rather create a game or compete. (Criar ou competir?)';
@@ -125,29 +135,55 @@ function autoteste() {
   const A2_IGUAL = "Sure! What game do you play?\n🇧🇷 Claro! Que jogo você joga?";
   const A2_PT_CORPO = "Tudo bem, vamos falar em português então. Qual jogo você joga?\n🇧🇷 Qual jogo você joga?";
   const A2_BR_NO_MEIO = "🇧🇷 Legal! Que jogo você joga?\nCool! What game do you play?";
-  // ajuda — direcao que tem de REPROVAR
-  t(julgaAjuda('B2', EN_B2).length > 0, 'ajuda B2: reprova resposta 100% em ingles');
-  t(julgaAjuda('B2', '').length > 0, 'ajuda B2: reprova resposta vazia');
-  t(julgaAjuda('C1', MISTO_B2).length > 0, 'ajuda C1: reprova ingles com um parentese de portugues');
-  t(julgaAjuda('A2', A2_IGUAL, A2_BASE).length > 0, 'ajuda A2: reprova o formato padrao (nao mais portugues que o turno 1)');
-  t(julgaAjuda('A2', '', A2_BASE).length > 0, 'ajuda A2: reprova resposta vazia');
-  // As duas saidas erradas que o verifier achou (tentativa 1): ignoram o "nao entendi", abrem pergunta
-  // nova e so estao no formato padrao um pouco mais longo. O detector v1 aprovava as duas.
   const A2_BASE_G = "Cool! What games do you play with your friends?\n🇧🇷 Legal! Que jogos você joga com seus amigos?";
-  const A2_ERRADA_VERIFIER = "Nice! Do you also watch movies with your friends on the weekend?\n🇧🇷 Legal! Você também assiste filmes com seus amigos no fim de semana quando não está jogando?";
   const B1_BASE_G = "That sounds fun! What kind of games do you play with your friends?\n🇧🇷 Que tipo de jogos você joga com seus amigos?";
-  const B1_ERRADA_VERIFIER = "Nice! Do you also like watching movies with your friends when you are not playing?\n🇧🇷 Você também gosta de assistir filmes com seus amigos quando não está jogando?";
-  const B1_MARCA_MAS_TROCOU = "Sorry! I asked about movies. Do you watch movies at home?\n🇧🇷 Desculpa! Eu perguntei sobre filmes: você assiste filmes em casa? Quer dizer, você vê filmes em casa com seus amigos?";
+  // saidas ERRADAS: as da T1 (pergunta nova, formato padrao) e a classe que enganou a T2 —
+  // marca de explicacao + troca de assunto reusando "friends"
+  const A2_ERRADA_T1 = "Nice! Do you also watch movies with your friends on the weekend?\n🇧🇷 Legal! Você também assiste filmes com seus amigos no fim de semana quando não está jogando?";
+  const B1_ERRADA_T1 = "Nice! Do you also like watching movies with your friends when you are not playing?\n🇧🇷 Você também gosta de assistir filmes com seus amigos quando não está jogando?";
+  const B1_ERRADA_T2 = "Sorry! I mean: do you go to the beach with your friends?\n🇧🇷 Desculpa! Quer dizer: você vai à praia com seus amigos?";
+  // saidas CERTAS, inclusive com redacao que a T2 reprovava (sem marca da lista, sem palavra repetida)
   const A2_AJUDA_G = "No problem! I asked: what games do you play with your friends?\n🇧🇷 Sem problema! Eu perguntei que jogos você joga com seus amigos. 'Games' quer dizer jogos.";
   const B1_AJUDA_G = "No problem! I asked what kind of games you play with your friends.\n🇧🇷 Sem problema! Eu perguntei que tipo de jogos você joga com seus amigos — 'kind of' quer dizer 'tipo de'.";
-  t(julgaAjuda('A2', A2_ERRADA_VERIFIER, A2_BASE_G).length > 0, 'ajuda A2: reprova a saida errada do verifier (ignora o pedido, pergunta nova sobre filmes)');
-  t(julgaAjuda('B1', B1_ERRADA_VERIFIER, B1_BASE_G).length > 0, 'ajuda B1: reprova a saida errada do verifier (pergunta nova, traducao normal)');
-  t(julgaAjuda('B1', B1_MARCA_MAS_TROCOU, B1_BASE_G).length > 0, 'ajuda B1: reprova marca de explicacao com TROCA de assunto (a continuidade tem dente proprio)');
-  // ajuda — direcao que tem de APROVAR
-  t(julgaAjuda('A2', A2_AJUDA_G, A2_BASE_G).length === 0, 'ajuda A2: aprova socorro certo (explica e retoma games/friends)');
-  t(julgaAjuda('B1', B1_AJUDA_G, B1_BASE_G).length === 0, 'ajuda B1: aprova socorro certo (explica e retoma games/friends)');
-  t(julgaAjuda('B2', PT_B2).length === 0, 'ajuda B2: aprova resposta em portugues');
-  t(julgaAjuda('A2', A2_AJUDA, A2_BASE).length === 0, 'ajuda A2: aprova reforco em portugues maior que o padrao');
+  const B1_CERTA_SEM_MARCA = "Let me say it another way: which ones do you and your buddies enjoy most?\n🇧🇷 Vou falar de outro jeito: de quais jogos você e seus amigos mais gostam de jogar juntos?";
+
+  // A2/B1 — NENHUMA saida recebe veredito automatico, certa ou errada (reprova as tentativas 1 e 2,
+  // que devolviam lista vazia = aprovado para as certas e para parte das erradas)
+  const casosA2B1 = [
+    ['A2', A2_ERRADA_T1, A2_BASE_G, 'errada T1 (filmes)'], ['B1', B1_ERRADA_T1, B1_BASE_G, 'errada T1 (filmes)'],
+    ['B1', B1_ERRADA_T2, B1_BASE_G, 'errada T2 (marca + praia reusando friends)'],
+    ['A2', A2_IGUAL, A2_BASE, 'formato padrao'],
+    ['A2', A2_AJUDA_G, A2_BASE_G, 'certa (games/friends)'], ['B1', B1_AJUDA_G, B1_BASE_G, 'certa (games/friends)'],
+    ['B1', B1_CERTA_SEM_MARCA, B1_BASE_G, 'certa sem marca da lista'], ['A2', A2_AJUDA, A2_BASE, 'certa (reforco)'],
+  ];
+  for (const [nv, tx, base, rot] of casosA2B1) {
+    const r = julgaAjuda(nv, tx, base);
+    t(semVeredito(r), 'ajuda ' + nv + ' ' + rot + ': sem veredito automatico, vai para LEITURA');
+    t(!aprovado(r), 'ajuda ' + nv + ' ' + rot + ': nunca aprovada automaticamente');
+    t(r && Array.isArray(r.sinais) && r.sinais.length === 3, 'ajuda ' + nv + ' ' + rot + ': traz os tres sinais para quem le');
+  }
+  const vazioA2 = julgaAjuda('A2', '', A2_BASE_G);
+  t(vazioA2.falhas.length > 0, 'ajuda A2: resposta vazia continua REPROVANDO (vazio nao vai para leitura)');
+  t(!aprovado(julgaAjuda('B1', '   ', B1_BASE_G)), 'ajuda B1: so espacos nao e aprovado');
+  // sinais descrevem o que viram (nao sao enfeite)
+  const sE = julgaAjuda('B1', B1_ERRADA_T2, B1_BASE_G).sinais.join(' | ');
+  t(/marca de explicacao[^|]*: sim/.test(sE) && /friend/.test(sE), 'sinais: marca e palavra reusada aparecem na saida enganosa da T2');
+  const sC = julgaAjuda('B1', B1_CERTA_SEM_MARCA, B1_BASE_G).sinais.join(' | ');
+  t(/marca de explicacao[^|]*: nao/.test(sC) && /repetidas[^|]*: nenhuma/.test(sC), 'sinais: ausencia de marca e de palavra repetida e dita, nao escondida');
+
+  // B2/C1 — veredito automatico mantido
+  t(julgaAjuda('B2', EN_B2).falhas.length > 0, 'ajuda B2: reprova resposta 100% em ingles');
+  t(julgaAjuda('B2', '').falhas.length > 0, 'ajuda B2: reprova resposta vazia');
+  t(julgaAjuda('C1', MISTO_B2).falhas.length > 0, 'ajuda C1: reprova ingles com um parentese de portugues');
+  t(aprovado(julgaAjuda('B2', PT_B2)), 'ajuda B2: aprova resposta em portugues');
+  t(aprovado(julgaAjuda('C1', PT_B2)), 'ajuda C1: aprova resposta em portugues');
+
+  // transcricao de leitura: o par inteiro, a pergunta e os sinais
+  const bl = blocoLeitura('B1', 990000001, B1_BASE_G, B1_ERRADA_T2, julgaAjuda('B1', B1_ERRADA_T2, B1_BASE_G).sinais);
+  t(bl.includes('> Sorry! I mean') && bl.includes('> That sounds fun!') && bl.includes('> 🇧🇷 Desculpa!'), 'leitura: traz as duas respostas inteiras, linha 🇧🇷 inclusive');
+  t(bl.includes(PERGUNTA_LEITURA) && /Veredito humano/.test(bl), 'leitura: traz a pergunta e o espaco do veredito humano');
+  t(blocoLeitura('A2', 1, A2_BASE, '', []).includes('(VAZIO)'), 'leitura: vazio aparece como (VAZIO), nao como bloco em branco');
+
   // volta
   t(julgaVolta('B2', EN_B2).length === 0, 'volta B2: aprova ingles integral');
   t(julgaVolta('B2', PT_B2).length > 0, 'volta B2: reprova portugues permanente');
@@ -164,23 +200,32 @@ function autoteste() {
   // o contador nao pode inflar ingles comum
   t(contaPT("So, do you play on a team or as a solo player? Me neither, um, I'm not sure.") === 0,
     'contador PT: zero numa frase inglesa com "so", "do", "on", "as", "me", "um"');
-  console.log('\n' + (f ? 'AUTOTESTE REPROVOU: ' + f : 'AUTOTESTE PASSOU: detectores nas duas direcoes'));
+  console.log('\n' + (f ? 'AUTOTESTE REPROVOU: ' + f : 'AUTOTESTE PASSOU: detectores nas duas direcoes, A2/B1 sem veredito automatico'));
   process.exit(f ? 1 : 0);
 }
 if (process.argv.includes('--autoteste')) autoteste();
 
 // ---------------- probe ao vivo ----------------
 process.env.IACHAT_TEST_PATH = 'iachat-test-evento';
+const fs = require('fs');
 require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.env') });
 const { Client } = require('pg');
 const { msg, digest, nodeOut, sleep } = require('./harness');
+const { rotuloDe, transcricaoDe, caminhoLivre } = require('./alvo');
 
 const ESPACO_MS = 13000;   // armadilha nº 7
 const UNIVERSAL = /vence\s+TODAS\s+as\s+demais\s+regras\s+deste\s+prompt/i;
 const BASE_UID = 990000000 + (Date.now() % 8000000);
+const TR = caminhoLivre(transcricaoDe('tr_ajuda_sob_pedido', process.env.IACHAT_TEST_PATH), fs.existsSync, Date.now());
 
 let fails = 0;
-function ok(cond, texto) { if (!cond) { fails++; console.log('  ✗ ' + texto); } else console.log('  ✓ ' + texto); }
+const leituras = [];
+function tr(s) { fs.appendFileSync(TR, s + '\n'); }
+function ok(cond, texto) {
+  const l = (cond ? '  ✓ ' : '  ✗ ') + texto;
+  if (!cond) fails++;
+  console.log(l); tr('- ' + (cond ? '✓ ' : '✗ ') + texto);
+}
 
 async function db(fn) {
   const c = new Client({ connectionString: process.env.DATABASE_URL });
@@ -201,6 +246,7 @@ async function semear(uid, nivel) {
 async function turno(uid, nivel, rotulo, text) {
   const exec = await msg(uid, text);
   console.log('\n--- ' + nivel + ' · ' + rotulo + ' · aluno: ' + JSON.stringify(text));
+  tr('\n#### ' + nivel + ' · ' + rotulo + ' · aluno: ' + JSON.stringify(text));
   if (!exec) { ok(false, nivel + ' ' + rotulo + ': a mensagem nao gerou execucao'); return null; }
   const d = digest(exec);
   const rd = exec.data && exec.data.resultData && exec.data.resultData.runData;
@@ -209,6 +255,7 @@ async function turno(uid, nivel, rotulo, text) {
   const ag = nodeOut(rd, 'Agente Conversa');
   const texto = String((ag && ag.output) || '').trim();
   console.log('exec ' + d.id + ' · rota ' + (rot && rot.route) + '\n' + (texto || '(VAZIO)'));
+  tr('\nexec ' + d.id + ' · rota ' + (rot && rot.route) + '\n\n' + (texto || '(VAZIO)').split('\n').map(l => '> ' + l).join('\n') + '\n');
   ok(!!rot && rot.route === 'conversa', nivel + ' ' + rotulo + ': o Roteador registrou a rota conversa (foi ' + JSON.stringify(rot && rot.route) + ')');
   ok(!!pc && UNIVERSAL.test(String(pc.systemMessage || '')),
      nivel + ' ' + rotulo + ': o Prompt Conversa ' + nivel + ' executado tem a precedencia universal (senao o fluxo no ar e o velho)');
@@ -217,20 +264,31 @@ async function turno(uid, nivel, rotulo, text) {
 }
 
 (async () => {
+  fs.writeFileSync(TR, '# Ajuda sob pedido (E014b) ao vivo — ' + rotuloDe(process.env.IACHAT_TEST_PATH)
+    + ' — ' + new Date().toISOString() + '\n\n'
+    + 'A2/B1 nao tem veredito automatico sobre o socorro: a secao **LEITURA OBRIGATORIA** no fim decide.\n');
+  console.log('transcricao: ' + TR);
   const NIVEIS = ['A2', 'B1', 'B2', 'C1'];
   for (let i = 0; i < NIVEIS.length; i++) {
     const nivel = NIVEIS[i];
     const uid = BASE_UID + i;
     await semear(uid, nivel);
     console.log('\n===== ' + nivel + ' (uid ' + uid + ') =====');
+    tr('\n## ' + nivel + ' (uid ' + uid + ')');
     const t1 = await turno(uid, nivel, 'turno 1', 'I usually play video games with my friends after work.');
     await sleep(ESPACO_MS);
     const t2 = await turno(uid, nivel, 'nao entendi', 'não entendi');
     await sleep(ESPACO_MS);
     const t3 = await turno(uid, nivel, 'turno seguinte', 'I think strategy games are the best ones.');
     if (!t1 || !t2 || !t3) { ok(false, nivel + ': roteiro incompleto — nao conta como aprovado (armadilha nº 24)'); continue; }
-    const pa = julgaAjuda(nivel, t2.texto, t1.texto);
-    ok(pa.length === 0, nivel + ': "não entendi" recebe apoio em portugues' + (pa.length ? ' (' + pa.join(' ; ') + ')' : ''));
+    const ja = julgaAjuda(nivel, t2.texto, t1.texto);
+    if (ja.ler) {
+      console.log('  ? ' + nivel + ': "não entendi" — SEM VEREDITO AUTOMATICO, LER A TRANSCRICAO\n    ' + ja.sinais.join('\n    '));
+      tr('- ? ' + nivel + ': "não entendi" — LER A TRANSCRICAO (secao LEITURA OBRIGATORIA)');
+      leituras.push(blocoLeitura(nivel, uid, t1.texto, t2.texto, ja.sinais));
+    } else {
+      ok(ja.falhas.length === 0, nivel + ': "não entendi" recebe apoio em portugues' + (ja.falhas.length ? ' (' + ja.falhas.join(' ; ') + ')' : ''));
+    }
     const pv = julgaVolta(nivel, t3.texto);
     ok(pv.length === 0, nivel + ': o turno seguinte volta ao ingles do nivel' + (pv.length ? ' (' + pv.join(' ; ') + ')' : ''));
     if (i < NIVEIS.length - 1) await sleep(ESPACO_MS);
@@ -241,6 +299,7 @@ async function turno(uid, nivel, rotulo, text) {
   const uid = BASE_UID + NIVEIS.length;
   await semear(uid, 'B2');
   console.log('\n===== CONTROLE B2 "ok" x3 (uid ' + uid + ') =====');
+  tr('\n## CONTROLE B2 "ok" x3 (uid ' + uid + ')');
   let ultimo = null;
   for (let k = 1; k <= 3; k++) {
     if (k > 1) await sleep(ESPACO_MS);
@@ -253,7 +312,14 @@ async function turno(uid, nivel, rotulo, text) {
   ok(!!ultimo && !!ultimo.ctx && /inseguro/.test(String(ultimo.ctx.moodLine || '')),
      'controle B2 ok #3: o AJUSTE DINAMICO de aluno inseguro estava de fato no prompt (o cenario de risco foi montado)');
 
-  console.log('\n' + (fails ? 'REPROVOU: ' + fails + ' falha(s)'
-                            : 'PASSOU: ajuda sob pedido em A2/B1/B2/C1, volta ao ingles, e "ok" nao vira portugues'));
-  process.exit(fails ? 1 : 0);
+  if (leituras.length) tr('\n## LEITURA OBRIGATORIA\n' + leituras.join('\n'));
+  let resumo, codigo;
+  if (fails) { resumo = 'REPROVOU: ' + fails + ' falha(s)'; codigo = 1; }
+  else if (leituras.length) {
+    resumo = 'PARTE AUTOMATICA VERDE — NAO E APROVACAO: ' + leituras.length + ' socorro(s) de A2/B1 aguardam LEITURA HUMANA em ' + TR;
+    codigo = 2;
+  } else { resumo = 'PASSOU: ajuda sob pedido, volta ao ingles, e "ok" nao vira portugues'; codigo = 0; }
+  tr('\n**Resumo:** ' + resumo);
+  console.log('\n' + resumo);
+  process.exit(codigo);
 })().catch((e) => { console.error('FATAL', e); process.exit(1); });
