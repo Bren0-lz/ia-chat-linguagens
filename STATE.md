@@ -1,8 +1,8 @@
 # Estado do loop
 
-- **Tarefa atual:** E014 (rede de seguranca sob pedido). E013 DONE, NAO PUBLICADA. O EVENTO ESTA NO AR — o bot ainda responde com a politica ANTIGA ate publicarmos
+- **Tarefa atual:** E014 — REPROVADA na tentativa 1, devolvida ao implementer. E013 DONE, NAO PUBLICADA. O EVENTO ESTA NO AR com a politica ANTIGA
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
-- **Tentativas na atual:** 0/3
+- **Tentativas na atual:** 1/3
 - **Bloqueios:** nenhum. Ambiente restabelecido em 14/09 (Breno reiniciou Docker e subiu o n8n). T010 e T030 ADIADOS por decisao do Breno. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
@@ -331,3 +331,8 @@
 - 2026-09-14 A PROIBICAO DE AJUDAR SOB PEDIDO existia em QUATRO niveis (B1, B2, C1, C2), nao em dois como eu havia mapeado. O teste novo varre as variacoes de redacao ("mesmo que peca", "em nenhuma hipotese", "ou peca", "peca explicacao").
 - 2026-09-14 RESSALVA DO VERIFIER sobre o teto do A2 (30 -> 40): o A2 passa a ter o MESMO teto de ingles do B1, achatando a progressao A2 < B1. Sugeriu 32-35. Decisao de produto do Breno, registrada, nao alterada.
 - 2026-09-14 CORRIGIDO de passagem: a linha do `gate:evento` no CLAUDE.md dizia "as 7 diferencas declaradas" e ja estava velha quando eram 10. Agora aponta para a lista fechada em vez de cravar numero.
+- 2026-09-16 A SESSAO ANTERIOR TERMINOU COM A E014 NO MEIO. Conferido antes de assumir qualquer coisa: working tree LIMPO, nada gravado pelo implementer. Retomado o MESMO agente (guarda a analise dos prompts) em vez de disparar outro.
+- 2026-09-16 E014 REPROVADA NA TENTATIVA 1, e com razao. O implementer declarou a AJUDA SOB PEDIDO com precedencia sobre "a clausula de IDIOMA" e "o INCENTIVO AO INGLES". O verifier montou o systemMessage REAL a partir do `Contexto Conversa` e achou uma TERCEIRA proibicao nao nomeada: a linha AJUSTE DINAMICO (`MOOD_LOW_ADV`), que diz "NAO passe a escrever em portugues — a regra de idioma do nivel continua valendo INTEGRALMENTE".
+- 2026-09-16 E ELA ENTRA EXATAMENTE QUANDO O ALUNO ESTA TRAVADO: com pt_streak>=2 (segundo "nao entendi" em portugues) e TAMBEM SOZINHA com short_streak>=3 — tres "ha?" seguidos, que e um dos gatilhos da propria regra de ajuda. Ou seja, o gatilho da ajuda e o gatilho da proibicao sao o mesmo sinal.
+- 2026-09-16 E A §5.3 PELA TERCEIRA VEZ NESTE PROJETO: diretiva nao nomeada fica solta e ganha em silencio. O teste da tentativa 1 nao enxergava porque montava o prompt so a partir do `Prompt Conversa` — o AJUSTE DINAMICO vem de OUTRO no. Mesmo erro de escopo do instrumento que ja custou caro: julgar a string que e facil de montar, nao a que o modelo recebe.
+- 2026-09-16 DEVOLVIDO com tres pedidos: cobrir o AJUSTE DINAMICO (nomeando na precedencia ou ajustando o MOOD_LOW_ADV), VARRER o Contexto Conversa inteiro atras de outra proibicao escondida, e fazer o teste montar o prompt a partir do Contexto Conversa em tres estados (normal, pt_streak=2, short_streak=3).
