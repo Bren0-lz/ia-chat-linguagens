@@ -1,4 +1,4 @@
-// E001/E002/E003/E013 — o arquivo do evento e uma copia fiel do v8, com uma lista FECHADA de diferencas.
+// E001/E002/E003/E013/E015 — o arquivo do evento e uma copia fiel do v8, com uma lista FECHADA de diferencas.
 //
 // O `IAChat_Telegram_evento.json` nasce do v8 para a apresentacao com usuarios reais
 // (sem teste de nivelamento). Ele e perigoso por construcao: tem o `Gatilho Telegram`
@@ -7,7 +7,7 @@
 //
 //   1. o evento nao diverge do v8 por acidente — depois de normalizar os campos DECLARADOS
 //      (name do workflow, path do TEST Ingress, disabled do Gatilho Telegram, o jsCode dos
-//      dez nos declarados abaixo e os dois textos da E003/E004) os dois JSON tem de ser
+//      dez nos declarados abaixo, os dois textos da E003/E004 e os dois da E015) os dois JSON tem de ser
 //      IGUAIS byte a byte. Cada divergencia entre evento e v8 e uma decisao explicita
 //      registrada AQUI; qualquer outra e deriva silenciosa e reprova;
 //   2. ninguem copiou na direcao errada — o v8 tem de continuar com o gatilho
@@ -28,7 +28,7 @@ const PATH_EVENTO = 'iachat-test-evento';
 let fails = 0;
 function ok(cond, msg) { if (!cond) { fails++; console.log('  ✗ ' + msg); } else console.log('  ✓ ' + msg); }
 function fim() {
-  console.log('\n' + (fails ? 'REPROVOU: ' + fails + ' falha(s)' : 'PASSOU: arquivo do evento e o v8 com as 15 diferencas declaradas'));
+  console.log('\n' + (fails ? 'REPROVOU: ' + fails + ' falha(s)' : 'PASSOU: arquivo do evento e o v8 com as 17 diferencas declaradas'));
   process.exit(fails ? 1 : 0);
 }
 
@@ -82,6 +82,9 @@ ok(ev.name !== v8.name, 'evento: name do workflow difere do v8');
 //   Enviar Pergunta Persona.text        — E003 (sai o "Esse e o seu resultado!")
 //                                         E004 (sai o falso "falta so o estilo do seu tutor")
 //   Enviar Pergunta Nível.inlineKeyboard — E003 (os seis niveis, em duas colunas)
+//   Enviar Explicação Modos.text — E015 (/nivel deixa de "refazer o teste de nivel" e sai a linha
+//                                  de /pausa e /continuar "durante o teste")
+//   Enviar Menu.text             — E015 (/nivel deixa de "refazer o teste")
 //   Prompt Conversa A2.jsCode   — E013 (a linha 🇧🇷 traduzindo a mensagem inteira, como no A1,
 //                                 e o teto de palavras que passa a contar so o ingles)
 //   Prompt Conversa B1.jsCode   — E013 (a linha 🇧🇷 so da pergunta final; cai o "mesmo que ele peca")
@@ -100,6 +103,8 @@ const CODIGO_PODE_DIFERIR = ['Placement Engine', 'Etapa de Cadastro', 'Roteador 
 const PARAMETRO_PODE_DIFERIR = [
   ['Enviar Pergunta Persona', 'text'],
   ['Enviar Pergunta Nível', 'inlineKeyboard'],
+  ['Enviar Explicação Modos', 'text'],
+  ['Enviar Menu', 'text'],
 ];
 
 // Normaliza so o que PODE mudar e exige igualdade total do resto.
@@ -119,7 +124,7 @@ function normaliza(f) {
 }
 const nv8 = JSON.stringify(normaliza(v8));
 const nev = JSON.stringify(normaliza(ev));
-ok(nv8 === nev, 'evento == v8 depois de normalizar as 15 divergencias declaradas');
+ok(nv8 === nev, 'evento == v8 depois de normalizar as 17 divergencias declaradas');
 
 if (nv8 !== nev) {
   // diagnostico: onde divergiu

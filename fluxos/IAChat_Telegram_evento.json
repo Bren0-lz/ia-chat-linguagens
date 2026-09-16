@@ -1126,7 +1126,7 @@
     {
       "parameters": {
         "chatId": "={{ $('Normalizar').first().json.chatId }}",
-        "text": "={{ $json.streak_count>=2 ? ('🔥 '+$json.streak_count+' dias seguidos praticando! Continue assim.\\n\\n') : '' }}Como você quer continuar? 👇\n\nComandos:\n/menu ou /modo — trocar de modo\n/nivel — refazer o teste\n/progresso — ver seu progresso",
+        "text": "={{ $json.streak_count>=2 ? ('🔥 '+$json.streak_count+' dias seguidos praticando! Continue assim.\\n\\n') : '' }}Como você quer continuar? 👇\n\nComandos:\n/menu ou /modo — trocar de modo\n/nivel — escolher outro nível\n/progresso — ver seu progresso",
         "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": {
           "rows": [
@@ -2071,7 +2071,7 @@
     {
       "parameters": {
         "chatId": "={{ $('Normalizar').first().json.chatId }}",
-        "text": "🎭 Personalidade definida!\n\nAntes de escolher, dá uma olhada nos dois modos que eu tenho 👇\n\n💬 <b>Conversa</b> — a gente bate papo em inglês sobre assuntos que você curte, de um jeito leve e natural. Eu corrijo seus errinhos no meio do papo, sem te travar.\n\n📚 <b>Professor</b> — eu te passo exercícios focados nos pontos que você mais erra, com correção e explicação. Ideal pra treinar gramática e vocabulário com método.\n\n⌨️ <b>Comandos úteis:</b>\n/menu — trocar de modo a qualquer momento\n/nivel — refazer o teste de nível\n/config — mudar a personalidade do tutor (Buddy, Coach, Debatedor…)\n/pausa e /continuar — pausar e retomar durante o teste",
+        "text": "🎭 Personalidade definida!\n\nAntes de escolher, dá uma olhada nos dois modos que eu tenho 👇\n\n💬 <b>Conversa</b> — a gente bate papo em inglês sobre assuntos que você curte, de um jeito leve e natural. Eu corrijo seus errinhos no meio do papo, sem te travar.\n\n📚 <b>Professor</b> — eu te passo exercícios focados nos pontos que você mais erra, com correção e explicação. Ideal pra treinar gramática e vocabulário com método.\n\n⌨️ <b>Comandos úteis:</b>\n/menu — trocar de modo a qualquer momento\n/nivel — escolher outro nível\n/config — mudar a personalidade do tutor (Buddy, Coach, Debatedor…)",
         "additionalFields": {
           "appendAttribution": false,
           "parse_mode": "HTML"
