@@ -947,3 +947,20 @@ A causa é a política escrita nos prompts, não o modelo desobedecendo. A escad
 Sequencial (as duas editam o mesmo arquivo e a mesma lista fechada), offline, com **uma**
 publicação no fim — com aval do Breno, porque o evento é o bot ao vivo — seguida do gate ao vivo
 das duas.
+
+### E016 — a linha traduzida ganha linha em branco e "🇧🇷:"
+- **Origem:** o Breno, na conta real em A1 (16/09): a tradução veio **colada** ao inglês — na mesma
+  linha ou em quebra simples. Formato pedido: bloco em inglês, **uma linha em branco**, e a última
+  linha começando com `🇧🇷: `. Linha de base ao vivo (`vivo_linha_br_evento.js`, N=3 por nível, 2
+  turnos): tradução presente sem pedir em todos os turnos medidos; **formato novo 0/N**. O turno
+  sem tradução que ele viu (exec 4584) não se repetiu — **fora do escopo**, e o Breno confirmou
+  que o bot traduz sem pedir. Achado junto: o exemplo de formato do `Prompt Conversa A1` tem `\\n`
+  (barra literal) no lugar da quebra.
+- **Escopo:** (1) **determinístico** (§5.4): o `Dividir Resposta` normaliza toda resposta com 🇧🇷 para
+  `inglês + "\n\n🇧🇷: " + tradução`, venha o modelo colado, com quebra simples ou sem dois-pontos;
+  (2) os exemplos de formato dos `Prompt Conversa A1/A2/B1` passam a mostrar o formato novo (e o A1
+  perde o `\\n` literal). Só no `evento.json`; lista fechada do `testa_arquivo_evento.js` atualizada.
+- **Gate offline:** o `Dividir Resposta` executado sobre as saídas reais (4585, 4587, baseline)
+  entrega o formato; resposta sem 🇧🇷 sai intacta; reprova a versão publicada.
+- **Gate ao vivo:** `vivo_linha_br_evento.js` — formato em todos os turnos de A1/A2/B1.
+- **Status:** TODO

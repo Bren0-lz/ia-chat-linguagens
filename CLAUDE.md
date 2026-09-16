@@ -36,17 +36,17 @@ Por isso publicar/ativar exige pedido explícito do Breno, sempre.
 
 | Comando | Tempo | Cobre |
 |---|---|---|
-| `npm run gate` | ~3 s | **30 comandos** em sequência — os quatro abaixo são só os mais usados à parte |
+| `npm run gate` | ~3 s | **31 comandos** em sequência — os quatro abaixo são só os mais usados à parte |
 | `npm run gate:regressao` | ~1 s | placement, roteador, anti-spoiler, interesses + sintaxe dos 31 nós de código |
 | `npm run gate:cadastro` | ~1 s | Triagem de Nome → Etapa de Cadastro |
 | `npm run gate:nome` | ~1 s | 77 casos da camada 1 da validação de nome |
 | `npm run gate:congelado` | instantâneo | prova que o `v7.4.json` não foi tocado |
-| `npm run gate:evento` | ~1 s | prova que o `evento.json` é o v8 com as diferenças declaradas (hoje 18; a lista fechada vive no `testa_arquivo_evento.js`), roda a regressão nele, o atalho de nível, os textos do evento e a política de idioma dos seis níveis |
+| `npm run gate:evento` | ~1 s | prova que o `evento.json` é o v8 com as diferenças declaradas (hoje 19; a lista fechada vive no `testa_arquivo_evento.js`), roda a regressão nele, o atalho de nível, os textos do evento, a política de idioma dos seis níveis e o formato da linha 🇧🇷 |
 
 Todos rodam **offline**: sem n8n, sem Postgres, sem LLM — e, desde o T036, **sem credencial**
 (o `harness.js` cobra `N8N_API_KEY` no primeiro uso de rede, nao na carga). Prove em clone
 limpo antes de acrescentar comando ao gate. Uma tarefa só está concluída quando
-todos retornam exit code 0. A lista completa dos 30 está no `fluxos/HANDOFF.md` §9 — e quem
+todos retornam exit code 0. A lista completa dos 31 está no `fluxos/HANDOFF.md` §9 — e quem
 acrescentar um comando ao `gate` atualiza os dois lugares, senão a próxima sessão acredita no
 número velho.
 

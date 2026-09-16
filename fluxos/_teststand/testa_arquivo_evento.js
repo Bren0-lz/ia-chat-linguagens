@@ -1,4 +1,4 @@
-// E001/E002/E003/E013/E015/E014b — o arquivo do evento e uma copia fiel do v8, com uma lista FECHADA de diferencas.
+// E001/E002/E003/E013/E015/E014b/E016 — o arquivo do evento e uma copia fiel do v8, com uma lista FECHADA de diferencas.
 //
 // O `IAChat_Telegram_evento.json` nasce do v8 para a apresentacao com usuarios reais
 // (sem teste de nivelamento). Ele e perigoso por construcao: tem o `Gatilho Telegram`
@@ -7,7 +7,7 @@
 //
 //   1. o evento nao diverge do v8 por acidente — depois de normalizar os campos DECLARADOS
 //      (name do workflow, path do TEST Ingress, disabled do Gatilho Telegram, o jsCode dos
-//      onze nos declarados abaixo, os dois textos da E003/E004 e os dois da E015) os dois JSON tem de ser
+//      doze nos declarados abaixo, os dois textos da E003/E004 e os dois da E015) os dois JSON tem de ser
 //      IGUAIS byte a byte. Cada divergencia entre evento e v8 e uma decisao explicita
 //      registrada AQUI; qualquer outra e deriva silenciosa e reprova;
 //   2. ninguem copiou na direcao errada — o v8 tem de continuar com o gatilho
@@ -28,7 +28,7 @@ const PATH_EVENTO = 'iachat-test-evento';
 let fails = 0;
 function ok(cond, msg) { if (!cond) { fails++; console.log('  ✗ ' + msg); } else console.log('  ✓ ' + msg); }
 function fim() {
-  console.log('\n' + (fails ? 'REPROVOU: ' + fails + ' falha(s)' : 'PASSOU: arquivo do evento e o v8 com as 18 diferencas declaradas'));
+  console.log('\n' + (fails ? 'REPROVOU: ' + fails + ' falha(s)' : 'PASSOU: arquivo do evento e o v8 com as 19 diferencas declaradas'));
   process.exit(fails ? 1 : 0);
 }
 
@@ -98,7 +98,11 @@ ok(ev.name !== v8.name, 'evento: name do workflow difere do v8');
 //                                 seguinte; a CHECAGEM FINAL abre a excecao. No A1 ela SUBSTITUI o
 //                                 antigo "SE O ALUNO DISSER QUE NAO ENTENDEU"; a REGRA DE OURO e a
 //                                 clausula de IDIOMA do A1 seguem iguais as do v8)
-const CODIGO_PODE_DIFERIR = ['Placement Engine', 'Etapa de Cadastro', 'Roteador Mestre',
+//   Prompt Conversa A1/A2/B1.jsCode — E016 (a instrucao e o exemplo "Formato EXATO" passam a
+//                                 'ingles / linha em branco / 🇧🇷: traducao'; o A1 perde o \\n literal)
+//   Dividir Resposta.jsCode     — E016 (normaliza a linha 🇧🇷 para o formato acima antes do envio,
+//                                 venha o modelo como vier — pedido do Breno, 16/09)
+const CODIGO_PODE_DIFERIR = ['Placement Engine', 'Etapa de Cadastro', 'Roteador Mestre', 'Dividir Resposta',
                              'Mensagem Sistema', 'Após Gabarito', 'Prompt Conversa A1',
                              'Prompt Conversa A2', 'Prompt Conversa B1', 'Prompt Conversa B2',
                              'Prompt Conversa C1', 'Prompt Conversa C2'];
@@ -128,7 +132,7 @@ function normaliza(f) {
 }
 const nv8 = JSON.stringify(normaliza(v8));
 const nev = JSON.stringify(normaliza(ev));
-ok(nv8 === nev, 'evento == v8 depois de normalizar as 18 divergencias declaradas');
+ok(nv8 === nev, 'evento == v8 depois de normalizar as 19 divergencias declaradas');
 
 if (nv8 !== nev) {
   // diagnostico: onde divergiu

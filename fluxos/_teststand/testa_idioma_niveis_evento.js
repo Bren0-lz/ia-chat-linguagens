@@ -255,10 +255,23 @@ ok(!/SE O ALUNO DISSER QUE N[ÃA]O ENTENDEU/.test(prompt.A1),
   const it = { json: { name: 'Ana', chatInput: 'oi' } };
   const sys8 = new Function('$input', n8.parameters.jsCode)({ item: it, first: () => it, all: () => [it] }).json.systemMessage;
   const linha = (s, re) => s.split('\n').filter(l => re.test(l));
-  for (const [nome, re] of [['REGRA DE OURO', /^REGRA DE OURO/], ['clausula bilingue (IDIOMA)', /^IDIOMA/]]) {
-    const a = linha(sys8, re), e = linha(prompt.A1, re);
-    ok(a.length === 1 && e.length === 1 && a[0] === e[0], 'A1: ' + nome + ' identica byte a byte a do v8');
+  {
+    const a = linha(sys8, /^REGRA DE OURO/), e = linha(prompt.A1, /^REGRA DE OURO/);
+    ok(a.length === 1 && e.length === 1 && a[0] === e[0], 'A1: REGRA DE OURO identica byte a byte a do v8');
   }
+  // E016: a IDIOMA do A1 muda SO no declarado — "linha em branco" + "🇧🇷: " na instrucao, e o exemplo com
+  // quebra REAL (o v8 tem "\\n" literal). Comparada no codigo-fonte: desfeitas exatamente essas tres
+  // trocas, o resto tem de ser byte a byte igual ao v8.
+  const BS = String.fromCharCode(92);
+  const fonte = (code) => code.split('\n').filter(l => l.includes('"IDIOMA (A1'));
+  const nEv = f.nodes.find(x => x.name === 'Prompt Conversa A1');
+  const s8 = fonte(n8.parameters.jsCode), sEv = fonte(nEv.parameters.jsCode);
+  const desfeita = (sEv[0] || '')
+    .replace('depois UMA linha em branco e então UMA única linha começando com 🇧🇷: que', 'depois UMA única linha nova começando com 🇧🇷 que')
+    .replace('Formato EXATO:' + BS + 'n', 'Formato EXATO:' + BS + BS + 'n')
+    .replace('guitar?' + BS + 'n' + BS + 'n🇧🇷: ', 'guitar? ' + BS + BS + 'n🇧🇷 ');
+  ok(s8.length === 1 && sEv.length === 1 && desfeita === s8[0] && sEv[0] !== s8[0],
+     'A1: clausula bilingue (IDIOMA) igual a do v8 exceto pelas trocas declaradas da E016');
 }
 
 // ---------- 8. o julgamento nas duas direcoes (§5.6) ----------
