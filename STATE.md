@@ -1,9 +1,9 @@
 # Estado do loop
 
-- **Tarefa atual:** PUBLICAR A E013 — **BLOQUEADO POR AMBIENTE** (Docker Desktop fora de novo, Postgres com a porta fechada). E014 guardada em branch wip/e014-rede-de-seguranca para redesenho
+- **Tarefa atual:** E014 a redesenhar (clausula de prioridade universal + probe ao vivo), depois E015. **E013 PUBLICADA E VERIFICADA AO VIVO.** EVENTO EM 22/09/2026
 - **Última concluída:** E007 (6f59c6f) — o ingress do evento ganha rotulo antes de gerar evidencia
 - **Tentativas na atual:** 3/3 — BLOCKED
-- **Bloqueios:** AMBIENTE (16/09) — Docker Desktop nao responde e o Postgres esta com a porta 5433 FECHADA. O bot AO VIVO esta sem banco. n8n e ngrok de pe. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
+- **Bloqueios:** nenhum. Ambiente restabelecido em 16/09 (Breno reiniciou o Docker). Duas quedas do Docker em tres dias — maior risco do dia 22. Ambiente conferido em 11/09: Postgres 5433, n8n 5678, ngrok 4040, gate_vivo_v8 exit 0, npm run gate exit 0.
 
 ## Ambiente (checar antes de tarefas marcadas "Precisa de ambiente")
 
@@ -352,3 +352,8 @@
 - 2026-09-16 **A PUBLICACAO DA E013 NAO FOI FEITA: O AMBIENTE CAIU DE NOVO.** A checagem com query real (a licao da E010) pegou: Postgres ECONNREFUSED com a porta 5433 FECHADA, e o Docker Desktop sem responder ("open //./pipe/dockerDesktopLinuxEngine: cannot find the file"). n8n (5678) e ngrok (4040) de pe.
 - 2026-09-16 CONSEQUENCIA IMEDIATA, mais grave que a publicacao: **O BOT AO VIVO ESTA SEM BANCO.** Quem mandar mensagem agora trava no "Carregar Aluno" e nao recebe resposta. E a segunda vez em tres dias (14/09 foi "WSL update required") — a 6 dias do evento, a infra local do Docker e o maior risco do dia 22, maior que qualquer defeito de prompt.
 - 2026-09-16 NAO tentei subir o Docker — e regra do CLAUDE.md. Nao publiquei com o banco fora — republicar com o Postgres morto nao mudaria nada para o participante e misturaria duas falhas.
+- 2026-09-16 O Breno reiniciou o Docker. Conferido com query real antes de publicar: Postgres respondendo (2 contas), n8n ok, evento atendendo o bot, v7.4 inativo, ZERO execucoes presas em running.
+- 2026-09-16 **E013 PUBLICADA NO BOT AO VIVO**, via `corta_para_evento.js` (republicar o evento que esta no ar e o mesmo procedimento do corte). Conferido NO n8n, nao no arquivo local: A2 e B1 com a linha 🇧🇷, nenhuma proibicao sob pedido, nada da E014.
+- 2026-09-16 **VERIFICADA AO VIVO** com `vivo_idioma_niveis_evento.js` (novo), um aluno por nivel, frase neutra "hi! i like games", execs 4566-4570: A1 e A2 com a mensagem INTEIRA traduzida na linha 🇧🇷; B1 com SO a pergunta traduzida; B2 e C1 em ingles integral. Nas cinco a linha 🇧🇷 e a ULTIMA. PASSOU.
+- 2026-09-16 O CASO DO BRENO RESOLVIDO: o A2, que recebia 100% ingles, agora recebe "Hey Marina! ... What kind of games do you like to play? 😊 / 🇧🇷 Ei Marina! Que legal! Eu adoro jogos tambem. Que tipo de jogos voce gosta de jogar?".
+- 2026-09-16 O SCRIPT AO VIVO E A COBERTURA QUE FALTAVA: a Fase B media o A1 como bilingue e B2/C1 para correcao, mas ninguem media o primeiro turno de A2/B1. Foi a lacuna por onde o defeito do Breno passou.

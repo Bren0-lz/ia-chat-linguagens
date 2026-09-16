@@ -874,7 +874,9 @@ A causa é a política escrita nos prompts, não o modelo desobedecendo. A escad
 - **Depende de:** —
 - **Status:** DONE (097d8fa) — A2 e B1 com linha 🇧🇷 no molde exato do A1 (intocado); B2/C1/C2 em
   inglês integral; **a proibição de ajudar sob pedido caiu nos quatro níveis que a tinham**,
-  inclusive no C2, que eu havia mandado preservar. Reprova o arquivo anterior por 14 falhas
+  inclusive no C2, que eu havia mandado preservar. Reprova o arquivo anterior por 14 falhas.
+  **PUBLICADA E VERIFICADA AO VIVO em 16/09** (execs 4566–4570, `vivo_idioma_niveis_evento.js`): o A2,
+  que recebia inglês puro, agora recebe a mensagem traduzida na linha 🇧🇷
 
 ### E014 — a rede de segurança que só o A1 tinha
 - **Escopo:** em **todos** os níveis, pedido explícito ("não entendi", "traduz", "o que significa
