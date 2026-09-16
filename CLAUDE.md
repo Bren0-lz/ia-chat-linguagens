@@ -41,7 +41,7 @@ Por isso publicar/ativar exige pedido explícito do Breno, sempre.
 | `npm run gate:cadastro` | ~1 s | Triagem de Nome → Etapa de Cadastro |
 | `npm run gate:nome` | ~1 s | 77 casos da camada 1 da validação de nome |
 | `npm run gate:congelado` | instantâneo | prova que o `v7.4.json` não foi tocado |
-| `npm run gate:evento` | ~1 s | prova que o `evento.json` é o v8 com as diferenças declaradas (hoje 17; a lista fechada vive no `testa_arquivo_evento.js`), roda a regressão nele, o atalho de nível, os textos do evento e a política de idioma dos seis níveis |
+| `npm run gate:evento` | ~1 s | prova que o `evento.json` é o v8 com as diferenças declaradas (hoje 18; a lista fechada vive no `testa_arquivo_evento.js`), roda a regressão nele, o atalho de nível, os textos do evento e a política de idioma dos seis níveis |
 
 Todos rodam **offline**: sem n8n, sem Postgres, sem LLM — e, desde o T036, **sem credencial**
 (o `harness.js` cobra `N8N_API_KEY` no primeiro uso de rede, nao na carga). Prove em clone
