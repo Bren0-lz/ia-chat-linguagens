@@ -40,8 +40,13 @@ async function db(fn) {
   await c.connect();
   try { return await fn(c); } finally { await c.end(); }
 }
+// --persona=comedian: a conta real do Breno e comedian, e o GESTO DE ASSINATURA dessa
+// persona se declara "obrigatorio em TODA resposta" (armadilha do §5.3: diretiva sem
+// precedencia perde para diretiva marcada como obrigatoria). O padrao segue buddy, que e
+// o que todas as rodadas anteriores mediram.
+const PERSONA = String(arg('persona', 'buddy'));
 async function semear(u, nivel) {
-  const profile = { persona: 'buddy', interests: ['🎮 Games'], inferred_interests: [], level: nivel };
+  const profile = { persona: PERSONA, interests: ['🎮 Games'], inferred_interests: [], level: nivel };
   await db(c => c.query(
     'INSERT INTO students (user_id,name,age,mode,onboarding,level,profile,msg_count,last_update_id,streak_count,last_active)'
     + " VALUES ($1,'Lucas',24,'chat','done',$3,$2::jsonb,3,1,1,now())"
@@ -107,7 +112,7 @@ function corrigiu(texto, probe) {
   reg('# Correcao de erro FORA da lista, em nivel alto — ' + ALVO);
   reg('');
   reg('> Rodada: ' + new Date().toISOString() + ' · N=' + N + ' por probe e por nivel · niveis: ' + NIVEIS.join(', '));
-  reg('> Ingress: ' + (process.env.IACHAT_TEST_PATH || 'iachat-test') + '');
+  reg('> Ingress: ' + (process.env.IACHAT_TEST_PATH || 'iachat-test') + ' · persona: ' + PERSONA);
   reg('>');
   reg('> Regua ESTRITA (a mesma do C1): exige reparo explicito. O bot usar a forma');
   reg('> certa na propria frase nao conta — foi essa frouxidao que saturou o');
