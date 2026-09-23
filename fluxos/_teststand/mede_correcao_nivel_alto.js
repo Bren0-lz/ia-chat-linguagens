@@ -21,12 +21,16 @@ require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.e
 const fs = require('fs');
 const { Client } = require('pg');
 const { msg, digest } = require('./harness');
-const { rotuloDe } = require('./alvo');
+const { rotuloDe, caminhoLivre } = require('./alvo');
 
 const ALVO = rotuloDe(process.env.IACHAT_TEST_PATH || 'iachat-test');
 const arg = (k, d) => { const a = process.argv.find(x => x.startsWith('--' + k + '=')); return a ? a.split('=')[1] : d; };
 const N = Math.max(1, Number(arg('n', 6)));
-const TR = './tr_correcao_nivel_alto_' + ALVO.replace(/[^\w.-]+/g, '-') + '.md';
+// --niveis=A1,A2,B1 abre a medicao para os niveis baixos. O padrao continua B2,C1,
+// para nao mudar o que as rodadas anteriores mediram.
+const NIVEIS = String(arg('niveis', 'B2,C1')).split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+// caminhoLivre: o nome derivado so do alvo sobrescreve a rodada anterior (armadilha nº 22).
+const TR = caminhoLivre('./tr_correcao_nivel_alto_' + ALVO.replace(/[^\w.-]+/g, '-') + '.md', fs.existsSync, Date.now());
 
 let uid = 990000000 + (Date.now() % 9000000);
 const novoUid = () => (uid += 3);
@@ -102,7 +106,7 @@ function corrigiu(texto, probe) {
 
   reg('# Correcao de erro FORA da lista, em nivel alto — ' + ALVO);
   reg('');
-  reg('> Rodada: ' + new Date().toISOString() + ' · N=' + N + ' por probe e por nivel');
+  reg('> Rodada: ' + new Date().toISOString() + ' · N=' + N + ' por probe e por nivel · niveis: ' + NIVEIS.join(', '));
   reg('> Ingress: ' + (process.env.IACHAT_TEST_PATH || 'iachat-test') + '');
   reg('>');
   reg('> Regua ESTRITA (a mesma do C1): exige reparo explicito. O bot usar a forma');
@@ -111,7 +115,7 @@ function corrigiu(texto, probe) {
   reg('');
 
   const tabela = [];
-  for (const nivel of ['B2', 'C1']) {
+  for (const nivel of NIVEIS) {
     for (const probe of PROBES) {
       let acertos = 0, vazios = 0;
       const amostras = [];
