@@ -108,9 +108,3 @@ PostgreSQL e credenciais de LLM, e não fazem parte do gate offline.
 **Breno Luiz Silva do Carmo**
 [LinkedIn](https://www.linkedin.com/in/breno-luiz-silva-do-carmo-19451a243/) ·
 [GitHub](https://github.com/Bren0-lz)
-
-## Licença
-
-Copyright (c) 2026 Breno Luiz Silva do Carmo. Todos os direitos reservados.
-Nenhuma parte deste código pode ser utilizada, reproduzida, distribuída ou modificada sem
-autorização prévia por escrito do autor. Veja [LICENSE](LICENSE).
